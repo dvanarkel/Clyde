@@ -49,6 +49,7 @@ Global
 		Path:	{Project}/cleantools/Ide
 		Path:	{Project}/cleantools/Interfaces/LinkerInterface
 		Path:	{Application}/lib/Platform
+		Path:	{Application}/lib/Platform/Deprecated/StdLib
 		Path:	{Application}/lib/Generics
 		Path:	{Application}/lib/Dynamics
 		Path:	{Application}/lib/Directory
@@ -350,6 +351,20 @@ OtherModules
 			ReuseUniqueNodes:	True
 			Fusion:	False
 	Module
+		Name:	set_return_code
+		Dir:	{Project}/cleantools/MacOSX
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+	Module
 		Name:	IdeState
 		Dir:	{Project}/cleantools/BatchBuild
 		Compiler
@@ -435,6 +450,20 @@ OtherModules
 			Fusion:	False
 	Module
 		Name:	typeatt
+		Dir:	{Project}/cleantools/BatchBuild
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+	Module
+		Name:	typewin
 		Dir:	{Project}/cleantools/BatchBuild
 		Compiler
 			NeverMemoryProfile:	False
@@ -826,20 +855,6 @@ OtherModules
 			ReuseUniqueNodes:	True
 			Fusion:	False
 	Module
-		Name:	System.Directory
-		Dir:	{Application}/lib/Platform
-		Compiler
-			NeverMemoryProfile:	False
-			NeverTimeProfile:	False
-			StrictnessAnalysis:	True
-			ListTypes:	StrictExportTypes
-			ListAttributes:	True
-			Warnings:	True
-			Verbose:	True
-			ReadableABC:	False
-			ReuseUniqueNodes:	True
-			Fusion:	False
-	Module
 		Name:	System.Environment
 		Dir:	{Application}/lib/Platform
 		Compiler
@@ -1022,6 +1037,34 @@ OtherModules
 			ReuseUniqueNodes:	True
 			Fusion:	False
 	Module
+		Name:	StdLibMisc
+		Dir:	{Application}/lib/Platform/Deprecated/StdLib
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+	Module
+		Name:	StdMaybe
+		Dir:	{Application}/lib/Platform/Deprecated/StdLib
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+	Module
 		Name:	GenEq
 		Dir:	{Application}/lib/Generics
 		Compiler
@@ -1035,6 +1078,22 @@ OtherModules
 			ReadableABC:	False
 			ReuseUniqueNodes:	True
 			Fusion:	False
+	Module
+		Name:	Directory
+		Dir:	{Application}/lib/Directory
+		Compiler
+			NeverMemoryProfile:	False
+			NeverTimeProfile:	False
+			StrictnessAnalysis:	True
+			ListTypes:	StrictExportTypes
+			ListAttributes:	True
+			Warnings:	True
+			Verbose:	True
+			ReadableABC:	False
+			ReuseUniqueNodes:	True
+			Fusion:	False
+		NeededObjFiles
+			ObjectFile:	cDirectory.
 	Module
 		Name:	StdArray
 		Dir:	{Application}/lib/StdEnv
