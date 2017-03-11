@@ -1,5 +1,9 @@
 # gitignore for Clyde repository
 
+### Clean ###
+
+**/Clean System Files/
+
 ### macOS ###
 *.DS_Store
 .AppleDouble
