@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+	   <dict>
+    	  <key>UTTypeIdentifier</key>
+    	  <string>nl.ru.clean.project</string>
+    	  <key>UTTypeConformsTo</key>
+    	  <array>
+    	     <string>public.data</string>
+    	     <string>public.plain-text</string>
+    	  </array>
+    	  <key>UTTypeDescription</key>
+    	  <string>Clean project</string>
+    	  <key>UTTypeIconFile</key>
+    	  <string>txt.icns</string>
+    	  <key>UTTypeTagSpecification</key>
+    	  <dict>
+    	     <key>public.filename-extension</key>
+    	     <array>
+    	        <string>prj</string>
+    	     </array>
+    	  </dict>
+       </dict>
+	   <dict>
+    	  <key>UTTypeIdentifier</key>
+    	  <string>nl.ru.clean.implementation</string>
+    	  <key>UTTypeConformsTo</key>
+    	  <array>
+    	     <string>public.data</string>
+    	     <string>public.plain-text</string>
+    	  </array>
+    	  <key>UTTypeDescription</key>
+    	  <string>Clean implementation module</string>
+    	  <key>UTTypeIconFile</key>
+    	  <string>txt.icns</string>
+    	  <key>UTTypeTagSpecification</key>
+    	  <dict>
+    	     <key>public.filename-extension</key>
+    	     <array>
+    	        <string>icl</string>
+    	     </array>
+    	  </dict>
+       </dict>
+	   <dict>
+    	  <key>UTTypeIdentifier</key>
+    	  <string>nl.ru.clean.definition</string>
+    	  <key>UTTypeConformsTo</key>
+    	  <array>
+    	     <string>public.data</string>
+    	     <string>public.plain-text</string>
+    	  </array>
+    	  <key>UTTypeDescription</key>
+    	  <string>Clean definition module</string>
+    	  <key>UTTypeIconFile</key>
+    	  <string>txt.icns</string>
+    	  <key>UTTypeTagSpecification</key>
+    	  <dict>
+    	     <key>public.filename-extension</key>
+    	     <array>
+    	        <string>dcl</string>
+    	     </array>
+    	  </dict>
+       </dict>
+	   <dict>
+    	  <key>UTTypeIdentifier</key>
+    	  <string>nl.ru.clean.abc</string>
+    	  <key>UTTypeConformsTo</key>
+    	  <array>
+    	     <string>public.data</string>
+    	     <string>public.plain-text</string>
+    	  </array>
+    	  <key>UTTypeDescription</key>
+    	  <string>Clean abc module</string>
+    	  <key>UTTypeIconFile</key>
+    	  <string>txt.icns</string>
+    	  <key>UTTypeTagSpecification</key>
+    	  <dict>
+    	     <key>public.filename-extension</key>
+    	     <array>
+    	        <string>abc</string>
+    	     </array>
+    	  </dict>
+       </dict>
+	</array>
+
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>txt.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Clean project</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>nl.ru.clean.project</string>
+			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>prj</string>
+			</array>
+
+			<key>NSDocumentClass</key>
+			<string>ProjDocument</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+		<dict>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>nl.ru.clean.implementation</string>
+			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>icl</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>txt.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Clean implementation module</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>NSDocumentClass</key>
+			<string>TextDocument</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>txt.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Clean definition module</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>nl.ru.clean.definition</string>
+			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>dcl</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>TextDocument</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>txt.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Clean abc module</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>nl.ru.clean.abc</string>
+			</array>
+			<key>LSIsAppleDefaultForType</key>
+			<true/>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>abc</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>TextDocument</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>txt.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Clean time profile</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>pcl</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>TextDocument</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>txt.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Clean heap profile</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>hcl</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>TextDocument</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>obj.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Clean object module</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>obj</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFile</key>
+			<string>obj.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Clean object module</string>
+			<key>CFBundleTypeRole</key>
+			<string>None</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>o</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>Play</string>
+	<key>CFBundleIconFile</key>
+	<string>Adium Bird.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>Clyde</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Clyde</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+<!--
+	<key>LSMinimumSystemVersion</key>
+	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+-->
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2016 Diederik van Arkel. All rights reserved.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>
