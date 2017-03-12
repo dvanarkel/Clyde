@@ -127,7 +127,7 @@ readFromURL_ofType_error self cmd absoluteURL typeName outError
 
 	#!	path				= ns2cls pathN
 		(prjPath,prj)		= splitRight path
-		appPath				= cleanhome
+		(appPath,env)		= cleanhome env
 		root				= initProjectTree prj prjPath appPath
 		(_,env)				= object_setInstanceVariable self "root\0" root env			// HUH??? Doesn't appear to actually work?!
 		env					= msgI_V root "retain\0" env
@@ -363,8 +363,9 @@ instance FileEnv Files where
 
 readEnvironment :: !String !*Files -> (![String],!*Files)
 readEnvironment env files
-	#	envspath				= cleanhome +++ "/etc/" +++. EnvsFileName
-		(envs,files)			= openEnvironments cleanhome envspath files
+	#!	(home,files)			= cleanhome files
+	#	envspath				= home +++ "/etc/" +++. EnvsFileName
+		(envs,files)			= openEnvironments home envspath files
 		senv				 	= [ e \\ e <- envs | e.target_name == env ]
 	| isEmpty senv
 		= ([],files)

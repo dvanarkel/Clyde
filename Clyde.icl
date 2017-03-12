@@ -1,7 +1,7 @@
 module Clyde
 
 /* Fix launch... when we have been playing with info.plist
-lsregister -f Clyde.app
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f Clyde.app
 */
 
 import StdEnv
@@ -9,6 +9,7 @@ import StdEnv
 from System.CommandLine					import setReturnCode
 
 from Cocoa.Foundation					import ::NSApplication, sharedApplication , runApplication, makeUnbundledLaunchable
+from Cocoa.UserDefaults					import registerApplicationDefaults
 
 from Clyde.projwindowcontroller			import makeProjWindowControllerClass
 from Clyde.ClydeApplicationController	import createAppDelegate, initAppDelegate, swizzleAboutPanel
@@ -20,6 +21,7 @@ from Clyde.DebugClyde					import installDebug
 Start world
 	#!	world			= installDebug world
 		(app,world) 	= sharedApplication world
+		world			= registerApplicationDefaults world
 		world			= swizzleAboutPanel world
 		world			= populateMainMenu world
 		world			= createAppDelegate world				// register AppDelegate class

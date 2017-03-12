@@ -4,7 +4,6 @@ import StdEnv
 import StdDebug
 
 import System.Time, System._Unsafe
-import qualified System.Environment as SE
 import Text
 
 import Cocoa.objc
@@ -14,27 +13,19 @@ import Cocoa.Foundation
 import Clyde.tableviewcontroller
 import Clyde.textdocument
 import Clyde.DebugClyde
+import Clyde.projactions
 
 swizzleAboutPanel :: !*a -> *a
 swizzleAboutPanel world
 	#!	(_,world)		= swizzleMethod "NSApplication" ("orderFrontStandardAboutPanel:", imp_orderFrontStandardAboutPanel,"i@:@\0") world
 	= world
 
-clydeInfoString
+clydeInfoString home
 	#	redirects	= join " " ["I/O isatty":map toString [stdin,stdout,stderr]]
 	// would like to add start datetime of app...
-	= concat [applicationName,"@",applicationPath,"\n\n",redirects,"\n","Started: ",startTime,"\n","$CLEAN_HOME: ",cleanhome,"\n"]
+	= concat [applicationName,"@",applicationPath,"\n\n",redirects,"\n","Started: ",startTime,"\n","CLEAN_HOME: ",home,"\n"]
 where
 	[stdin,stdout,stderr:_]	= ttyStandardDescriptors
-
-cleanhome	=: accUnsafe getenv			// no trailing slash...
-where
-	getenv :: !*World -> (!String,!*World)
-	getenv world
-		#!	(mh,world)	= 'SE'.getEnvironmentVariable "CLEAN_HOME" world
-		| 'SE'.isJust mh
-			= ('SE'.fromJust mh,world)
-			= ("",world)
 
 startTime =: toString (accUnsafe localTime)
 /*
@@ -76,7 +67,8 @@ orderFrontStandardAboutPanel self cmd arg
 		(dict,env)	= allocObject "NSMutableDictionary" env
 		(dict,env)	= initObject dict env
 		key			= p2ns "Credits"
-		credits		= p2ns clydeInfoString
+		(home,env)	= cleanhome env
+		credits		= p2ns (clydeInfoString home)
 		(cras,env)	= allocObject "NSAttributedString" env
 		(cras,env)	= msgIP_P cras "initWithString:\0" credits env
 		(_,env)		= msgIPP_P dict "setObject:forKey:\0" cras key env	// Note: setObject:forKey: has void return

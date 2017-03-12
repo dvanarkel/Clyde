@@ -1,6 +1,6 @@
 definition module Clyde.projactions
 
-cleanhome :: !String
+cleanhome :: !*env -> (!String,!*env)
 
 build :: !Bool !String !*World -> (!Int,!*World)
 buildAndRun :: !*World -> (!Int,!*World)

@@ -15,31 +15,23 @@ import messwin		// showInfo, closeInfo
 
 import StdDebug
 import qualified Data.Maybe as DM
-import qualified System.Environment as SE
-import System._Unsafe
+import Cocoa.UserDefaults
 
-cleanhome :: !String
-cleanhome	=: accUnsafe getenv			// no trailing slash...
-where
-	getenv :: !*World -> (!String,!*World)
-	getenv world
-		#!	(mh,world)	= 'SE'.getEnvironmentVariable "CLEAN_HOME" world
-		| 'SE'.isJust mh
-			= ('SE'.fromJust mh,world)
-			= (defaulthome,world)
-defaulthome = "/usr/local/Cellar/clean-itasks/20160630/"
+cleanhome :: !*env -> (!String,!*env)
+cleanhome env
+		= stringForKey "CLEAN_HOME" env
 
 build :: !Bool !String !*World -> (!Int,!*World)
 build force proj_path world
-	| trace_n ("projactions:build\t"+++cleanhome) False = undef
+	#!	(startup,world)			= cleanhome world
+	| trace_n ("projactions:build\t"+++startup) False = undef
 	//	ed_ask_save_all False True (enableProjectMenu o bring_project_upto_date force cont o disableProjectMenu) ps
 	//	mb_update_undoinfo ps
 	// '/Users/dvanarkelmaccom/Documents/CleanLab/Clyde.prj'
 	// '/usr/local/Cellar/clean-itasks/20151022/etc/'
 
-	# envloc					= cleanhome +++ "/etc/"
+	# envloc					= startup +++ "/etc/"
 	# envspath					= envloc +++. EnvsFileName
-	# startup					= cleanhome
 	# (envs,world)				= openEnvironments startup envspath world
 
 	| trace_n ("proj_path: '"+++proj_path+++"'") False = undef
@@ -64,17 +56,6 @@ where
 		| linked || not ok
 			= closeInfo ps
 		= showInfo (Level1 "Project is up to date") ps
-
-/*
-proj_path: '/Users/dvanarkelmaccom/Documents/CleanLab/bake.prj'
-application_path: '/Users/dvanarkelmaccom/Documents/CleanLab/Clyde.app/Contents/MacOS/'
-startup: '/usr/local/Cellar/clean-itasks/20151022/'
-envspath: '/usr/local/Cellar/clean-itasks/20151022//etc/IDEEnvs'
-#envs: '8'
-/usr/local/Cellar/clean-itasks/20151022//lib/exe/cocl	cocl -dynamics -wmt -lset -ou bake -P "/Users/dvanarkelmaccom/Documents/CleanLab:/Users/dvanarkelmaccom/Documents/CleanLab/Bake:/Users/dvanarkelmaccom/Documents/CleanLab/CleanPlatform:/Users/dvanarkelmaccom/Documents/CleanLab/CleanPlatform/Deprecated/StdLib:/Users/dvanarkelmaccom/Documents/CleanLab/cleantools/cpm:/Users/dvanarkelmaccom/Documents/CleanLab/cleantools/cpm/Posix:/Users/dvanarkelmaccom/Documents/CleanLab/cleantools/BatchBuild:/Users/dvanarkelmaccom/Documents/CleanLab/cleantools/MacOSX:/Users/dvanarkelmaccom/Documents/CleanLab/cleantools/Pm:/Users/dvanarkelmaccom/Documents/CleanLab/cleantools/Util:/Users/dvanarkelmaccom/Documents/CleanLab/cleantools/Interfaces/LinkerInterface:/usr/local/Cellar/clean-itasks/20151022//lib/StdEnv:/usr/local/Cellar/clean-itasks/20151022//lib/Dynamics" -RE "/usr/local/Cellar/clean-itasks/20151022/Temp/errors" -RO "/usr/local/Cellar/clean-itasks/20151022/Temp/out"
-
-cont	/Users/dvanarkelmaccom/Documents/CleanLab/bake.exe	False	False
-*/
 
 buildAndRun :: !*World -> (!Int,!*World)
 buildAndRun env

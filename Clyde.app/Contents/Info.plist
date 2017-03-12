@@ -237,7 +237,7 @@
 	<key>CFBundleIconFile</key>
 	<string>Adium Bird.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>Clyde</string>
+	<string>com.mac.dvanarkel.Clyde</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

@@ -7,9 +7,12 @@ This is a work in progress towards an integrated development environment for [Cl
 ## status
 This v0.0 is not yet directly useable due to:
 
-* hardcoding for local system paths
 * build not yet functioning
 * code signing (is this actually needed?)(note that it also calls through to local backup script, not included)
+## Using ##
+
+- Clyde is automatically bound to files of type \*.prj, \*.icl and \*.dcl
+- Clyde needs to know the path to your Clean installation. Use `defaults write com.mac.dvanarkel.Clyde CLEAN_HOME <path>` from your Terminal to inform it of the correct path. 
 
 ## Mac OS X version supported?
 * No Mac OS supported version is currently explicitly set, therefore the built application will default to requiring the OS version on which  it was built. 
@@ -54,10 +57,11 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 
 ### v0.1 ###
 - [x] upload to github
-- [ ] fix hardcoding to Clean installation
+- [x] fix hardcoding to Clean installation
 - [ ] get `Build` functioning (as well as Build & Run and Run)
 - [ ] aborts when trying to open file it can't find
 - [ ] cleanup Project menu
+- [ ] figure out if code signing required
 
 ### v0.2 ###
 - [ ] update project window after build
@@ -81,8 +85,12 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 - [ ] api documentation
 - [ ] xref
 - [ ] cross compilation
-- [ ] consider moving to collection of *.env files under /etc instead of monolithic IDEEnvs
+- [ ] consider moving to collection of *.env files under /etc instead of monolithic 
+IDEEnvs
 - [ ] logo in README once we have sorted licensing
+- [ ] edit IDE options (CLEAN_HOME)
+- [ ] edit project options
+- [] weird line wrapping on new files
 ### Others ###
 
 - [ ] Update .gitignore
