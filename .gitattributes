@@ -1,0 +1,2 @@
+# hook to vacuum Clean projects on commit
+*.prj	filter=vacuum

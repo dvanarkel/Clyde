@@ -30,10 +30,25 @@ Contributions welcome (code, comments, issue reports)
 Building Clyde requires
 
 - installation of a recent Nightly build of Clean for Mac OS X (http://clean.cs.ru.nl/Download_Clean).
-- installation of the Xcode command line tools
+- installation of the Xcode command line tools, if you don't have these already you can install them by running `xcode-select --install` from a Terminal session and following the prompts
 - open the Terminal in the Clyde.git directory
 - Run `.\cpm Clyde.prj`  (note the .\ in order to pick up the local copy of `cpm`)
 - Run `lsregister -f Clyde.app` in order to have the OS pick up any changes to the Clyde.app properties
+- Append `StdEnvClyde.env` to the IDEEnvs file in your Clean installation
+
+## Working With Git ##
+
+Append the following to your `.git/config` in order to clean out Clean project files automatically when committing to the repository:
+```
+[filter "vacuum"]
+	clean = sed '/^OtherModules$/,$d'
+	smudge = cat
+```
+Where the filter is triggered as the `.gitattributes` has been modified to include:
+```
+# hook to vacuum Clean projects on commit
+*.prj	filter=vacuum
+```
 
 ## Roadmap ##
 
@@ -66,7 +81,8 @@ Building Clyde requires
 - [ ] api documentation
 - [ ] xref
 - [ ] cross compilation
-
+- [ ] consider moving to collection of *.env files under /etc instead of monolithic IDEEnvs
+- [ ] logo in README once we have sorted licensing
 ### Others ###
 
 - [ ] Update .gitignore
