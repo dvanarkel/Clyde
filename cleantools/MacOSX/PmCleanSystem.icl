@@ -1,5 +1,7 @@
 implementation module PmCleanSystem
 
+// Modified for Clyde to include Linker arguments and enable PostLink actions
+
 import StdEnv,StdMisc,StdMaybe
 from Directory import pd_StringToPath,getFileInfo,createDirectory,::Path,::FileInfo{pi_fileInfo},::PI_FileInfo{isDirectory},::DirError(..)
 import UtilStrictLists
