@@ -55,15 +55,17 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 
 ## Roadmap ##
 
-### v0.1 ###
+### v0.1 
 - [x] upload to github
 - [x] fix hardcoding to Clean installation
 - [ ] get `Build` functioning (as well as Build & Run and Run)
-- [ ] aborts when trying to open file it can't find
+- [x] aborts when trying to open file it can't find
 - [ ] cleanup Project menu
 - [ ] figure out if code signing required
+- [x] do something about writing debug logs to hardcoded location
+- [x] don't die when reading invalid project file 
 
-### v0.2 ###
+### v0.2 
 - [ ] update project window after build
 - [ ] error, message and type windows for build output
 - [ ] after first save it appears later edit's do not immediately mark file as dirty
@@ -71,7 +73,7 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 - [ ] shift-doubleclick doesn't have desired effect in project window (should open definition module)
 
 
-### Unplanned ###
+### Unplanned 
 - [ ] still some issues with syntax colouring vs unicode
 - [ ] project global Clean sensitive search
 - [ ] allow opening project files 'as text'
@@ -90,7 +92,8 @@ IDEEnvs
 - [ ] logo in README once we have sorted licensing
 - [ ] edit IDE options (CLEAN_HOME)
 - [ ] edit project options
-- [] weird line wrapping on new files
+- [ ] weird line wrapping on new files
+- [ ] column sizes & resizing in project window
 ### Others ###
 
 - [ ] Update .gitignore

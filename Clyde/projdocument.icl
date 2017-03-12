@@ -376,8 +376,8 @@ readProject :: !String !String !String !*Files -> (TreeView,!*Files)
 readProject prj prjPath appPath files
 		#!	path						= prjPath +++. prj
 			((proj,succ,errmsg),files)	= ReadProjectFile path appPath files
-		| not succ
-			= abort (errmsg)								// bit brutal for an IDE...
+		| not succ && trace_n ("failed to read project file: '"+++path+++"' with error: '"+++errmsg+++"'") True
+			= ({},files)
 		#!	modules						= PR_GetModuleStuff proj
 			mods						= [ (mod,pth) \\ (mod,pth,_,_) <|- modules ]
 		| isEmpty mods
@@ -438,6 +438,8 @@ initProjectTree prj prjPath appPath
 	| trace_n ("path: '"+++prjPath+++"'") False = undef
 	| trace_n ("appPath: '"+++appPath+++"'") False = undef
 	| trace_n ("# treeElem: "+++toString (size treeItems)) False = undef
+	| size treeItems == 0
+		= 0
 	#!	root = treeElem 0
 	| trace_n ("iPT root:\t"+++toString root) False = undef
 	= root

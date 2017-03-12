@@ -45,9 +45,10 @@ build force proj_path world
 // write logging to <proj>.log
 	# (ok,logfile,world)		= openLogfile proj_path world
 	# ((proj,ok,err),world)		= accFiles (ReadProjectFile proj_path startup) world
-
+	| not ok && trace_n ("failed to read project file: '"+++proj_path+++"' with error: '"+++err+++"'") True
+		= (0,world)
 	# iniGeneral				= initGeneral True default_compiler_options startup proj_path proj envs logfile
-	# ps = {ls=iniGeneral,gst_world=world,gst_continue_or_stop=False}
+	# ps 						= {ls=iniGeneral,gst_world=world,gst_continue_or_stop=False}
 	# ps						= bring_project_upto_date force cont ps
 	= (42,ps.gst_world)
 where

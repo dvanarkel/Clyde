@@ -5,13 +5,19 @@ import StdDebug
 
 import System._Posix
 import System._Pointer
+import System._Unsafe
 import System.CommandLine
 import Text
 
 import Cocoa.Foundation
+import Cocoa.UserDefaults
+
+debugpath =: accUnsafe (stringForKey "DEBUG_PATH")
 
 installDebug :: !*World -> *World
 installDebug world
+	| debugpath == ""
+		= world
 	#!	world			= if (not (isatty 0)) (swizzleStandardDescriptors world) world
 		world			= writeDebugPaths world
 	= world
@@ -22,7 +28,7 @@ ttyStandardDescriptors = map isatty [0,1,2]
 writeDebugPaths world
  	#!	buffer			= createArray 2048 '\0'
  		(ptr,world)		= getcwd buffer 2048 world
- 		(ok,file,world)	= fopen "/Users/dvanarkelmaccom/Documents/CleanLab/debug.txt" FWriteText world
+ 		(ok,file,world)	= fopen (debugpath +++ "/Clyde_debug.txt") FWriteText world
  		cwd				= derefString ptr
  		(args,world)	= getCommandLine world
  		file			= file <<< "CWD:\t'" <<< cwd <<< "'\n"
@@ -36,21 +42,16 @@ writeDebugPaths world
 
 swizzleStandardDescriptors :: !*a -> *a
 swizzleStandardDescriptors world
-	#!	outp	= "/Users/dvanarkelmaccom/Documents/CleanLab/debug_out.txt\0"
-		errp	= "/Users/dvanarkelmaccom/Documents/CleanLab/debug_err.txt\0"
-		(outd,world)	= fopen` outp "a\0" world
-		(errd,world)	= fopen` errp "a\0" world
+	#!	outp	= debugpath +++ "/Clyde_debug_out.txt\0"
+		errp	= debugpath +++ "/Clyde_debug_err.txt\0"
+		(outd,world)	= fopen` outp "w\0" world
+		(errd,world)	= fopen` errp "w\0" world
 		(outn,world)	= fileno outd world
 		(outf,world)	= dup2 outn 1 world
 		(errn,world)	= fileno errd world
 		(errf,world)	= dup2 errn 2 world
 		(outc,world)	= fclose` outd world
 		(errc,world)	= fclose` errd world
-//		world	= force outf world
-//		world	= force errf world
-//		world	= force outc world
-//		world	= force errc world
-//	| trace_n ("done") False = undef
 	= world
 
 fopen` :: !String !String !*env -> (!Int,!*env)
