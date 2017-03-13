@@ -2,7 +2,7 @@ Version: 1.4
 Global
 	ProjectRoot:	.
 	Target:	StdEnvClyde
-	Exec:	{Project}/Clyde.app/Contents/MacOS/Play
+	Exec:	{Project}/Clyde.app/Contents/MacOS/Clyde
 	CodeGen
 		CheckStacks:	False
 		CheckIndexes:	True
