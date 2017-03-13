@@ -4,11 +4,12 @@ A Clean IDE for Mac OS X
 
 This is a work in progress towards an integrated development environment for [Clean](http://clean.cs.ru.nl/Clean)  similar to the [CleanIDE for Windows](http://clean.cs.ru.nl/Clean_IDE). 
 
-## status
+## Status
 This v0.0 is not yet directly useable due to:
 
 * build not yet functioning
 * code signing (is this actually needed?)(note that it also calls through to local backup script, not included)
+
 ## Using ##
 
 - Clyde is automatically bound to files of type \*.prj, \*.icl and \*.dcl
@@ -56,17 +57,18 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 ## Roadmap ##
 
 ### v0.1 
+- [ ] get `Build` functioning (as well as Build & Run and Run)
+- [ ] figure out if code signing required
+- [x] cleanup Project menu
 - [x] upload to github
 - [x] fix hardcoding to Clean installation
-- [ ] get `Build` functioning (as well as Build & Run and Run)
 - [x] aborts when trying to open file it can't find
-- [ ] cleanup Project menu
-- [ ] figure out if code signing required
 - [x] do something about writing debug logs to hardcoded location
 - [x] don't die when reading invalid project file 
 
 ### v0.2 
 - [ ] update project window after build
+-  [ ] New should allow you to choose prj/dcl/icl/txt
 - [ ] error, message and type windows for build output
 - [ ] after first save it appears later edit's do not immediately mark file as dirty
 - [ ] save all before Build
@@ -94,8 +96,8 @@ IDEEnvs
 - [ ] edit project options
 - [ ] weird line wrapping on new files
 - [ ] column sizes & resizing in project window
-### Others ###
 
+### Others ###
 - [ ] Update .gitignore
 - [ ] Sort out icon licensing
 

@@ -318,6 +318,7 @@ populateProjectMenu menu world
 		world			= setKeyEquivalentModifierMask item (NSShiftKeyMask) world
 //		(item,world)	= addItemWith_title_action_keyEquivalent menu "Open definition module" "doubleClick:" "M" world
 		world			= setTarget item delegate world
+/*
 		world			= addSeparator menu world
 	#!	(item,world)	= addItemWith_title_action_keyEquivalent menu "Clyde.prj" "project:" "" world
 		world			= setRepresentedObject item "Clyde.prj" world
@@ -325,4 +326,5 @@ populateProjectMenu menu world
 		world			= setRepresentedObject item "Play.prj" world
 	#!	(item,world)	= addItemWith_title_action_keyEquivalent menu "hex.prj" "project:" "" world
 		world			= setRepresentedObject item "hex.prj" world
+*/
 	= world
