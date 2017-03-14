@@ -59,6 +59,20 @@ instance FileEnv GeneralSt where
 	, logfile		:: !*File
 	}
 
+
+testGeneral :: !Bool !CompilerOptions !String !String !Project ![Target] -> (!Bool,!String)
+testGeneral be_verb comp_opts application_path project_path project targets
+	| isNothing target_index	= (False,target_name)
+	= (True,"")
+where
+	target_name	= PR_GetTarget project
+	target_index = findIndex 0 target_name targets
+
+	findIndex x name [] = Nothing
+	findIndex x name [t=:{target_name=n}:ns]
+		| n == name = Just x
+		= findIndex (inc x) name ns
+
 initGeneral :: !Bool !CompilerOptions !String !String !Project ![Target] !*File -> *General
 initGeneral be_verb comp_opts application_path project_path project targets logfile
 	| isNothing target_index	= abort ("Unable to find project environment for target '" +++ target_name +++ "' in available environments.\n")
@@ -233,3 +247,9 @@ abortLog flag message ps
 		True	-> app_world_instead_of_ps (set_return_code_world (-1)) ps
 		_		-> ps
 	= {ps & gst_continue_or_stop=True}
+
+closeLog :: !*GeneralSt -> *GeneralSt
+closeLog ps
+	# (lf,ps)	= accPLoc (\ls=:{logfile} -> (logfile,{ls & logfile = stderr})) ps
+	# (ok,ps)	= closeLogfile lf ps
+	= ps

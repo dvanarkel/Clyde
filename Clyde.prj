@@ -46,7 +46,6 @@ Global
 		Path:	{Project}/cleantools/Pm
 		Path:	{Project}/cleantools/Util
 		Path:	{Project}/cleantools/Ed
-		Path:	{Project}/cleantools/Ide
 		Path:	{Project}/cleantools/Interfaces/LinkerInterface
 		Path:	{Application}/lib/Platform
 		Path:	{Application}/lib/Platform/Deprecated/StdLib

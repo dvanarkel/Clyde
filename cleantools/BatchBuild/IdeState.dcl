@@ -21,8 +21,9 @@ from PmCleanSystem import ::CompilerProcessIds,NoCompilerProcessIds
 app_world_instead_of_ps f gst :== {gst & gst_world=f gst.gst_world}
 
 instance FileSystem GeneralSt
-instance FileEnv GeneralSt
+instance FileEnv GeneralSt  
 
+testGeneral :: !Bool !CompilerOptions !String !String !Project ![Target] -> (!Bool,!String)
 initGeneral :: !Bool !CompilerOptions !String !String !Project ![Target] !*File -> *General
 
 :: Prefs =
@@ -81,3 +82,4 @@ getInteract  :: !*GeneralSt -> (!Bool,!*GeneralSt)
 
 writeLog :: !String !*GeneralSt -> *GeneralSt
 abortLog :: !Bool !String !*GeneralSt -> *GeneralSt
+closeLog :: !*GeneralSt -> *GeneralSt

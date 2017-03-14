@@ -268,7 +268,7 @@ CodeGen cgen used_compiler_process_ids wf genAsmOrCode abc_path obj_path timepro
 	| code_generator_pid<0
 		= abort "fork failed"
 	| code_generator_pid==0
-		# r=dup2 stderr_fd 2
+		# r=dup2 stderr_fd 2		// redirect cgen stderr to errors file
 		| r== (-1)
 			= abort "dup2 failed"
 		| execv (cgen+++"\0") argv<0
@@ -400,6 +400,9 @@ finish_code_generator process_handle {scg_abc_path,scg_path_without_suffix,scg_s
 					ps)
 	= (exit_code==0, ps)
 
+from System._Pointer import ::Pointer,packString,derefString
+from System._Posix import getcwd,chdir
+import StdDebug
 Link ::	!String !(WindowFun *GeneralSt) !Pathname !ApplicationOptions
 		!Pathname !(List Pathname) !(List Pathname) !(List Pathname) !Bool !Bool !Bool !Bool !Bool !String
 		!Bool !String !Pathname !String !Processor !Bool !*GeneralSt
@@ -454,6 +457,12 @@ Link linker winfun path
 	| ld_pid<0
 		= abort "fork failed"
 	| ld_pid==0
+		# cwdbuf	= createArray 256 ' '
+		# (ptr,ps)	= getcwd cwdbuf 255 ps
+		| trace_n ("cwd: "+++ derefString ptr+++"\tdir: "+++(optdirpath+++"/..")) False= undef
+		# (ret,ps)	= chdir (packString (optdirpath+++"/..")) ps
+		# (ptr,ps)	= getcwd cwdbuf 255 ps
+		| trace_n ("cwd: "+++ derefString ptr) False= undef
 		| execv (linker+++"\0") argv<0
 			= abort ("execv failed: Could not run '" +++ linker +++ "'")
 			= abort "execution continued after execv"

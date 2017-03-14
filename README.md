@@ -94,10 +94,17 @@ IDEEnvs
 - [ ] logo in README once we have sorted licensing
 - [ ] edit IDE options (CLEAN_HOME)
 - [ ] edit project options
+- [ ] edit module options
 - [ ] weird line wrapping on new files
 - [ ] column sizes & resizing in project window
+- [ ] store build artefacts in a per-project hierarchy (as opposed to current per source directory Clean System Files)
+- [ ] include clean system for a one-step install
+- [ ] git integration (include 'modified upstream' alerting)
+- [ ] paste styled text as plain
+- [ ] interactive clean 
 
-### Others ###
+
+### Others 
 - [ ] Update .gitignore
 - [ ] Sort out icon licensing
 

@@ -46,6 +46,13 @@ build force proj_path world
 	# (ok,logfile,world)		= openLogfile proj_path world
 	# ((proj,ok,err),world)		= accFiles (ReadProjectFile proj_path startup) world
 	| not ok && trace_n ("failed to read project file: '"+++proj_path+++"' with error: '"+++err+++"'") True
+		#!	logfile				= logfile <<< ("failed to read project file: '"+++proj_path+++"' with error: '"+++err+++"'")
+			(ok,world)			= fclose logfile world
+		= (0,world)
+	# (ok,target_name)			= testGeneral True default_compiler_options startup proj_path proj envs
+	| not ok && trace_n ("Unable to find project environment for target '" +++ target_name +++ "' in available environments.") True
+		#!	logfile				= logfile <<< ("Unable to find project environment for target '" +++ target_name +++ "' in available environments.\n")
+			(ok,world)			= fclose logfile world
 		= (0,world)
 	# iniGeneral				= initGeneral True default_compiler_options startup proj_path proj envs logfile
 	# ps 						= {ls=iniGeneral,gst_world=world,gst_continue_or_stop=False}
