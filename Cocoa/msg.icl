@@ -213,6 +213,19 @@ msgI_V cls selS env
 		env				= dcFree vm env
 	= env
 
+msgIS_S :: !Pointer !ZString !DCStruct !Pointer !DCStruct !*a -> (!Pointer,*a)
+msgIS_S cls selS argt argv rett env
+	#!	(vm,env)		= dcNewCallVM 4096 env
+		(sel,env)		= sel_getUid selS env
+		env				= dcReset vm env
+		env				= dcArgPointer vm cls env
+		env				= dcArgPointer vm sel env
+		env				= dcArgStruct vm argt argv env
+
+		(ret,env)		= dcCallStruct vm objc_msgSend_stretPtr rett env
+		env				= dcFree vm env
+	= (ret,env)
+
 msgI_S :: !Pointer !ZString !DCStruct !*a -> (!Pointer,!*a)
 msgI_S cls selS s env
 	#!	(vm,env)		= dcNewCallVM 4096 env
@@ -223,6 +236,18 @@ msgI_S cls selS s env
 		(ret,env)		= dcCallStruct vm objc_msgSend_stretPtr s env
 		env				= dcFree vm env
 	= (ret,env)
+
+msgIB_V :: !Pointer !ZString !Bool !*a -> *a
+msgIB_V cls selS arg env
+	#!	(vm,env)		= dcNewCallVM 4096 env
+		(sel,env)		= sel_getUid selS env
+		env				= dcReset vm env
+		env				= dcArgPointer vm cls env
+		env				= dcArgPointer vm sel env
+		env				= dcArgBool vm arg env
+		env				= dcCallVoid vm objc_msgSendPtr env
+		env				= dcFree vm env
+	= env
 
 msgII_S :: !Pointer !ZString !Int !DCStruct !*a -> (!Pointer,!*a)
 msgII_S cls selS arg s env
@@ -385,6 +410,19 @@ msgIPI_V cls selS arg1 arg2 env
 		env				= dcArgPointer vm sel env
 		env				= dcArgPointer vm arg1 env
 		env				= dcArgInt vm arg2 env
+		env				= dcCallVoid vm objc_msgSendPtr env
+		env				= dcFree vm env
+	= env
+
+msgIPP_V :: !Pointer !ZString !Pointer !Pointer !*a -> *a
+msgIPP_V cls selS arg1 arg2 env
+	#!	(vm,env)		= dcNewCallVM 4096 env
+		(sel,env)		= sel_getUid selS env
+		env				= dcReset vm env
+		env				= dcArgPointer vm cls env
+		env				= dcArgPointer vm sel env
+		env				= dcArgPointer vm arg1 env
+		env				= dcArgPointer vm arg2 env
 		env				= dcCallVoid vm objc_msgSendPtr env
 		env				= dcFree vm env
 	= env

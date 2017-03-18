@@ -29,6 +29,7 @@ msgIII_P :: !Pointer !ZString !Int !Int !*a -> (!Pointer,!*a)
 msgIPP_P :: !Pointer !ZString !Pointer !Pointer !*a -> (!Pointer,!*a)
 msgIPPPP_I :: !Pointer !ZString !Pointer !Pointer !Pointer !Pointer !*a -> (!Int,!*a)
 msgIPI_V :: !Pointer !ZString !Pointer !Int !*a -> *a
+msgIPP_V :: !Pointer !ZString !Pointer !Pointer !*a -> *a
 msgIPII_V :: !Pointer !ZString !Pointer !Int !Int !*a -> *a
 msgIPPII_V :: !Pointer !ZString !Pointer !Pointer !Int !Int !*a -> *a
 msgIPPP_P :: !Pointer !ZString !Pointer !Pointer !Pointer !*a -> (!Pointer,!*a)
@@ -41,8 +42,11 @@ msgIPIIB_P :: !Pointer !ZString !Pointer !Int !Int !Bool !*a -> (!Pointer,!*a)
 
 from Cocoa.dyncall import :: DCStruct, :: DCpointer
 msgCS_V :: !ZString !ZString !DCStruct !Pointer !*a -> *a
-msgI_S :: !Pointer !ZString !DCStruct !*a -> (!Pointer,!*a)
-msgII_S :: !Pointer !ZString !Int !DCStruct !*a -> (!Pointer,!*a)
+// struct returns not supported by dyncall library
+//msgIS_S :: !Pointer !ZString !DCStruct !Pointer !DCStruct !*a -> (!Pointer,*a)
+//msgI_S :: !Pointer !ZString !DCStruct !*a -> (!Pointer,!*a)
+msgIB_V :: !Pointer !ZString !Bool !*a -> *a
+//msgII_S :: !Pointer !ZString !Int !DCStruct !*a -> (!Pointer,!*a)
 msgIPS_P :: !Pointer !ZString !Pointer !DCStruct !Pointer !*a -> (!Pointer,!*a)
 msgIPPS_P :: !Pointer !ZString !Pointer !Pointer !DCStruct !Pointer !*a -> (!Pointer,!*a)
 msgIS_V :: !Pointer !ZString !DCStruct !Pointer !*a -> *a
