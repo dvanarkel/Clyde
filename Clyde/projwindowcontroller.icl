@@ -15,6 +15,8 @@ import StdDebug
 
 NIL	:== 0
 
+/////
+
 sharedDocumentController :: Pointer
 sharedDocumentController =: sharedDocumentController
 where
@@ -22,6 +24,8 @@ where
 	sharedDocumentController
 		#!	(app,world) 	= msgC_P "NSDocumentController\0" "sharedDocumentController\0" newWorld
 		= app
+
+/////
 
 makeProjWindowControllerClass :: !*a -> *a
 makeProjWindowControllerClass env
@@ -77,6 +81,8 @@ addOVDataSource adc world
 	
 	= world
 
+/////
+
 foreign export setDocument
 
 imp_setdocument :: Int
@@ -89,15 +95,28 @@ setDocument self cmd document
 //	super setDocument document
 	| trace_n ("setDocument\t"+++object_getClassName self +++ "\t" +++ sel_getName cmd+++"\t"+++object_getClassName document) False = undef
 	| trace_n ("["+++toString self+++"\t"+++toString document+++"]") False = undef
-	#!	cls				= fst (objc_getClass "NSWindowController\0" newWorld)
+	#!	env				= newWorld
+
+	#!	(wind,env)		= msgI_P document "windowForSheet\0" env
+		env				= traceVisible 42 wind env
+
+	#!	(cls,env)		= objc_getClass "NSWindowController\0" env
 		ptr				= malloc 16
 		ptr				= writeInt ptr 0 self
 		ptr				= writeInt ptr 8 cls
 	| trace_n ("before super setDocument:\t"+++toString ptr+++"\t"+++toString cls) False = undef
-	#!	(ret,env)		= msgSP_I ptr cmd document newWorld
+	#!	(ret,env)		= msgSP_I ptr cmd document env
 	| trace_n ("after super setDocument:\t"+++toString ret) False = undef
+
+	#!	(wind,env)		= msgI_P document "windowForSheet\0" env
+		env				= traceVisible 43 wind env
+
 	#!	(outl,env)		= object_getInstanceVariable self "outlineview\0" env
 		env				= msgIPI_V outl "reloadItem:reloadChildren:\0" NIL YES env
+
+	#!	(wind,env)		= msgI_P document "windowForSheet\0" env
+		env				= traceVisible 44 wind env
+
 	= force env ret
 
 impOutlineViewNummberOfChildrenOfItem :: Int
@@ -132,6 +151,7 @@ zeroToRoot ov 0
 	= root
 zeroToRoot ov item
 	= item
+
 outlineViewNummberOfChildrenOfItem :: !Int !Int !Int !Int -> Int
 outlineViewNummberOfChildrenOfItem self cmd ov item
 	| trace_n ("outlineViewNummberOfChildrenOfItem\t"+++toString self+++"\t"+++toString ov+++"\t"+++toString item) False = undef
@@ -252,7 +272,7 @@ cbHandlerPPPPP_P cb_ args_ result_ userdata_
 
 foreign export cbHandlerPPPPP_P
 
-addrcbHandlerPPPPP_P :: !Int
+addrcbHandlerPPPPP_P :: Int
 addrcbHandlerPPPPP_P = code {
 		pushLc 	cbHandlerPPPPP_P
 	}
@@ -262,6 +282,8 @@ addrcbHandlerPPPPP_P = code {
 // where do delegate menu items go?
 // window controller sounds correct...
 
+import Clyde.windows
+
 makeProjWindowController :: !Pointer !*World -> (!Pointer,!*World)
 makeProjWindowController document/*appdelegate*/ env
 	#!	(wind,env)		= msgC_P "NSWindow\0" "alloc\0" env
@@ -269,26 +291,66 @@ makeProjWindowController document/*appdelegate*/ env
 		style			= NSTitledWindowMask + NSClosableWindowMask + NSResizableWindowMask + NSMiniaturizableWindowMask
 		backing			= NSBackingStoreBuffered	// NSBackingStoreRetained
 		(wind,env)		= msgISIIB_P wind "initWithContentRect:styleMask:backing:defer:\0" NSRectType rect style backing False env
+/*
+		(screen,env)	= msgI_P wind "screen\0" env
+		(vis,env)		= visibleFrame screen env
+		env = trace_n ("screen "+++toString screen+++"\t"+++rect2string vis) env
+		(frm,env)		= getFrame wind env
+		shgt			= readReal8 vis 24
+		fhgt			= (readReal8 frm 24) - (readReal8 frm 8)
+		top				= shgt - fhgt
+		env				= msgIS_V wind "setFrameOrigin:\0" NSSizeType (NSMakeSize 0.0 top) env	//NSPoint
+*/
+//		env = trace_n ("pre-cascade "+++toString cascadeTL+++"\t"+++toString (readReal8 cascadeTL 0)+++"\t"+++toString (readReal8 cascadeTL 8)) env 
+		env = trace_n ("pre-cascade "+++toString wind) env 
+		env				= cascade wind env
+		env = trace_n ("post-cascade "+++toString wind) env 
+//		env	= cascadeTopLeftFromPoint wind env
+		env = trace_n ("postpost-cascade "+++toString wind) env 
+//		env	= cascadeTopLeftFromPoint wind env
+//		env = trace_n ("postpost-cascade "+++toString wind) env 
+//		env	= cascadeTopLeftFromPoint wind env
+//		env = trace_n ("postpost-cascade "+++toString wind) env 
+
+		env				= traceVisible 1 wind env
 		env				= msgIP_V wind "setTitle:\0" (c2ns "Project Window\0") env
+		env				= traceVisible 2 wind env
+
 		(view,env)		= msgC_P "NSView\0" "alloc\0" env
 		rect			= cgRect 0.0 0.0 400.0 400.0
 //		(cont_,env)		= msgI_P wind "contentView:\0" env
 //		(rect,env)		= getBounds cont_ env
 		(view,env)		= msgIS_P view "initWithFrame:\0" NSRectType rect env
+		env				= traceVisible 3 wind env
 //		(flip,env)		= msgI_I view "isFlipped\0" env
 //		env = trace_n ("root is flipped: "+++toString flip) env
 
 		(wctrl,env)		= msgC_P "ProjWindowController\0" "alloc\0" env
+		env				= traceVisible 4 wind env
+		env				= msgIB_V wctrl "setShouldCascadeWindows:\0" True env
 		(wctrl,env)		= msgIP_P wctrl "initWithWindow:\0" wind env
+		env				= msgIB_V wctrl "setShouldCascadeWindows:\0" True env
+		env				= traceVisible 5 wind env
 		env = trace_n ("project window controller: "+++toString wctrl) env
 		
 		env				= msgIP_V wind "setContentView:\0" view env
+		env				= traceVisible 6 wind env
 		(vw,env)		= msgI_P wind "contentView\0" env
+		env				= traceVisible 7 wind env
 		env				= createPOView wctrl view env		
+		env				= traceVisible 8 wind env
+//		(should,env)	= msgI_B wctrl "shouldCascadeWindows\0" env
+		(should,env)	= msgI_I wctrl "shouldCascadeWindows\0" env
+		env				= trace_n ("should\t"+++toString (should<>0)) env
 //		(w,env)			= msgI_P wind "becomeFirstResponder\0" env	
 //		env				= msgIP_V wind "makeKeyAndOrderFront:\0" self env
 
 	= (wctrl,env)
+
+traceVisible i wind env
+	#!	(vis,env)		= msgI_I wind "isVisible\0" env
+	| trace_n ("visible ("+++toString i+++"): "+++ (if (vis==0) "NO" "YES")) False = undef
+	= env
 
 // create the project view
 
