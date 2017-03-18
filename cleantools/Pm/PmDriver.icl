@@ -158,7 +158,7 @@ where
 		| isJust postlink
 			# (Just post_link)	= postlink
 			# (prj_path,ps)		= getProjectFilePath ps
-			# prj_dir_path  = PR_GetRootDir project
+			# prj_dir_path 		= PR_GetRootDir project
 			# (app_path,ps)		= getStup ps
 			# post_link			= fulPath app_path prj_dir_path post_link
 			# ps				= showInfo (Level1 "Postlink...") ps
