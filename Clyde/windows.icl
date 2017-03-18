@@ -121,6 +121,18 @@ cascade` _ _ _ _ _ = code {
 	} 
 
 
+////// Line Numbers
+import code from "NoodleLineNumberMarker.o"
+import code from "NoodleLineNumberView.o"
+import code from "NSTextView+JSDExtensions.o"
+//	gcc -c -ObjC -o Clean\ System\ Files/NoodleLineNumberMarker.o NoodleLineNumberMarker.m 
+//	gcc -c -ObjC -o Clean\ System\ Files/NoodleLineNumberView.o NoodleLineNumberView.m 
+//	gcc -c -ObjC -o Clean\ System\ Files/NSTextView+JSDExtensions.o NSTextView+JSDExtensions.m 
+
+setShowsLineNumbers :: !Pointer !Bool !* a -> *a
+setShowsLineNumbers textv show env
+	= msgII_V textv "setShowsLineNumbers:" (if show YES NO) env			// from Noodle & NSTextView+JSDExtensions...
+
 //////
 
 populateWindow :: !Pointer !*World -> *World
