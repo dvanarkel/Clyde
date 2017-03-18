@@ -7,6 +7,7 @@ import Cocoa.objc
 import Cocoa.Foundation
 import Clyde.controls
 import Clyde.menus
+import Clyde.windows
 from Clyde.textdocument import setMyParagraphStyle
 
 populateTextWindow :: !Pointer !String !*World -> (!Pointer,!*World)
@@ -18,6 +19,7 @@ populateTextWindow self type env
 		backing			= NSBackingStoreRetained
 
 		(wind,env)		= msgISIIB_P wind "initWithContentRect:styleMask:backing:defer:\0" NSRectType rect style backing True env
+		env				= cascade wind env
 
 		env				= msgIP_V wind "setTitle:\0" (c2ns "My Third Window\0") env
 
@@ -122,27 +124,18 @@ createTextView2 delegate window (r,g,b,a) env
 		env				= msgI_V col "retain\0" env
 		env				= msgIP_V textv "setBackgroundColor:\0" col env
 
-
 		env				= setMyParagraphStyle textv font env
 		
 		(tcont,env)		= msgI_P textv "textContainer\0" env
-//		env				= msgIS_V tcont "setContainerSize:\0" NSSizeType (NSMakeSize 2048.0 2048.0) env
 		env				= msgIS_V tcont "setContainerSize:\0" NSSizeType (NSMakeSize FLT_MAX FLT_MAX) env
 		env				= msgII_V tcont "setWidthTracksTextView:\0" NO env
-
 // add app delegate to text storage for syntax colouring...
 		(stor,env)		= msgI_P textv "textStorage\0" env
 		env				= msgIP_V stor "setDelegate:\0" delegate env
-
 	// assemble the pieces
 		env				= msgIP_V scroll "setDocumentView:\0" textv env
-
 		env				= msgIP_V window "setContentView:\0" scroll env
-		(ret,env)		= msgIP_I window "makeFirstResponder:\0" textv env
-
-//		env				= msgIP_V window "makeKeyAndOrderFront:\0" delegate env
-
 		(cview,env)		= msgI_P window "contentView\0" env
+		env				= setShowsLineNumbers textv True env
 	| trace_n ("created textview '"+++toString textv+++"'") False = undef
 	= env
-
