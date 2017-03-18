@@ -57,22 +57,31 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 ## Roadmap ##
 
 ### v0.1 
-- [ ] get `Build` functioning (as well as Build & Run and Run)
-- [ ] figure out if code signing required
+- [ ] get `Run` functioning (as well as Build & Run)
+- [x] figure out if code signing required
+- [x] get `Build` functioning
 - [x] cleanup Project menu
 - [x] upload to github
 - [x] fix hardcoding to Clean installation
 - [x] aborts when trying to open file it can't find
 - [x] do something about writing debug logs to hardcoded location
 - [x] don't die when reading invalid project file 
+- [x] weird line wrapping on new files
+- [x] cascade windows when opening
+- [x] add line numbers
+- [ ] paste styled text as plain
+- [ ] jump to line... (should be easy with added NSTextView++)
+- [ ] override shouldRunSavePanelWithAccessoryView to return NO (https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/DocBasedAppProgrammingGuideForOSX/AdvancedTopics/AdvancedTopics.html)
 
 ### v0.2 
 - [ ] update project window after build
--  [ ] New should allow you to choose prj/dcl/icl/txt
 - [ ] error, message and type windows for build output
-- [ ] after first save it appears later edit's do not immediately mark file as dirty
 - [ ] save all before Build
+- [ ] New should allow you to choose prj/dcl/icl/txt
+- [ ] after first save it appears later edit's do not immediately mark file as dirty
 - [ ] shift-doubleclick doesn't have desired effect in project window (should open definition module)
+- [ ] column sizes & resizing in project window
+- [ ] edit project options
 
 
 ### Unplanned 
@@ -83,28 +92,20 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 - [ ] update module mangling so that hierarchical modules are part of directory name instead of module name
 	eg				{Project}.Cocoa		dyncall
 	rather than		{Project}			Cocoa.dyncall
-- [ ] cascade windows when opening
-- [ ] add line numbers
 - [ ] integrate cloogle
 - [ ] api documentation
 - [ ] xref
 - [ ] cross compilation
 - [ ] consider moving to collection of *.env files under /etc instead of monolithic 
 IDEEnvs
-- [ ] logo in README once we have sorted licensing
 - [ ] edit IDE options (CLEAN_HOME)
-- [ ] edit project options
 - [ ] edit module options
-- [ ] weird line wrapping on new files
-- [ ] column sizes & resizing in project window
 - [ ] store build artefacts in a per-project hierarchy (as opposed to current per source directory Clean System Files)
 - [ ] include clean system for a one-step install
 - [ ] git integration (include 'modified upstream' alerting)
-- [ ] paste styled text as plain
 - [ ] interactive clean 
-
 
 ### Others 
 - [ ] Update .gitignore
 - [ ] Sort out icon licensing
-
+- [ ] logo in README once we have sorted licensing
