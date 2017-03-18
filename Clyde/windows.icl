@@ -14,8 +14,8 @@ import Clyde.tableviewcontroller
 import Clyde.menus
 import Clyde.textdocument
 
-windBounds :: !Pointer !*World -> (!Pointer,!*World)
-windBounds self env
+contentLayoutRect :: !Pointer !*World -> (!Pointer,!*World)
+contentLayoutRect self env
 	#!	(sel,env)		= sel_getUid "contentLayoutRect\0" env
 		ptr				= malloc 32
 		(ptr`,env)		= theCall ptr self sel env
@@ -25,6 +25,103 @@ where
 	theCall _ _ _ _ = code {
 			ccall objc_msgSend_stret "Gppp:I:A"
 		}
+
+readRect :: !Pointer !*a -> (!(!Real,!Real),!(!Real,!Real),!*a)
+readRect bounds env
+	#!	origin_x		= readReal8 bounds 0
+		origin_y		= readReal8 bounds 8
+		size_w			= readReal8 bounds 16
+		size_h			= readReal8 bounds 24
+	= ((origin_x,origin_y),(size_w,size_h),env)
+
+visibleFrame :: !Pointer !*a -> (!Pointer,!*a)
+visibleFrame self env
+	#!	(sel,env)		= sel_getUid "visibleFrame\0" env
+		ptr				= malloc 32
+		(ptr`,env)		= theCall ptr self sel env
+//		env = trace_n ("getFrame\t"+++toString self+++"\t"+++toString sel+++"\t"+++toString ptr+++"\t"+++toString ptr`) env
+	= (ptr,env)
+where
+	theCall :: !Pointer !Pointer !Pointer !*a -> (!Int,!*a)
+	theCall _ _ _ _ = code {
+			ccall objc_msgSend_stret "Gppp:I:A"
+		}
+
+import code from "NSWindow+DvA.o"
+//	gcc -c -ObjC -o Clean\ System\ Files/NSWindow+DvA.o NSWindow+DvA.m 
+
+cascade :: !Pointer !*a -> *a
+cascade wind env
+	= code {
+		ccall doCascade "p:V:A"
+	}
+/*
+cascadeTL	=: NSMakeSize 0.0 0.0
+cascadeTL`	=: NSMakeSize 0.0 0.0
+cascade wind env
+	| trace_n ("<<<cascade "+++toString cascadeTL+++"\t"+++toString (readReal8 cascadeTL 0)+++"\t"+++toString (readReal8 cascadeTL 8)) False = undef
+//	#!	(tl,env)		= msgIS_S wind "cascadeTopLeftFromPoint:\0" NSSizeType cascadeTL NSSizeType  env
+	#!	(tl,env)		= call wind "cascadeTopLeftFromPoint:\0" NSSizeType cascadeTL NSSizeType  env
+	| trace_n (">>>cascade "+++toString cascadeTL+++"\t"+++toString (readReal8 cascadeTL 0)+++"\t"+++toString (readReal8 cascadeTL 8)) False = undef
+	| trace_n (">> c\t" +++ toString tl) False = undef
+	| trace_n ("cascade\t"
+				+++toString cascadeTL
+				+++"\t"+++toString tl
+				+++"\t"+++toString (readReal8 cascadeTL 0) 
+				+++"\t"+++toString (readReal8 cascadeTL 8)
+				+++"\t"+++toString (readReal8 tl 0)
+				+++"\t"+++toString (readReal8 tl 8) 
+			  ) False = undef
+	= env
+where
+	call self seln _ ptr _ env
+		#!	(sel,env)		= sel_getUid seln env
+			ptr` = malloc 16
+//			env	= call` ptr` self sel ptr env
+			(ptr`,env)	= call` ptr` self sel ptr env
+//		| ptr` <> cascadeTL` = abort "????"
+//		#!	ptr	= writeReal8 ptr 0 (readReal8 ptr` 0)
+//			ptr	= writeReal8 ptr 8 (readReal8 ptr` 8)
+//			env = force ptr env
+		= (ptr`, env)
+//	call` :: !Int !Int !Int !Int !*a -> *a//(!Int,!*a)
+	call` :: !Int !Int !Int !Int !*a -> (!Int,!*a)
+	call` _ _ _ _ _ = code {
+			ccall objc_msgSend_stret "Gpppp:I:A"
+		}
+*/		
+
+cascadeTL	=: NSMakeSize 0.0 0.0
+
+cascadeTopLeftFromPoint wind env
+	#!	(sel,env)		= sel_getUid "cascadeTopLeftFromPoint:\0" env
+		x				= readReal8 cascadeTL 0
+		y				= readReal8 cascadeTL 8
+		(x,y,env)		= maybeInit x y wind env
+		(l,t,env)		= cascade` wind sel x y env
+	| trace_n ("ctlfp\t"+++toString l+++"\t"+++toString t) False = undef
+	#!	ptr				= cascadeTL
+		ptr				= writeReal8 ptr 0 l
+		ptr				= writeReal8 ptr 8 t
+	= force ptr env
+
+maybeInit 0.0 0.0 wind env
+	#!	(screen,env)	= msgI_P wind "screen\0" env
+		(vis,env)		= visibleFrame screen env
+		(frm,env)		= getFrame wind env
+		shgt			= readReal8 vis 24
+		fhgt			= (readReal8 frm 24) - (readReal8 frm 8)
+		top				= shgt - fhgt
+	= (0.0,top,env)
+maybeInit x y wind env
+	= (x,y,env)
+cascade` :: !Pointer !Pointer !Real !Real !*a -> (!Real,!Real,!*a)	// second 'R' not picked up...
+cascade` _ _ _ _ _ = code {
+		ccall objc_msgSend "GppRR:RR:A"
+	} 
+
+
+//////
 
 populateWindow :: !Pointer !*World -> *World
 populateWindow self env
@@ -196,11 +293,7 @@ populateFourthWindow self env
 		rectT			= NSRectType
 		(wind,env)		= msgISIIB_P wind "initWithContentRect:styleMask:backing:defer:\0" rectT rect style backing False env
 
-		(bounds1,env)	= windBounds wind env
-		origin_x		= readReal8 bounds1 0
-		origin_y		= readReal8 bounds1 8
-		size_w			= readReal8 bounds1 16
-		size_h			= readReal8 bounds1 24
+		(bounds1,env)	= contentLayoutRect wind env
 
 		env				= msgIP_V wind "setTitle:\0" (c2ns "Profile Window\0") env
 
