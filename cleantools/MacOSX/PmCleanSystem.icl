@@ -17,6 +17,8 @@ from linkargs import ReadLinkErrors,WriteLinkOpts,:: LinkInfo`(..),:: LPathname
 from Platform import TempDir
 tooltempdir =: TempDir
 
+import Clyde.Process
+
 :: CompileOrCheckSyntax = SyntaxCheck | Compilation
 
 :: CompilePollCompletedResult = NoFinishedCompiler | UnknownFinishedCompiler | FinishedCompiler !Int !Int
@@ -90,6 +92,19 @@ Compile
 	  cocl_arguments = add_options_string_to_args 0 options2 cocl_arguments
 	  cocl_arguments = add_options_string_to_args 0 options1 cocl_arguments
 
+// so, provided that cocl is an absolute path...
+	  result	= accUnsafe ('SP'.callProcess cocl cocl_arguments Nothing)
+	| isError result
+		#	(err_code,err_msg)	= fromError result
+		= abort ("Compile failed: ("+++toString err_code+++") "+++err_msg)
+	# exitCode = fromOk result
+	# exitcode = if (exitCode==0) 0 1
+	# dummy_slot = 0
+	# (path,mess,env) =	CompileHandleExitCode exitcode cocl startupdir dummy_slot errwin typewin mdn listTypes env
+	= (path,mess,compiler_process_ids,env)
+
+/*
+//... runProcess...
 	# (argv,args_memory) = make_argv [cocl:cocl_arguments]
 
 	# compiler_pid = fork
@@ -101,10 +116,13 @@ Compile
 			= abort "execution continued after execv"
 	| free args_memory<0
 		= abort "free failed"
+//... above equivalent to runProcess, returning (Ok {pid}) (provided we call runProcess with an absolute path)
+// ... waitForProcess
 	# (w_pid,status) = wait_pid compiler_pid 0
 	| w_pid <> -1 && w_pid<>compiler_pid
 		= abort "waitpid failed"
 	# result = (status bitand 0xff00) >> 8
+// ... above equivalent to waitGotProcess... returning (Ok exitCode)
 	# wtermsig = status bitand 0x7f
 	| wtermsig<>0
 		= abort "compiler exited abnormally"
@@ -115,7 +133,7 @@ Compile
 	# dummy_slot = 0
 	# (path,mess,env) =	CompileHandleExitCode exitcode cocl startupdir dummy_slot errwin typewin mdn listTypes env
 	= (path,mess,compiler_process_ids,env)
-
+*/
 CompilePersistent ::
 	!String !Bool !(WindowFun *env) !(WindowFun *env) !CompileOrCheckSyntax !ModuleDirAndName
 	!(List Pathname) !ProjectCompilerOptions !CompilerOptions !Pathname !*CompilingInfo !*env
@@ -211,13 +229,23 @@ exit_clean_compiler {compiler_pid,commands_fd,results_fd,commands_file_name,resu
 	# r = write commands_fd args_string n_chars
 	| r<>n_chars
 		= abort "write_failed"
+
+//
+	# result	= accUnsafe (waitForProcess {pid=compiler_pid})
+	| isError result
+		#	(err_code,err_msg)	= fromError result
+		= abort ("Compile failed: ("+++toString err_code+++") "+++err_msg)
+/*
+// waitForProcess...
 	# (w_pid,status) = wait_pid compiler_pid 0
 	| w_pid <> -1 && w_pid<>compiler_pid
 		= abort "waitpid failed"
 	# result = (status bitand 0xff00) >> 8
+// ...waitForProcess
 	# wtermsig = status bitand 0x7f
 	| wtermsig<>0
 		= abort "compiler exited abnormally"
+*/
 	# r=close commands_fd
 	| r==(-1)
 		= abort "close failed"
@@ -262,13 +290,28 @@ CodeGen cgen used_compiler_process_ids wf genAsmOrCode abc_path obj_path timepro
 	| stderr_fd== (-1)
 		= abort "creat failed"
 
+	#	args	= add_options_string_to_args 0 options (cg_arguments++[path_without_suffix])
+		res		= accUnsafe ( runProcessWithRedirect cgen args Nothing Nothing (Just stderr_fd) )
+	| isError res
+		#	(err_code,err_msg)	= fromError res
+		= abort ("Code generation failed: ("+++toString err_code+++") "+++err_msg)
+	#	pid		= fromOk res
+	#	result	= accUnsafe (waitForProcess pid)//{pid=compiler_pid})
+	| isError result
+		#	(err_code,err_msg)	= fromError result
+		= abort ("Code generation failed: ("+++toString err_code+++") "+++err_msg)
+	# exitCode = fromOk result
+	# exit_code = if (exitCode==0) 0 1
+
+/*
+// runProcess...
 	# (argv,args_memory) = make_argv [cgen : add_options_string_to_args 0 options (cg_arguments++[path_without_suffix])]
 
 	# code_generator_pid = fork
 	| code_generator_pid<0
 		= abort "fork failed"
 	| code_generator_pid==0
-		# r=dup2 stderr_fd 2		// redirect cgen stderr to errors file
+		# r=dup2 stderr_fd 2			// redirect cgen stderr to errors file
 		| r== (-1)
 			= abort "dup2 failed"
 		| execv (cgen+++"\0") argv<0
@@ -276,7 +319,8 @@ CodeGen cgen used_compiler_process_ids wf genAsmOrCode abc_path obj_path timepro
 			= abort "execution continued after execv"
 	| free args_memory<0
 		= abort "free failed"
-
+// ...runProcess
+// waitForProcess...
 	# (w_pid,status) = wait_pid code_generator_pid 0
 	| w_pid <> -1 && w_pid<>code_generator_pid
 		= abort "waitpid failed"
@@ -284,12 +328,12 @@ CodeGen cgen used_compiler_process_ids wf genAsmOrCode abc_path obj_path timepro
 	# wtermsig = status bitand 0x7f
 	| wtermsig<>0
 		= abort "code generator exited abnormally"
-
+// ...waitForProcess
+	# exit_code = if (result==0) 0 1
+*/
 	# r=close stderr_fd
 	| r==(-1)
 		= abort "close failed"
-
-	# exit_code = if (result==0) 0 1
 
 	# ((_, errors_not_empty, error_text),ps) = accFiles (readErrorsAndWarnings errors_file_name) ps
 	  ps = if errors_not_empty
@@ -306,8 +350,17 @@ CodeGen cgen used_compiler_process_ids wf genAsmOrCode abc_path obj_path timepro
 
 	# assembly_path_name = path_without_suffix+++".s"
 	# assembler_path_name = "/usr/bin/as"
-	# (argv,args_memory) = make_argv [assembler_path_name,"-o",obj_path,assembly_path_name]
 
+	#	args	= ["-o",obj_path,assembly_path_name]
+		result	= accUnsafe ( callProcess assembler_path_name args Nothing)
+	| isError result
+		#	(err_code,err_msg)	= fromError result
+		= abort ("Code generation failed (as): ("+++toString err_code+++") "+++err_msg)
+	#	exitCode	= fromOk result
+		exit_code	= if (exitCode==0) 0 1
+/*
+// runProcess...
+	# (argv,args_memory) = make_argv [assembler_path_name,"-o",obj_path,assembly_path_name]
 	# assembler_pid = fork
 	| assembler_pid<0
 		= abort "fork failed"
@@ -317,7 +370,8 @@ CodeGen cgen used_compiler_process_ids wf genAsmOrCode abc_path obj_path timepro
 			= abort "execution continued after execv"
 	| free args_memory<0
 		= abort "free failed"
-
+// ...runProcess
+// waitProcess...
 	# (w_pid,status) = wait_pid assembler_pid 0
 	| w_pid <> -1 && w_pid<>assembler_pid
 		= abort "waitpid failed"
@@ -325,7 +379,8 @@ CodeGen cgen used_compiler_process_ids wf genAsmOrCode abc_path obj_path timepro
 	# wtermsig = status bitand 0x7f
 	| wtermsig<>0
 		= abort "assembler exited abnormally"
-
+// ...waitProcess
+*/
 	| unlink (assembly_path_name+++"\0")<>0
 		= abort "deleting the assembler file failed"
 
@@ -351,8 +406,14 @@ start_code_generator cgen wf abc_path slot timeprofile cgo tp startupdir ps
 	| stderr_fd== (-1)
 		= abort "creat failed"
 
-	# (argv,args_memory) = make_argv [cgen : add_options_string_to_args 0 options (cg_arguments++[path_without_suffix])]
-
+	#	args	= add_options_string_to_args 0 options (cg_arguments++[path_without_suffix])
+		res	= accUnsafe (runProcessWithRedirect cgen args Nothing Nothing (Just stderr_fd))
+	| isError res
+		#	(err_code,err_msg)	= fromError res
+		= abort ("Code generation failed: ("+++toString err_code+++") "+++err_msg)
+	#	code_generator_pid		= (fromOk res).pid
+// runProcessWithRedirect...
+/*	# (argv,args_memory) = make_argv [cgen : add_options_string_to_args 0 options (cg_arguments++[path_without_suffix])]
 	# code_generator_pid = fork
 	| code_generator_pid<0
 		= abort "fork failed"
@@ -365,13 +426,20 @@ start_code_generator cgen wf abc_path slot timeprofile cgo tp startupdir ps
 			= abort "execution continued after execv"
 	| free args_memory<0
 		= abort "free failed"
+*/
+// ...runProcess
 	# scg = {scg_abc_path=abc_path,scg_path_without_suffix=path_without_suffix,
 			 scg_std_error_fd=stderr_fd,scg_errors_file_name=errors_file_name}
 	= (True,code_generator_pid,scg,ps)
 
 wait_for_finished_code_generator :: !{#Int} !*GeneralSt -> (!Int,!Int,!*GeneralSt)
 wait_for_finished_code_generator process_ids ps
-	# (w_pid,status) = wait_pid -1 0
+	#	(process_n,res)	= accUnsafe (waitForAnyChild process_ids)
+	| isError res
+		= abort "wait_for_finished_code_generator failed"
+	= (process_n,fromOk res,ps)
+/*
+	# (w_pid,status) = wait_pid -1 0	// wait _any_ child
 	| w_pid<0
 		= abort "waitpid failed"
 	# process_n = find_process_id_index 0 w_pid process_ids
@@ -386,7 +454,7 @@ wait_for_finished_code_generator process_ids ps
 			| pids.[i]==w_pid
 				= i
 				= find_process_id_index (i+1) w_pid pids
-
+*/
 finish_code_generator :: !Int/*HANDLE*/ !StartedCodeGenerator !Int !(WindowFun *GeneralSt) !*GeneralSt -> (!Bool,!*GeneralSt)
 finish_code_generator process_handle {scg_abc_path,scg_path_without_suffix,scg_std_error_fd,scg_errors_file_name} exit_code wf ps
 	# r=close scg_std_error_fd
@@ -450,8 +518,23 @@ Link linker winfun path
 	# (err,ps) = if is_gcc (Nothing,ps) (accFiles (WriteLinkOpts linkoptspath linkopts) ps)
 	| isJust err
 		= (winfun (fromJust err) ps,False)
+
 	# linker_args = if is_gcc (add_options_string_to_args 0 options ["-o", path: [optionspathname : StrictListToList (RemoveDup object_file_names)]++StrictListToList library_file_names])
 							  ["-I",linkoptspath,"-O",linkerrspath]
+
+	#	res	= accUnsafe (runProcess linker linker_args (Just (optdirpath+++"/..")))
+	| isError res
+		#	(err_code,err_msg)	= fromError res
+		= abort ("Linking failed (exec): ("+++toString err_code+++") "+++err_msg)
+	#	ld_pid		= (fromOk res)
+		res	= accUnsafe (waitForProcess ld_pid)
+	| isError res
+		#	(err_code,err_msg)	= fromError res
+		= abort ("Linking failed (wait): ("+++toString err_code+++") "+++err_msg)
+	# result = fromOk res
+
+// runProcess...
+/*
 	# (argv,args_memory) = make_argv [linker:linker_args]
 	# ld_pid = fork
 	| ld_pid<0
@@ -468,6 +551,10 @@ Link linker winfun path
 			= abort "execution continued after execv"
 	| free args_memory<0
 		= abort "free failed"
+*/
+// ...runProcess
+// waitProcess...
+/*
 	# (w_pid,status) = wait_pid ld_pid 0
 	| w_pid <> -1 && w_pid<>ld_pid
 		= abort "waitpid failed"	
@@ -475,6 +562,8 @@ Link linker winfun path
 	# wtermsig = status bitand 0x7f
 	| wtermsig<>0
 		= abort "linker exited abnormally"
+*/
+// ...waitForProcess
 	# link_ok = result>=0
 	//Read link errors
 	# ((err,link_errors),ps) = if is_gcc ((Nothing,[]),ps) (accFiles (ReadLinkErrors linkerrspath) ps)
@@ -566,6 +655,13 @@ start_compiler compiler_file_name
 
 	# cocl_arguments = ["--pipe",commands_file_name,results_file_name]
 
+	#	res		= accUnsafe (runProcess compiler_file_name cocl_arguments Nothing)
+	| isError res
+		#	(err_code,err_msg)	= fromError res
+		= abort ("start compiler failed (exec): ("+++toString err_code+++") "+++err_msg)
+	#	compiler_pid		= (fromOk res).pid
+// runProcess...
+/*
 	# (argv,args_memory) = make_argv [compiler_file_name:cocl_arguments]
 
 	# compiler_pid = fork
@@ -577,6 +673,8 @@ start_compiler compiler_file_name
 			= abort "execution continued after execv"
 	| free args_memory<0
 		= abort "free failed"
+*/
+// ...runProcess
 
 	# commands_fd = open (commands_file_name+++"\0") O_WRONLY 0
 	| commands_fd == -1
@@ -859,7 +957,7 @@ where
 		| j >= l = (i,s)
 		# s = update s i h.[j]
 		= sU l (inc i) (inc j) s h
-
+/*
 make_argv argv_list
 	# args_size = argv_length argv_list 0
 	  args_string = create_args_string args_size argv_list
@@ -904,7 +1002,7 @@ where
 			= fill_argv (arg_n+1) as argv args_memory
 		fill_argv arg_n [] argv args_memory
 			= {argv & [arg_n]=0}
-
+*/
 ApplicationOptionsToFlags :: !ApplicationOptions -> Int
 ApplicationOptionsToFlags {sgc,pss,marking_collection,set,o,memoryProfiling,write_stderr_to_file,disable_rts_flags}
 	= showgc+printstacksize+showexectime+cons+marking_collection_mask+memory_profiling_mask+write_stderr_to_file_mask+disable_rts_flags_mask
@@ -1000,9 +1098,15 @@ SendRepeatResult = abort "SendRepeatResult"
 StartCodeGenerator :: .a
 StartCodeGenerator = abort "StartCodeGenerator"
 
-import qualified System.Process as SP
+import qualified Clyde.Process as SP
 import IdeState
-
+/*
+ * we can push Execute to the application specific level by implementing it in IdeState...
+ * note that it currently is just a simple wrapper around Process.callProcess, which is fine
+ * for the usage in Precompile and Postlink phases
+ * but _not_ for launching final application ('Run'), where we want Process.runProcess,
+ * with varying i/o hookups for out of IDE or in IDE running (pipe or pty redirection) 
+*/
 Execute` ::	!String !*GeneralSt -> (!Bool,!Int,!*GeneralSt)
 Execute` command ps=:{gst_world}
 	#!	env			= gst_world
@@ -1018,7 +1122,7 @@ Execute` command ps=:{gst_world}
 where
 		mCurrentDirectory :: 'SP'.Maybe String
 		mCurrentDirectory	= 'SP'.Nothing
-
+/*
 wait_pid :: !Int !Int -> (!Int,!Int)
 wait_pid pid options
 	# status_a = createArray 1 0
@@ -1028,7 +1132,7 @@ wait_pid pid options
 		= (w_pid,status)
 		# status = status_a.[0]
 		= (w_pid,status)
-
+*/
 S_IRUSR:==0x100
 S_IWUSR:==0x080
 
@@ -1071,7 +1175,7 @@ mkfifo :: !{#Char} !Int -> Int;
 mkfifo name flags = code {
 	ccall mkfifo "sI:I"
 }
-
+/*
 dup2 :: !Int !Int -> Int
 dup2 oldfd newfd = code {
 	ccall dup2 "II:I"
@@ -1091,12 +1195,13 @@ waitpid :: !Int !{#Int} !Int -> Int
 waitpid pid status_p options = code {
 	ccall waitpid "IAI:I"
 }
+*/
 
 poll :: !{#Int} !Int !Int -> Int;
 poll fds nfds timeout = code {
 	ccall poll "AII:I"
 }
-
+/*
 malloc :: !Int -> Int
 malloc s = code {
 	ccall malloc "p:p"
@@ -1111,3 +1216,4 @@ memcpy_string_to_pointer :: !Int !{#Char} !Int -> Int
 memcpy_string_to_pointer p s n = code {
 	ccall memcpy "psp:p"
 }
+*/
