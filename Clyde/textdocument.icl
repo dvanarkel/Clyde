@@ -317,7 +317,9 @@ makeWindowControllers self cmd
 		(wind,world)		= populateTextWindow delegate (ns2cls nstype) world
 //		world				= msgIP_V self "setWindow:\0" wind world
 		(wctrl,world)		= msgC_P "NSWindowController\0" "alloc\0" world
+		world				= msgIB_V wctrl "setShouldCascadeWindows:\0" True world
 		(wctrl,world)		= msgIP_P wctrl "initWithWindow:\0" wind world
+		world				= msgIB_V wctrl "setShouldCascadeWindows:\0" True world
 // need to actually generate a window controller...
 
 	#!	(str,world)			= object_getInstanceVariable self "contentString\0" world
@@ -700,7 +702,25 @@ setMyParagraphStyle textview myFont env
 		env						= msgIP_V paragraphStyle "setTabStops:\0" array env
 		env						= msgIP_V textview "setDefaultParagraphStyle:\0" paragraphStyle env
 
-		env						= msgI_V paragraphStyle "release\0" env
+/*
+   NSMutableDictionary* typingAttributes = [[myTextView typingAttributes] mutableCopy];
+   [typingAttributes setObject:paragraphStyle forKey:NSParagraphStyleAttributeName];
+   [typingAttributes setObject:scriptFont forKey:NSFontAttributeName];
+   [myTextView setTypingAttributes:typingAttributes];
+*/
+	| trace_n ("about to set typing attributes (textdocument:setMyParagraphStyle)") False = undef
+	#!	(typingAttr,env)		= msgI_P textview "typingAttributes\0" env
+	| trace_n "1" False = undef	
+	#!	(typingAttr,env)		= msgI_P typingAttr "mutableCopy\0" env
+	| trace_n "2" False = undef	
+	#!	env						= msgIPP_V typingAttr "setObject:forKey:\0" paragraphStyle (p2ns "defaultParagraphStyle") env
+	| trace_n "3" False = undef	
+	#!	env						= msgIPP_V typingAttr "setObject:forKey:\0" myFont (p2ns "Helvetica(Neue) 12") env
+	| trace_n "4" False = undef	
+	#!	env						= msgIP_V textview "setTypingAttributes:\0" typingAttr env
+	| trace_n "done setting attrs" False = undef	
+
+	#!	env						= msgI_V paragraphStyle "release\0" env
 	= env
 
 getDefaultParagraphStyle textview env
