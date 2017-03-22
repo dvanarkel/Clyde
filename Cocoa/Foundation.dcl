@@ -25,7 +25,8 @@ setAction :: !NSObject !String !*a -> *a
 setFrameOrigin :: !NSObject !Real !Real !*a -> *a
 
 
-createClass :: !String !String ![(String,Int,String)] !*a -> *a
+createClass :: !String !String ![(String,Int,String)] ![(String,Int,Int,String)] !*a -> *a
+createClass` :: !String !String ![(String,Int,String)] !*a -> *a
 swizzleMethod :: !String !(!String,!Int,!String) !*a -> (!Int,!*a)
 
 applicationDelegate :: !*a -> (!NSObject,!*a)
@@ -42,6 +43,8 @@ getFrame :: !Pointer !*a -> (!Pointer,!*a)
 
 c2ns :: !CString -> NSString
 p2ns :: !String -> NSString
+CFRelease :: !Int !*a -> *a
+
 ns2cls :: !NSString -> String
 
 cgRect :: !Real !Real !Real !Real -> Pointer

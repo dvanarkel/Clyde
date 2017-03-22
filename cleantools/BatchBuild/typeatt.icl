@@ -1,4 +1,15 @@
 implementation module typeatt
 
-update_type_window :: !Bool !String ![String] !*state -> *state
-update_type_window _ _ _ ps = ps
+import StdEnv
+import Data.List, Text
+import Clyde.ClydeApplicationController
+import IdeState
+
+update_type_window :: !Bool !String ![String] !*GeneralSt -> *GeneralSt
+update_type_window interact name message ps
+	| isEmpty message
+		= ps
+	#!	ps	= app_world_instead_of_ps (appendTypeWindow info) ps
+	= ps
+where
+	info = concat (intersperse "\n" ["\"" +++ name +++ "\"" : message])

@@ -293,7 +293,7 @@ makeElem /*idx*/ str pth isgroup children
 
 //	| trace_n ("makeElem\t"+++toString ins+++"\t"+++str+++"\t"+++pth+++"\t"+++toString isgroup+++"\t"+++toString (size children)) False = undef
 //	| trace_n ("lookNumChildren\t"+++toString (lookNumChildren ins)) False = undef
-	#!	(chs,env)		= object_getInstanceVariable ins "children\0" newWorld
+	#!	(chs,env)		= object_getInstanceVariable ins "children\0" env
 //	| trace_n ("ivar children\t"+++toString chs+++"\t"+++object_getClassName chs) False = undef
 	#!	(num,env)		= msgI_P chs "count\0" env
 //	| trace_n ("num\t"+++toString num) False = undef
@@ -477,33 +477,64 @@ impRun = code {
 foreign export Build
 foreign export BuildAndRun
 foreign export Run
+import IdeState, messwin
 
 Build :: !Int !Int !Int -> Int
 Build self cmd notification
-	#!	env	= newWorld
-	| trace_n ("projdocument:Build\t"+++toString notification+++"\t"+++(object_getClassName notification)) False = undef		// how do we get 'Clyde.prj' from notification???
-	| trace_n ("self:\t"+++toString self +++"\t"+++(object_getClassName self)) False = undef
-	#!	(pathN,env)		= object_getInstanceVariable self "ppath\0" env
-		path			= ns2cls pathN
-	| trace_n ("project path: "+++path) False = undef
-//	#!	(rep,env)	= msgI_P self "path\0" env
-//	| trace_n ("rep:\t"+++toString rep +++"\t"+++(object_getClassName rep)+++"\t"+++ ns2cls rep) False = undef
-
-//	#!	ret	= 0
-	#!	(ret,world)		= build False path newWorld
+	#!	env						= newWorld
+		(pathN,env)				= object_getInstanceVariable self "ppath\0" env
+		path					= ns2cls pathN
+		(ret,env)				= build False path cont env
 	= ret
+where
+	cont exepath linked ok ps
+		| trace_n ("cont\t"+++exepath+++"\t"+++toString linked+++"\t"+++toString ok) False = undef
+		| linked || not ok
+			= closeInfo ps
+		= showInfo (Level1 "Project is up to date") ps
 
 //REFRESH PROJECT WINDOW AFTER BUILD
 
 BuildAndRun :: !Int !Int !Int -> Int
 BuildAndRun self cmd notification
-	#!	(ret,world)		= buildAndRun newWorld
+	#!	env						= newWorld
+//	#!	(ret,env)				= buildAndRun env
+		(pathN,env)				= object_getInstanceVariable self "ppath\0" env
+		path					= ns2cls pathN
+		(ret,env)				= build False path cont env
 	= ret
+where
+	cont :: !String !Bool !Bool !*GeneralSt -> *GeneralSt
+	cont execpath linked ok ps
+		#!	ps					= closeInfo ps
+		| not ok
+			= ps
+		= RunProcess execpath ps
+
+RunProcess :: !String !*GeneralSt -> *GeneralSt
+RunProcess execpath ps=:{gst_world}
+		#!	(res,world)			= runProcessWithRedirect execpath [] Nothing Nothing Nothing gst_world
+	= {ps & gst_world = world}
+
+import PmProject, PmPath, Clyde.Process
 
 Run :: !Int !Int !Int -> Int
 Run self cmd notification
-	#!	(ret,world)		= run newWorld
-	= ret
+	#!	env						= newWorld
+		(pathN,env)				= object_getInstanceVariable self "ppath\0" env
+		proj_path				= ns2cls pathN
+
+		(app_path,env)			= cleanhome env
+		((proj,ok,err), env)	= accFiles (ReadProjectFile proj_path app_path) env
+
+		prj_path`				= PR_GetRootDir proj
+		execpath				= PR_GetExecPath proj
+		execpath				= fulPath app_path prj_path` execpath
+
+		(res,env)				= runProcessWithRedirect execpath [] Nothing Nothing Nothing env	
+// gives out/err in Clyde out/err.. (for console apps)
+// runs process as child process, maybe not what we really want?
+	= force env 42
 
 /*
 

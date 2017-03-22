@@ -214,6 +214,50 @@ static char const * const JSDtagShowsLineNumbers = "JSDtagShowsLineNumbers";
 
 
 /*–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––*
+	selectLineToVisible:
+		Select and scroll the display to a specific line.
+ *–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––*/
+- (void)selectLineToVisible:(NSInteger)line
+{
+	// setup the variables we need for the loop
+	NSRange aRange;								// Range for counting lines
+	NSInteger i = 0;							// Glyph counter
+	NSInteger j = 1; 							// Line counter
+	NSLayoutManager *lm = [self layoutManager];	// Layout manager
+	
+	if (line >= 1)
+	{
+		// The line number counting loop
+		while ( i < [lm numberOfGlyphs] )
+		{
+			// Retrieve the rect |r| and range |aRange| for the current line.
+			[lm lineFragmentRectForGlyphAtIndex:i effectiveRange:&aRange];
+
+			// If the current line is what we're looking for, then scroll to it.
+			if (j == line)
+			{
+				aRange.length = 0;
+				[self setSelectedRange:aRange];
+				[self scrollRangeToVisible:aRange];
+				i = [lm numberOfGlyphs];
+				return;
+			}
+
+			i += [[[self string] substringWithRange:aRange] length];	// Advance glyph counter to EOL
+			j ++;														// Increment the line number
+		}
+		aRange.length = 0;
+		[self setSelectedRange:aRange];
+		[self scrollRangeToVisible:aRange];
+	}
+	[lm lineFragmentRectForGlyphAtIndex:i effectiveRange:&aRange];
+	aRange.length = 0;
+	[self setSelectedRange:aRange];
+	[self scrollRangeToVisible:aRange];
+}
+
+
+/*–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––*
 	highlightLine:
 		Sets |highlitLine|, |highlitColumn|, and |highlit| in
 		one go, as well as scrolls that line into view.

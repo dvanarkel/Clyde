@@ -246,11 +246,13 @@ populateEditMenu menu world
 		
 		(item,world)	= addItemWith_title_action_keyEquivalent menu "Cut" "cut:" "x" world
 		(item,world)	= addItemWith_title_action_keyEquivalent menu "Copy" "copy:" "c" world
+		(item,world)	= addItemWith_title_action_keyEquivalent menu "Paste" "pasteAsPlainText:" "v" world
+/*
 		(item,world)	= addItemWith_title_action_keyEquivalent menu "Paste" "paste:" "v" world
 
 		(item,world)	= addItemWith_title_action_keyEquivalent menu "Paste and Match Style" "pasteAsPlainText:" "V" world
 		world			= setKeyEquivalentModifierMask item (NSCommandKeyMask bitor NSAlternateKeyMask) world
-
+*/
 		(item,world)	= addItemWith_title_action_keyEquivalent menu "Delete" "delete:" "" world
 		(item,world)	= addItemWith_title_action_keyEquivalent menu "Select All" "selectAll:" "a" world
 
@@ -273,6 +275,7 @@ populateFindMenu menu world
 		(item,world)	= addItemWith_title_action_keyEquivalent menu "Use Selection for Find" "performFindPanelAction:" "e" world
 		world			= setTag item NSFindPanelActionSetFindString world
 		(item,world)	= addItemWith_title_action_keyEquivalent menu "Jump to Selection" "centerSelectionInVisibleArea:" "" world
+		(item,world)	= addItemWith_title_action_keyEquivalent menu "Go to line..." "didTapOpenButton:" "j" world
 	= world
 
 populateSpellingMenu menu world
@@ -300,7 +303,10 @@ populateHelpMenu menu world
 populateDebugMenu menu world
 	// TODO
 	#!	(delegate,world)	= applicationDelegate world
-		(item,world)		= addItemWith_title_action_keyEquivalent menu ("Log windows") "logwindows:" "d" world
+		(item,world)		= addItemWith_title_action_keyEquivalent menu ("Log windows") "logwindows:" "" world
+		world				= setTarget item delegate world
+
+		(item,world)		= addItemWith_title_action_keyEquivalent menu ("Test") "test:" "" world
 		world				= setTarget item delegate world
 	= world
 

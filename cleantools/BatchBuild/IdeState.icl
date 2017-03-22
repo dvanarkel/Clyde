@@ -231,15 +231,19 @@ setCompilerProcessIds compiler_project_ids ps = appPLoc (\l -> {l & g_compiler_p
 getInteract  :: !*GeneralSt -> (!Bool,!*GeneralSt)
 getInteract ps = (False,ps)
 
+import Clyde.ClydeApplicationController
 writeLog :: !String !*GeneralSt -> *GeneralSt
 writeLog message ps
+	#!	ps	= appendLogWindow message ps
 	= appPLoc (\ls=:{logfile} -> {ls & logfile = writeLogfile message logfile}) ps
 
 abortLog :: !Bool !String !*GeneralSt -> *GeneralSt
 abortLog flag message ps
 	# ps		= case message of
 					""	-> ps
-					_	-> appPLoc (\ls=:{logfile} -> {ls & logfile = writeLogfile message logfile}) ps
+					_
+						#	ps	= appendLogWindow message ps
+						-> appPLoc (\ls=:{logfile} -> {ls & logfile = writeLogfile message logfile}) ps
 	# (lf,ps)	= accPLoc (\ls=:{logfile} -> (logfile,{ls & logfile = stderr})) ps
 	# (ok,ps)	= closeLogfile lf ps
 //	| not ok ...

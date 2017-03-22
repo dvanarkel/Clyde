@@ -16,13 +16,14 @@ import messwin		// showInfo, closeInfo
 import StdDebug
 import qualified Data.Maybe as DM
 import Cocoa.UserDefaults
+import Clyde.ClydeApplicationController
 
 cleanhome :: !*env -> (!String,!*env)
 cleanhome env
 		= stringForKey "CLEAN_HOME" env
 
-build :: !Bool !String !*World -> (!Int,!*World)
-build force proj_path world
+build :: !Bool !String !(!String !Bool !Bool !*GeneralSt -> *GeneralSt) !*World -> (!Int,!*World)
+build force proj_path cont world
 	#!	(startup,world)			= cleanhome world
 	| trace_n ("projactions:build\t"+++startup) False = undef
 	//	ed_ask_save_all False True (enableProjectMenu o bring_project_upto_date force cont o disableProjectMenu) ps
@@ -43,7 +44,9 @@ build force proj_path world
 	# default_compiler_options	= DefaultCompilerOptions
 
 // write logging to <proj>.log
-	# (ok,logfile,world)		= openLogfile proj_path world
+	#	(ok,logfile,world)		= openLogfile proj_path world
+		world					= openTypeWindow world
+		world					= openLogWindow world
 	# ((proj,ok,err),world)		= accFiles (ReadProjectFile proj_path startup) world
 	| not ok && trace_n ("failed to read project file: '"+++proj_path+++"' with error: '"+++err+++"'") True
 		#!	logfile				= logfile <<< ("failed to read project file: '"+++proj_path+++"' with error: '"+++err+++"'")
@@ -58,13 +61,14 @@ build force proj_path world
 	# ps 						= {ls=iniGeneral,gst_world=world,gst_continue_or_stop=False}
 	# ps						= bring_project_upto_date force cont ps
 	= (42,ps.gst_world)
+/*
 where
 	cont exepath linked ok ps
 		| trace_n ("cont\t"+++exepath+++"\t"+++toString linked+++"\t"+++toString ok) False = undef
 		| linked || not ok
 			= closeInfo ps
 		= showInfo (Level1 "Project is up to date") ps
-
+*/
 buildAndRun :: !*World -> (!Int,!*World)
 buildAndRun env
 	//	ed_ask_save_all False True (enableProjectMenu o bring_project_upto_date False cont o disableProjectMenu) ps
@@ -85,12 +89,14 @@ where
 run :: !*World -> (!Int,!*World)
 run env
 	| trace_n "'run' not yet implemented..." False = undef
-	//	(app_path,ps)				= getStup ps
-	//	(prj_path`,ps)				= getFromProject PR_GetRootDir ps
-	//	(execpath,ps)				= getFromProject PR_GetExecPath ps
-	//	execpath					= fulPath app_path prj_path` execpath
+/*	#!	(app_path,world)			= cleanhome world
+		((proj,ok,err),world)		= accFiles (ReadProjectFile proj_path startup) world
+//	#!	(app_path,ps)				= getStup ps
+		(prj_path`,ps)				= getFromProject PR_GetRootDir ps
+		(execpath,ps)				= getFromProject PR_GetExecPath ps
+		execpath					= fulPath app_path prj_path` execpath
 	//	= RunProgram execpath ps
-	= (42,env)
+*/	= (42,env)
 
 bring_project_upto_date :: !Bool CleanupCont !*GeneralSt -> *GeneralSt
 bring_project_upto_date force continuation ps

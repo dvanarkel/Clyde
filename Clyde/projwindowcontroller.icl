@@ -97,9 +97,6 @@ setDocument self cmd document
 	| trace_n ("["+++toString self+++"\t"+++toString document+++"]") False = undef
 	#!	env				= newWorld
 
-	#!	(wind,env)		= msgI_P document "windowForSheet\0" env
-		env				= traceVisible 42 wind env
-
 	#!	(cls,env)		= objc_getClass "NSWindowController\0" env
 		ptr				= malloc 16
 		ptr				= writeInt ptr 0 self
@@ -108,15 +105,8 @@ setDocument self cmd document
 	#!	(ret,env)		= msgSP_I ptr cmd document env
 	| trace_n ("after super setDocument:\t"+++toString ret) False = undef
 
-	#!	(wind,env)		= msgI_P document "windowForSheet\0" env
-		env				= traceVisible 43 wind env
-
 	#!	(outl,env)		= object_getInstanceVariable self "outlineview\0" env
 		env				= msgIPI_V outl "reloadItem:reloadChildren:\0" NIL YES env
-
-	#!	(wind,env)		= msgI_P document "windowForSheet\0" env
-		env				= traceVisible 44 wind env
-
 	= force env ret
 
 impOutlineViewNummberOfChildrenOfItem :: Int
@@ -301,47 +291,32 @@ makeProjWindowController document/*appdelegate*/ env
 		top				= shgt - fhgt
 		env				= msgIS_V wind "setFrameOrigin:\0" NSSizeType (NSMakeSize 0.0 top) env	//NSPoint
 */
-//		env = trace_n ("pre-cascade "+++toString cascadeTL+++"\t"+++toString (readReal8 cascadeTL 0)+++"\t"+++toString (readReal8 cascadeTL 8)) env 
-		env = trace_n ("pre-cascade "+++toString wind) env 
 		env				= cascade wind env
-		env = trace_n ("post-cascade "+++toString wind) env 
-//		env	= cascadeTopLeftFromPoint wind env
-		env = trace_n ("postpost-cascade "+++toString wind) env 
-//		env	= cascadeTopLeftFromPoint wind env
-//		env = trace_n ("postpost-cascade "+++toString wind) env 
-//		env	= cascadeTopLeftFromPoint wind env
-//		env = trace_n ("postpost-cascade "+++toString wind) env 
 
-		env				= traceVisible 1 wind env
 		env				= msgIP_V wind "setTitle:\0" (c2ns "Project Window\0") env
-		env				= traceVisible 2 wind env
 
 		(view,env)		= msgC_P "NSView\0" "alloc\0" env
 		rect			= cgRect 0.0 0.0 400.0 400.0
 //		(cont_,env)		= msgI_P wind "contentView:\0" env
 //		(rect,env)		= getBounds cont_ env
 		(view,env)		= msgIS_P view "initWithFrame:\0" NSRectType rect env
-		env				= traceVisible 3 wind env
 //		(flip,env)		= msgI_I view "isFlipped\0" env
 //		env = trace_n ("root is flipped: "+++toString flip) env
 
 		(wctrl,env)		= msgC_P "ProjWindowController\0" "alloc\0" env
-		env				= traceVisible 4 wind env
 		env				= msgIB_V wctrl "setShouldCascadeWindows:\0" True env
+
 		(wctrl,env)		= msgIP_P wctrl "initWithWindow:\0" wind env
 		env				= msgIB_V wctrl "setShouldCascadeWindows:\0" True env
-		env				= traceVisible 5 wind env
 		env = trace_n ("project window controller: "+++toString wctrl) env
 		
 		env				= msgIP_V wind "setContentView:\0" view env
-		env				= traceVisible 6 wind env
 		(vw,env)		= msgI_P wind "contentView\0" env
-		env				= traceVisible 7 wind env
-		env				= createPOView wctrl view env		
-		env				= traceVisible 8 wind env
 //		(should,env)	= msgI_B wctrl "shouldCascadeWindows\0" env
 		(should,env)	= msgI_I wctrl "shouldCascadeWindows\0" env
 		env				= trace_n ("should\t"+++toString (should<>0)) env
+		env				= createPOView wctrl view env		
+		wind			= msgIS_V "setContentRect:\0" rect env
 //		(w,env)			= msgI_P wind "becomeFirstResponder\0" env	
 //		env				= msgIP_V wind "makeKeyAndOrderFront:\0" self env
 
@@ -364,47 +339,55 @@ createPOView delegate container env
 		(scroll,env)	= msgIS_P scroll "initWithFrame:\0" NSRectType bounds env
 		env				= msgII_V scroll "setBorderType:\0" NSBezelBorder env
 		env				= msgII_V scroll "setHasVerticalScroller:\0" YES env
-		env				= msgII_V scroll "setHasHorizontalScroller:\0" YES env
+		env				= msgII_V scroll "setHasHorizontalScroller:\0" NO env
 		env				= msgII_V scroll "setAutohidesScrollers:\0" YES env
 		env				= msgII_V scroll "setAutoresizingMask:\0" (NSViewWidthSizable + NSViewHeightSizable) env
 
-		bounds1			= cgRect 0.0 0.0 298.0 298.0
+		bounds1			= cgRect 0.0 0.0 5000.0 5000.0	//298.0 298.0
 		(outl,env)		= msgC_P "NSOutlineView\0" "alloc\0" env
-	| trace_n ("before outl initWithFrame") False = undef
-	#!	(outl,env)		= msgIS_P outl "initWithFrame:\0" NSRectType bounds1 env
-	| trace_n ("after outl initWithFrame") False = undef
-	#!	//env				= force (writeInt projectOutlineview 0 outl) env				// <== FIXME
+		(outl,env)		= msgIS_P outl "initWithFrame:\0" NSRectType bounds1 env
+		env				= msgII_V outl "setColumnAutoresizingStyle:\0" NSTableViewUniformColumnAutoresizingStyle env
 		(_,env)			= object_setInstanceVariable delegate "outlineview\0" outl env
-
-		env				= msgII_V outl "setAutoresizesOutlineColumn:\0" NO env
-		env				= msgI_V outl "sizeLastColumnToFit\0" env
 		
 		(ocol1,env)		= msgC_P "NSTableColumn\0" "alloc\0" env
 		(ocol1,env)		= msgIP_P ocol1 "initWithIdentifier:\0" (c2ns "columnOne\0") env
+		env				= msgIR_V ocol1 "setWidth:\0" 5000.0 env
 		(header,env)	= msgI_P ocol1 "headerCell\0" env
 		env				= msgIP_V header "setStringValue:\0" (c2ns "One\0") env
+
+		env				= msgII_V ocol1 "setResizingMask:\0" NSTableColumnAutoresizingMask env
 		env			 	= msgII_V ocol1 "setEditable:\0" NO env
+
 		env				= msgIP_V outl "addTableColumn:\0" ocol1 env
 		env				= msgIP_V outl "setOutlineTableColumn:\0"  ocol1 env
-	| trace_n ("now here")	False = undef
+//		env				= msgI_V outl "sizeLastColumnToFit\0" env
+
+		env				= msgII_V outl "setAutoresizesOutlineColumn:\0" NO env
+
 	// set outl delegate & datasource...
-	#!	env				= msgIP_V outl "setDelegate:\0" delegate env		// ==> ahh.. probably arrives at app delegate by default so for proper view controller _do_ want to set
-	| trace_n ("now here 2")	False = undef
-	#!	env				= msgIP_V outl "setDataSource:\0" delegate env
-	| trace_n ("now here 3")	False = undef
-	#!	env = trace_n ("outl delegate "+++toString delegate) env
-	| trace_n ("now here 4")	False = undef
+		env				= msgIP_V outl "setDelegate:\0" delegate env		// ==> ahh.. probably arrives at app delegate by default so for proper view controller _do_ want to set
+		env				= msgIP_V outl "setDataSource:\0" delegate env
 
 	// set outl double-click response
 	#!	(asel,env)		= sel_getUid "openIcl:\0" env
 		env				= msgIP_V outl "setDoubleAction:\0" asel env
 		(_,env)			= addContextmenu outl delegate env
+
 		env				= msgIP_V scroll "setDocumentView:\0" outl env
 		env				= msgIP_V container "addSubview:\0" scroll env
 		env				= msgI_V scroll "release\0" env
-		env				= msgI_V outl "reloadData\0" env
+//		env				= msgI_V outl "reloadData\0" env
+//		env = msgI_V container "invalidateIntrinsicContentSize\0" env
+//		env				= msgI_V outl "sizeLastColumnToFit\0" env
 	= env
 
+NSTableViewUniformColumnAutoresizingStyle	:== 1
+NSTableColumnAutoresizingMask				:== 1
+/*
+[tableView  setColumnAutoresizingStyle:NSTableViewUniformColumnAutoresizingStyle];
+[tableColumn setResizingMask:NSTableColumnAutoresizingMask];
+[tableView sizeLastColumnToFit];
+*/
 addContextmenu outl delegate env
 	#!	(menu,env) 	= msgC_P "NSMenu\0" "alloc\0" env
 		(menu,env) 	= msgIP_P menu "initWithTitle:\0" (c2ns "ContexMenu\0") env

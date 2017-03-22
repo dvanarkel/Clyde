@@ -69,19 +69,20 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 - [x] weird line wrapping on new files
 - [x] cascade windows when opening
 - [x] add line numbers
-- [ ] paste styled text as plain
-- [ ] jump to line... (should be easy with added NSTextView++)
-- [ ] override shouldRunSavePanelWithAccessoryView to return NO (https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/DocBasedAppProgrammingGuideForOSX/AdvancedTopics/AdvancedTopics.html)
+- [x] paste styled text as plain (for Paste command from main menu)
+- [x] jump to line... (should be easy with added NSTextView++)
+- [ ] override [shouldRunSavePanelWithAccessoryView](https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/DocBasedAppProgrammingGuideForOSX/AdvancedTopics/AdvancedTopics.html)  to return NO 
 
 ### v0.2 
 - [ ] update project window after build
 - [ ] error, message and type windows for build output
 - [ ] save all before Build
+- [ ] paste styled text as plain (e.g. when drag 'n drop text into IDE window)
 - [ ] New should allow you to choose prj/dcl/icl/txt
 - [ ] after first save it appears later edit's do not immediately mark file as dirty
 - [ ] shift-doubleclick doesn't have desired effect in project window (should open definition module)
-- [ ] column sizes & resizing in project window
 - [ ] edit project options
+- [x] column sizes & resizing in project window
 
 
 ### Unplanned 

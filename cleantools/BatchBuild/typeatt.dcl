@@ -1,3 +1,5 @@
 definition module typeatt
 
-update_type_window :: !Bool !String ![String] !*state -> *state
+import IdeState
+
+update_type_window :: !Bool !String ![String] !*GeneralSt -> *GeneralSt

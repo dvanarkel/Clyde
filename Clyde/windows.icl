@@ -48,7 +48,7 @@ where
 		}
 
 import code from "NSWindow+DvA.o"
-//	gcc -c -ObjC -o Clean\ System\ Files/NSWindow+DvA.o NSWindow+DvA.m 
+//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NSWindow+DvA.o NSWindow+DvA.m 
 
 cascade :: !Pointer !*a -> *a
 cascade wind env
@@ -125,9 +125,9 @@ cascade` _ _ _ _ _ = code {
 import code from "NoodleLineNumberMarker.o"
 import code from "NoodleLineNumberView.o"
 import code from "NSTextView+JSDExtensions.o"
-//	gcc -c -ObjC -o Clean\ System\ Files/NoodleLineNumberMarker.o NoodleLineNumberMarker.m 
-//	gcc -c -ObjC -o Clean\ System\ Files/NoodleLineNumberView.o NoodleLineNumberView.m 
-//	gcc -c -ObjC -o Clean\ System\ Files/NSTextView+JSDExtensions.o NSTextView+JSDExtensions.m 
+//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NoodleLineNumberMarker.o NoodleLineNumberMarker.m 
+//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NoodleLineNumberView.o NoodleLineNumberView.m 
+//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NSTextView+JSDExtensions.o NSTextView+JSDExtensions.m 
 
 setShowsLineNumbers :: !Pointer !Bool !* a -> *a
 setShowsLineNumbers textv show env

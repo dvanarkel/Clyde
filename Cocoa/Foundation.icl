@@ -71,19 +71,35 @@ setFrameOrigin :: !NSObject !Real !Real !*a -> *a
 setFrameOrigin object x y env
 	= msgIRR_V object "setFrameOrigin:\0" x y env
 
-createClass :: !String !String ![(String,Int,String)] !*a -> *a
-createClass superclass classname methods world
+createClass` :: !String !String ![(String,Int,String)] !*a -> *a
+createClass` superclass classname methods world
 	#!	(cls,world)		= objc_getClass (packString superclass) world
 		(adc,world)		= objc_allocateClassPair cls (packString classname) 0 world
 		world			= foldl (createMethod adc) world methods
 		world			= objc_registerClassPair adc world
 	= world
-where
-	createMethod :: !Int !*a !(!String,!Int,!String) -> *a
-	createMethod adc world (name,imp,typ)
+
+createClass :: !String !String ![(String,Int,String)] ![(String,Int,Int,String)] !*a -> *a
+createClass superclass classname methods ivars world
+	#!	(cls,world)		= objc_getClass (packString superclass) world
+		(adc,world)		= objc_allocateClassPair cls (packString classname) 0 world
+		world			= foldl (createMethod adc) world methods
+		world			= foldl (createIvar adc) world ivars
+		world			= objc_registerClassPair adc world
+	= world
+
+createMethod :: !Int !*a !(!String,!Int,!String) -> *a
+createMethod adc world (name,imp,typ)
 		#!	(sel,world)		= sel_getUid (packString name) world
 			(ok,world)		= class_addMethod adc sel imp typ world
+		| ok == 42 = abort ("\nerror adding method for class: "+++name+++"\n\n")
 		= world
+createIvar :: !Int !*a !(!String,!Int,!Int,!String) -> *a
+createIvar adc world (name,size,alignment,typ)
+		#!	(ok,world)		= class_addIvar adc (packString name) size alignment typ world
+		| ok ==42 = abort ("\nerror adding ivar for class: "+++name+++"\n\n")
+		= world
+
 
 swizzleMethod :: !String !(!String,!Int,!String) !*a -> (!Int,!*a)
 swizzleMethod classname (selector,imp,typ) world
@@ -211,6 +227,11 @@ CFStringCreateWithBytes alloc bytes numbytes encoding isexternal = code {
 		ccall CFStringCreateWithBytes "IsIII:p"
 	}
 //CFStringRef CFStringCreateWithBytes(CFAllocatorRef alloc, const UInt8 *bytes, CFIndex numBytes, CFStringEncoding encoding, Boolean isExternalRepresentation);
+
+CFRelease :: !Int !*a -> *a
+CFRelease ptr env = code {
+		ccall CFRelease "p:V:A"
+	}
 
 cgRect :: !Real !Real !Real !Real -> Pointer
 cgRect x y w h

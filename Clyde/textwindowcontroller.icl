@@ -25,7 +25,7 @@ populateTextWindow self type env
 
 		env				= createTextView2 self wind colour env
 
-		env				= msgI_V wind "retain\0" env
+//		env				= msgI_V wind "retain\0" env
 	= (wind,env)
 where
 	colour	= case type of
@@ -87,8 +87,11 @@ createTextView2 delegate window (r,g,b,a) env
 //		(action,env)	= msgI_P mitem "action\0" env
 //		env = trace_n ("myItem menu item: '"+++ns2cls title+++"'\t'"+++ns2cls action+++"'") env
 		
+/*
+		env				= addSeparator menu env
 		(mitem,env)		= itemWithTag menu (p2ns "myTag:") env
 		env = trace_n ("myItem menu item: "+++toString mitem) env
+		title			= "Jump to..."
 		(mitem,env)		= itemWithTitle menu "myItem" env
 		env = trace_n ("myItem menu item: "+++toString mitem) env
 		(mitem,env)		= case mitem of
@@ -98,6 +101,7 @@ createTextView2 delegate window (r,g,b,a) env
 							_	-> (mitem,env)
 		// insertItemWith_title
 		// implement validateMenuItem: to add context sensitive enable/disable
+*/
 
 		env			= removeItemWithTitle menu "Font" env
 		env			= removeItemWithTitle menu "Substitutions" env

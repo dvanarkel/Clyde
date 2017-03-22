@@ -5,6 +5,7 @@ from Cocoa.dyncall		import ::ZString
 
 //:: ZString :== String	// zero-terminated string
 
+msgS_V :: !Pointer !Pointer !*a -> *a
 msgS_P :: !Pointer !Pointer !*a -> (!Pointer,!*a)
 msgSP_I :: !Pointer !Pointer !Pointer !*a -> (!Int,!*a)
 
@@ -25,6 +26,7 @@ msgIP_P :: !Pointer !ZString !Pointer !*a -> (!Pointer,!*a)
 msgIP_I :: !Pointer !ZString !Pointer !*a -> (!Int,!*a)
 msgIPA_V :: !Pointer !ZString !Pointer !{#Int} !*a -> *a
 msgIPA_P :: !Pointer !ZString !Pointer !{#Int} !*a -> (!Pointer,!*a)
+msgIII_V :: !Pointer !ZString !Int !Int !*a -> *a
 msgIII_P :: !Pointer !ZString !Int !Int !*a -> (!Pointer,!*a)
 msgIPP_P :: !Pointer !ZString !Pointer !Pointer !*a -> (!Pointer,!*a)
 msgIPPPP_I :: !Pointer !ZString !Pointer !Pointer !Pointer !Pointer !*a -> (!Int,!*a)

@@ -50,6 +50,8 @@
 
 - (void)scrollLineToVisible:(NSInteger)line;					// Ensures that a logical line is visible in the view.
 
+- (void)selectLineToVisible:(NSInteger)line;					// Ensures that a logical line is selected and visible in the view.
+
 - (void)highlightLine:(NSInteger)line Column:(NSInteger)column;	// As above, including scrolling into view.
 
 @end

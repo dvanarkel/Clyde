@@ -109,17 +109,130 @@ createAppDelegate world
 		(ok,world)		= class_addMethod adc sel imp_project "v@:@\0" world		// lying about return type here...
 */
 	#!	world			= force startTime world		// capture process start...
-		world			= createClass "NSObject" "AppDelegate" appDelegateMethods world
+//		world			= createClass` "NSObject" "AppDelegate" appDelegateMethods world
+		world			= createClass "NSObject" "AppDelegate" appDelegateMethods [] world
 	= world
 
 appDelegateMethods	= 
 	[ ("applicationDidFinishLaunching:",		impAppDelDidFinishLaunching,	"i@:@\0")
 	, ("logwindows:", 							impAppDelLogWindows,			"v@:@\0")	// lying about return type...
 	, ("applicationShouldOpenUntitledFile:",	imp_should,						"v@:@\0")	// lying about return type...
+	, ("test:",									impTest,						"v@:@\0")
+	, ("hideLogWindow:",						impHideL,						"v@:@\0")
+	, ("hideTypeWindow:",						impHideT,						"v@:@\0")
 	, textStorageDidProcess 
 	: tableViewControllerMethods 
 	]
 
+
+// test:
+
+impTest :: IMP
+impTest = code {
+		pushLc doTest
+	}
+
+foreign export doTest
+
+doTest :: !Int !Int !Int -> Int
+doTest self cmd notification
+	| traceMsg "doTest" self cmd notification	= undef
+	#!	(ret,world)		= callback newWorld
+	= ret
+where
+	callback :: !*World -> (!Int,!*World)
+	callback env
+		#!	env = msgII_V mylogwindow "setIsVisible:\0" YES env
+		= (NO,env)
+
+import Clyde.textwindowcontroller
+
+mylogwindow =: accUnsafe (swizzledTextWindow "Log")
+mytypwindow =: accUnsafe (swizzledTextWindow "Types")
+
+swizzledTextWindow :: !String !*World -> (!Int,!*World)
+swizzledTextWindow title env
+	#!	(delegate,env)	= applicationDelegate env
+	#!	(wind,env)	= populateTextWindow delegate "" env
+		(but,env)	= msgII_P wind "standardWindowButton:\0" NSWindowCloseButton env
+		env			= setAction but "hideLogWindow:\0" env
+		env			= msgIP_V but "setTarget:\0" delegate env
+		env			= msgIP_V wind "setTitle:\0" (p2ns title) env
+	= (wind,env)
+
+NSWindowCloseButton	:== 0
+
+impHideT :: IMP
+impHideT = code {
+		pushLc doHideT
+	}
+
+impHideL :: IMP
+impHideL = code {
+		pushLc doHideL
+	}
+
+foreign export doHideT
+foreign export doHideL
+
+doHideL :: !Int !Int !Int -> Int
+doHideL self cmd notification
+	= force (doHide mylogwindow newWorld) NO
+
+doHideT :: !Int !Int !Int -> Int
+doHideT self cmd notification
+	= force (doHide mytypwindow newWorld) NO
+
+doHide :: !Int !*World -> *World
+doHide window env
+	#!	env = msgII_V window "setIsVisible:\0" NO env
+	= env
+
+openLogWindow :: !*World -> *World
+openLogWindow  env
+// clear contents
+	#!	(app,env) 		= sharedApplication env
+		(cont,env)		= msgI_P mylogwindow "contentView\0" env
+		(txtv,env)		= msgI_P cont "documentView\0" env
+		(stor,env)		= msgI_P txtv "textStorage\0" env
+		env				= msgIP_V stor "setString:\0" (p2ns "") env
+		env				= msgIP_V mylogwindow "makeKeyAndOrderFront:\0" application env
+		env				= msgII_V mylogwindow "setIsVisible:\0" YES env
+	= env
+
+openTypeWindow :: !*World -> *World
+openTypeWindow  env
+// clear contents
+	#!	(app,env) 		= sharedApplication env
+		(cont,env)		= msgI_P mytypwindow "contentView\0" env
+		(txtv,env)		= msgI_P cont "documentView\0" env
+		(stor,env)		= msgI_P txtv "textStorage\0" env
+		env				= msgIP_V stor "setString:\0" (p2ns "") env
+		env				= msgIP_V mytypwindow "makeKeyAndOrderFront:\0" application env
+		env				= msgII_V mytypwindow "setIsVisible:\0" YES env
+	= env
+
+appendLogWindow :: !String !*a -> *a
+appendLogWindow message env
+	#!	(cont,env)	= msgI_P mylogwindow "contentView\0" env
+		(txtv,env)	= msgI_P cont "documentView\0" env
+		(stor,env)	= msgI_P txtv "textStorage\0" env
+		(mstr,env)	= msgI_P stor "mutableString\0" env
+		env			= msgIP_V mstr "appendString:\0" (p2ns (message+++"\n")) env
+// scroll to visible...
+		env			= msgIII_V txtv "scrollRangeToVisible:\0" (inc (size message)) 0 env
+	= env
+
+appendTypeWindow :: !String !*a -> *a
+appendTypeWindow message env
+	#!	(cont,env)	= msgI_P mytypwindow "contentView\0" env
+		(txtv,env)	= msgI_P cont "documentView\0" env
+		(stor,env)	= msgI_P txtv "textStorage\0" env
+		(mstr,env)	= msgI_P stor "mutableString\0" env
+		env			= msgIP_V mstr "appendString:\0" (p2ns (message+++"\n")) env
+// scroll to visible...
+		env			= msgIII_V txtv "scrollRangeToVisible:\0" (inc (size message)) 0 env
+	= env
 
 // shouldOpenUntitledFile:
 

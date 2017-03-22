@@ -6,6 +6,17 @@ import System._Pointer
 import Cocoa.objc
 import Cocoa.dyncall
 
+msgS_V :: !Pointer !Pointer !*a -> *a
+msgS_V cls sel env
+	#!	(vm,env)		= dcNewCallVM 4096 env
+//		(sel,env)		= sel_getUid selS env
+		env				= dcReset vm env
+		env				= dcArgPointer vm cls env
+		env				= dcArgPointer vm sel env
+		env				= dcCallVoid vm objc_msgSendSuper2Ptr env
+		env				= dcFree vm env
+	= env
+
 msgS_P :: !Pointer !Pointer !*a -> (!Pointer,!*a)
 msgS_P cls sel env
 	#!	(vm,env)		= dcNewCallVM 4096 env
@@ -306,6 +317,19 @@ msgIP_I cls selS arg env
 		(ret,env)		= dcCallInt vm objc_msgSendPtr env
 		env				= dcFree vm env
 	= (ret,env)
+
+msgIII_V :: !Pointer !ZString !Int !Int !*a -> *a
+msgIII_V cls selS arg1 arg2 env
+	#!	(vm,env)		= dcNewCallVM 4096 env
+		(sel,env)		= sel_getUid selS env
+		env				= dcReset vm env
+		env				= dcArgPointer vm cls env
+		env				= dcArgPointer vm sel env
+		env				= dcArgInt vm arg1 env
+		env				= dcArgInt vm arg2 env
+		env				= dcCallVoid vm objc_msgSendPtr env
+		env				= dcFree vm env
+	= env
 
 msgIII_P :: !Pointer !ZString !Int !Int !*a -> (!Pointer,!*a)
 msgIII_P cls selS arg1 arg2 env

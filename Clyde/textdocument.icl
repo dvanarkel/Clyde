@@ -12,39 +12,49 @@ import Clyde.textwindowcontroller
 import Clyde.coloured_line
 
 createTextDocument :: !*a -> *a
+
+createTextDocument env
+	= createClass "NSDocument" "TextDocument" textDocumentMethods textDocumentIvars env
+//	= createClass` "NSDocument" "TextDocument" textDocumentMethods env
+
+textDocumentMethods =
+	[ ("readFromURL:ofType:error:",				exportedCBHandler2,				"i@:@@@\0")
+	, ("writeToURL:ofType:error:",	 			exportedCBHandler3,				"i@:@@@\0")
+	, ("init",	 								imp_init,						"@@:\0")
+	, ("dealloc",	 							imp_dealloc,					"i@:\0")
+	, ("makeWindowControllers", 				imp_makeWindowControllers,		"i@:@\0")
+	, ("_shouldShowAutosaveButtonForWindow", 	imp_shouldShow,					"i@:@\0")
+	, textStorageDidProcess 
+	]
+textDocumentIvars =
+	[ ("contentString",		8,	3,	"@\0")
+//	[
+	]
+/*
 createTextDocument env
 	| trace_n ("createTextDocument") False = undef
 	#!	(cls,env)		= objc_getClass "NSDocument\0" env
 		(adc,env)		= objc_allocateClassPair cls "TextDocument\0" 0 env
 
 	#!	(sel,env)		= sel_getUid "readFromURL:ofType:error:\0" env
-	| trace_n ("createTextDocument, selector = "+++toString sel) False = undef
 //	#!	(ok,env)		= class_addMethod adc sel imp_readFromURL_ofType_error "i@:@@@\0" env
 	#!	(ok,env)		= class_addMethod adc sel exportedCBHandler2 "i@:@@@\0" env
-	| trace_n ("createTextDocument, added = "+++toString ok) False = undef
 
 	#!	(sel,env)		= sel_getUid "writeToURL:ofType:error:\0" env
-	| trace_n ("createTextDocument, selector = "+++toString sel) False = undef
 //	#!	(ok,env)		= class_addMethod adc sel imp_writeToURL_ofType_error "i@:@@@\0" env
 	#!	(ok,env)		= class_addMethod adc sel exportedCBHandler3 "i@:@@@\0" env
-	| trace_n ("createTextDocument, added = "+++toString ok) False = undef
 
 	#!	(sel,env)		= sel_getUid "init\0" env
-	| trace_n ("createTextDocument, selector = "+++toString sel) False = undef
 	#!	(ok,env)		= class_addMethod adc sel imp_init "@@:\0" env
-	| trace_n ("createTextDocument, added = "+++toString ok) False = undef
+
+	#!	(sel,env)		= sel_getUid "dealloc\0" env
+	#!	(ok,env)		= class_addMethod adc sel imp_dealloc "i@:\0" env
 
 	#!	(sel,env)		= sel_getUid "makeWindowControllers\0" env
-	| trace_n ("createTextDocument, selector = "+++toString sel) False = undef
 	#!	(ok,env)		= class_addMethod adc sel imp_makeWindowControllers "i@:@\0" env
-	| trace_n ("createTextDocument, added = "+++toString ok) False = undef
 
 	#!	(sel,env)		= sel_getUid "_shouldShowAutosaveButtonForWindow\0" env
 	#!	(ok,env)		= class_addMethod adc sel imp_shouldShow "i@:@\0" env
-	| trace_n ("_shouldShowAutosaveButtonForWindow, added = "+++toString ok) False = undef
-
-
-
 
 // create the ivar for storing the document content..
 //	#!	(ok,env)		= class_addIvar adc "contentString\0" size alignment types env
@@ -53,6 +63,7 @@ createTextDocument env
 	#!	env				= objc_registerClassPair adc env
 	| trace_n ("exit createTextDocument") False = undef
 	= env
+*/
 
 /*
 char *texPosEncoding = @encode(UITextPosition);
@@ -100,6 +111,7 @@ init_ self cmd
 		(ret,world)		= msgS_P ptr cmd newWorld
 	| ret == 0
 		= ret
+	// free ptr again...
 //	#!	world			= msgI_V self "makeWindowControllers\0" world
 	#!	nsstring		= p2ns ""
 	#!	(_,world)		= object_setInstanceVariable self "contentString\0" nsstring world
@@ -107,6 +119,27 @@ init_ self cmd
 	| trace_n ("set contentString: "+++toString nsstring+++"\t"+++toString str`) False = undef
 	#!	world			= msgII_V self "_setShowAutosaveButton:\0" 1 world
 	= force world ret
+
+imp_dealloc :: Int
+imp_dealloc = code {
+		pushLc dealloc
+	}
+	
+foreign export dealloc
+
+dealloc :: !Int !Int -> Int
+dealloc self cmd
+	#!	world			= newWorld
+		(ns,world)		= object_getInstanceVariable self "contentString\0" world
+		world			= msgI_V ns "release\0" world
+
+		(cls,world)		= objc_getClass "TextDocument\0" world
+		ptr				= malloc 16
+		ptr				= writeInt ptr 0 self
+		ptr				= writeInt ptr 8 cls
+		world			= msgS_V ptr cmd world
+
+	= force world (free ptr)
 
 // readFromURL_ofType_error
 
@@ -210,8 +243,11 @@ readFromURL_ofType_error self cmd absoluteURL typeName outError
 	| trace_n ("textv string length "+++toString (size (ns2cls nss))) False = undef
 	// so we need to know the textview in order to set its contents...
 */
-	#!	(_,env)		= object_setInstanceVariable self "contentString\0" str env			// HUH??? Doesn't appear to actually work?!
-		env			= msgI_V str "retain\0" env
+	#!	(str`,env)			= object_getInstanceVariable self "contentString\0" env
+		env					= msgI_V str` "release\0" env
+
+	#!	(_,env)				= object_setInstanceVariable self "contentString\0" str env			// HUH??? Doesn't appear to actually work?!
+		env					= msgI_V str "retain\0" env
 	#!	(str`,env)			= object_getInstanceVariable self "contentString\0" env
 // need to release previous one if present...
 	| trace_n ("set contentString to: "+++toString str+++"\t"+++toString str`) False = undef
@@ -314,9 +350,11 @@ makeWindowControllers self cmd
 		(delegate,world)	= msgI_P application "delegate\0" world
 		(nstype,world)		= msgI_P self "fileType\0" world
 
-		(wind,world)		= populateTextWindow delegate (ns2cls nstype) world
+//		(wind,world)		= populateTextWindow delegate (ns2cls nstype) world
+		(wind,world)		= populateTextWindow self (ns2cls nstype) world
 //		world				= msgIP_V self "setWindow:\0" wind world
 		(wctrl,world)		= msgC_P "NSWindowController\0" "alloc\0" world
+		world				= msgIB_V wctrl "setShouldCloseDocument:\0" True world
 		world				= msgIB_V wctrl "setShouldCascadeWindows:\0" True world
 		(wctrl,world)		= msgIP_P wctrl "initWithWindow:\0" wind world
 		world				= msgIB_V wctrl "setShouldCascadeWindows:\0" True world
@@ -335,6 +373,8 @@ makeWindowControllers self cmd
 	| trace_n ("textv string length "+++toString (size (ns2cls nss))) False = undef
 
 	#!	world				= msgIP_V self "addWindowController:\0" wctrl world
+		world				= msgI_V wind "release\0" world
+		world				= msgI_V wctrl "release\0" world
 
 	#!	world				= msgII_V self "_setShowAutosaveButton:\0" 1 world
 //		(url,env)		= msgCP_P "NSURL\0" "fileURLWithPath:\0" (p2ns "/Users/dvanarkelmaccom/Documents/CleanLab/icfp2015/hex.icl") env
@@ -645,6 +685,8 @@ where
 debugSubstring storage location length env
 	#!	(str,env)	= msgI_P storage "string\0" env
 		(sstr,env)	= msgIII_P str "substringWithRange:\0" location length env
+		string		= ns2cls sstr
+//		env			= msgI_V sstr "release\0" env
 	= (ns2cls sstr,env)
 
 
