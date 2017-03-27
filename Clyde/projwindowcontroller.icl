@@ -29,57 +29,20 @@ where
 
 makeProjWindowControllerClass :: !*a -> *a
 makeProjWindowControllerClass env
-	#!	(cls,env)		= objc_getClass "NSWindowController\0" env
-		(adc,env)		= objc_allocateClassPair cls "ProjWindowController\0" 0 env
+	= createClass "NSWindowController" "ProjWindowController" projWindowMethods projWindowIvars env
 
-//	#!	(sel,env)		= sel_getUid "init\0" env
-//		(ok,env)		= class_addMethod adc sel imp_init "@@:\0" env
-
-	#!	(sel,env)		= sel_getUid "setDocument:\0" env
-		(ok,env)		= class_addMethod adc sel imp_setdocument "i@:@\0" env
-
-		env				= addOVDataSource adc env
-		
-	#!	(ok,env)		= class_addIvar adc "outlineview\0" 8 3 "@\0" env
-
-	#!	env				= objc_registerClassPair adc env
-	= env
-
-// outline view callbacks, needs to be in subclass of NSWindowController
-
-addOVDataSource :: !Class !*a -> *a
-addOVDataSource adc world
-	#!	selname			= "outlineView:numberOfChildrenOfItem:\0"
-		(sel,world)		= sel_getUid selname world
-		imp				= impOutlineViewNummberOfChildrenOfItem
-		(ok,world)		= class_addMethod adc sel imp "i@:@@\0" world		// lying about return type here...
-	
-	#!	selname			= "outlineView:isItemExpandable:\0"
-		(sel,world)		= sel_getUid selname world
-		imp				= impOutlineViewIsItemExpandable
-		(ok,world)		= class_addMethod adc sel imp "i@:@@\0" world		// lying about return type here...
-	
-	#!	selname			= "outlineView:child:ofItem:\0"
-		(sel,world)		= sel_getUid selname world
-		imp				= impOutlineViewChildOfItem
-		(ok,world)		= class_addMethod adc sel imp "@@:@i@\0" world		// lying about return type here...
-	
-	#!	selname			= "outlineView:objectValueForTableColumn:byItem:\0"
-		(sel,world)		= sel_getUid selname world
-		imp				= impOutlineViewObjectValueForTableColumnByItem
-		(ok,world)		= class_addMethod adc sel imp "i@:@@@\0" world		// lying about return type here...
-	
-	#!	selname			= "openIcl:\0"
-		(sel,world)		= sel_getUid selname world
-		imp				= imp_openIcl
-		(ok,world)		= class_addMethod adc sel imp "i@:@\0" world		// lying about return type here...
-
-	#!	selname			= "openDcl:\0"
-		(sel,world)		= sel_getUid selname world
-		imp				= imp_openDcl
-		(ok,world)		= class_addMethod adc sel imp "i@:@\0" world		// lying about return type here...
-	
-	= world
+projWindowMethods =
+	[ ("setDocument:", 									imp_setdocument,						"i@:@\0")
+	, ("outlineView:numberOfChildrenOfItem:", 			impOVNumberOfChildrenOfItem,			"i@:@@\0") 	// lying about return type here...
+	, ("outlineView:isItemExpandable:", 				impOVIsItemExpandable,					"i@:@@\0") 	// lying about return type here...
+	, ("outlineView:child:ofItem:", 					impOVChildOfItem,						"@@:@i@\0") // lying about return type here...
+	, ("outlineView:objectValueForTableColumn:byItem:", impOVObjectValueForTableColumnByItem,	"i@:@@@\0") // lying about return type here...
+	, ("openIcl:", 										imp_openIcl,							"i@:@\0") // lying about return type here...
+	, ("openDcl:", 										imp_openDcl,							"i@:@\0") // lying about return type here...
+	]
+projWindowIvars =
+	[ ("outlineview",		8,	3,	"@\0")
+	]
 
 /////
 
@@ -109,23 +72,23 @@ setDocument self cmd document
 		env				= msgIPI_V outl "reloadItem:reloadChildren:\0" NIL YES env
 	= force env ret
 
-impOutlineViewNummberOfChildrenOfItem :: Int
-impOutlineViewNummberOfChildrenOfItem = code {
+impOVNumberOfChildrenOfItem :: Int
+impOVNumberOfChildrenOfItem = code {
 		pushLc outlineViewNummberOfChildrenOfItem
 	}
 	
-impOutlineViewIsItemExpandable :: Int
-impOutlineViewIsItemExpandable = code {
+impOVIsItemExpandable :: Int
+impOVIsItemExpandable = code {
 		pushLc outlineViewIsItemExpandable
 	}
 	
-impOutlineViewChildOfItem :: Int
-impOutlineViewChildOfItem
+impOVChildOfItem :: Int
+impOVChildOfItem
 	= dcbNewCallback "iiiii)i\0" addrcbHandlerPPPPP_P 0
 
 	
-impOutlineViewObjectValueForTableColumnByItem :: Int
-impOutlineViewObjectValueForTableColumnByItem
+impOVObjectValueForTableColumnByItem :: Int
+impOVObjectValueForTableColumnByItem
 	= dcbNewCallback "iiiii)i\0" addrcbHandlerPPPPP_P 1
 
 foreign export outlineViewNummberOfChildrenOfItem
@@ -150,31 +113,6 @@ outlineViewNummberOfChildrenOfItem self cmd ov item
 		= 0
 	= lookNumChildren item
 
-/*
-// 0 == root
-	| item == 0
-//		#!	(root,env)		= object_getInstanceVariable elm "root\0" newWorld
-		#!	env	= newWorld
-			selfclass		= object_getClassName self
-			ovclass			= object_getClassName ov
-			cmdname			= sel_getName cmd
-		| trace_n ("selfclass\t"+++selfclass+++"\t"+++toString self) False = undef
-		| trace_n ("ovclass\t"+++ovclass) False = undef
-		| trace_n ("cmd\t"+++cmdname) False = undef
-		#!	(ovdel,env)		= msgI_P ov "delegate\0" env
-		| trace_n ("ov delegate\t"+++toString ovdel+++"\t"+++object_getClassName ovdel) False = undef
-		#!	(doc,env)		= msgI_P ovdel "document\0" env
-		| trace_n ("document\t"+++toString doc+++"\t"+++object_getClassName doc) False = undef
-		| doc == 0
-			= 0
-		#!	(root,env)		= object_getInstanceVariable doc "root\0" env
-//		#!	(root,env)		= msgI_P doc "root\0" env
-		| trace_n ("root\t"+++toString root+++"\t"+++object_getClassName root) False = undef
-//		= abort "\nchildren of nil\n\n"
-		#!	num	= lookNumChildren root
-		= trace_n ("root number of children: "+++toString num) num
-	= lookNumChildren item
-*/
 outlineViewIsItemExpandable :: !Int !Int !Int !Int -> Int
 outlineViewIsItemExpandable self cmd ov item
 	| item == 0		= 0		// ???
@@ -275,46 +213,31 @@ addrcbHandlerPPPPP_P = code {
 import Clyde.windows
 
 makeProjWindowController :: !Pointer !*World -> (!Pointer,!*World)
-makeProjWindowController document/*appdelegate*/ env
+makeProjWindowController document env
 	#!	(wind,env)		= msgC_P "NSWindow\0" "alloc\0" env
 		rect			= cgRect 0.0 0.0 1024.0 460.0			// TODO: need to free...
 		style			= NSTitledWindowMask + NSClosableWindowMask + NSResizableWindowMask + NSMiniaturizableWindowMask
 		backing			= NSBackingStoreBuffered	// NSBackingStoreRetained
 		(wind,env)		= msgISIIB_P wind "initWithContentRect:styleMask:backing:defer:\0" NSRectType rect style backing False env
-/*
-		(screen,env)	= msgI_P wind "screen\0" env
-		(vis,env)		= visibleFrame screen env
-		env = trace_n ("screen "+++toString screen+++"\t"+++rect2string vis) env
-		(frm,env)		= getFrame wind env
-		shgt			= readReal8 vis 24
-		fhgt			= (readReal8 frm 24) - (readReal8 frm 8)
-		top				= shgt - fhgt
-		env				= msgIS_V wind "setFrameOrigin:\0" NSSizeType (NSMakeSize 0.0 top) env	//NSPoint
-*/
 		env				= cascade wind env
 
 		env				= msgIP_V wind "setTitle:\0" (c2ns "Project Window\0") env
 
 		(view,env)		= msgC_P "NSView\0" "alloc\0" env
 		rect			= cgRect 0.0 0.0 400.0 400.0
-//		(cont_,env)		= msgI_P wind "contentView:\0" env
-//		(rect,env)		= getBounds cont_ env
 		(view,env)		= msgIS_P view "initWithFrame:\0" NSRectType rect env
-//		(flip,env)		= msgI_I view "isFlipped\0" env
-//		env = trace_n ("root is flipped: "+++toString flip) env
-
 		(wctrl,env)		= msgC_P "ProjWindowController\0" "alloc\0" env
 		env				= msgIB_V wctrl "setShouldCascadeWindows:\0" True env
 
 		(wctrl,env)		= msgIP_P wctrl "initWithWindow:\0" wind env
-		env				= msgIB_V wctrl "setShouldCascadeWindows:\0" True env
+//		env				= msgIB_V wctrl "setShouldCascadeWindows:\0" True env
 		env = trace_n ("project window controller: "+++toString wctrl) env
 		
 		env				= msgIP_V wind "setContentView:\0" view env
 		(vw,env)		= msgI_P wind "contentView\0" env
 //		(should,env)	= msgI_B wctrl "shouldCascadeWindows\0" env
-		(should,env)	= msgI_I wctrl "shouldCascadeWindows\0" env
-		env				= trace_n ("should\t"+++toString (should<>0)) env
+//		(should,env)	= msgI_I wctrl "shouldCascadeWindows\0" env
+//		env				= trace_n ("should\t"+++toString (should<>0)) env
 		env				= createPOView wctrl view env		
 		wind			= msgIS_V "setContentRect:\0" rect env
 //		(w,env)			= msgI_P wind "becomeFirstResponder\0" env	

@@ -484,8 +484,8 @@ step intr state=:(DComp force dircache compinfo=:(AsyncWin _ _) rest ds) ps
 						-> (state, ps)
 					(FinishedCompiler completedSlot exitcode, ps)
 						#! (state,ps) = process_completed completedSlot exitcode state ps
-						-> IF_BATCHBUILD_OR_IDE
-								(state,ps)
+						-> //IF_BATCHBUILD_OR_IDE
+						//		(state,ps)
 								(check_completed state ps)
 					(UnknownFinishedCompiler,ps)
 						-> (state, ps)	// -> doesn't occur on win

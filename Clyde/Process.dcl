@@ -48,5 +48,5 @@ callProcess :: !FilePath ![String] !(Maybe String) !*World -> (MaybeOSError Int,
 
 
 // as above but with potential redirect of stdout & stderr to passed file descriptors
-runProcessWithRedirect :: !FilePath ![String] !(Maybe String) !(Maybe Int) !(Maybe Int) !*World -> (MaybeOSError ProcessHandle, *World)
+runProcessWithRedirect :: !FilePath ![String] !(Maybe String) !(Maybe Int) !(Maybe Int) !(Maybe Int) !*World -> (MaybeOSError ProcessHandle, *World)
 waitForAnyChild :: !{#Int} !*World -> (!(!Int,!MaybeOSError Int),!*World)

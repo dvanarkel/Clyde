@@ -20,40 +20,33 @@ documentClass	:== "ProjDocument\0"
 
 createProjDocumentClass :: !*a -> *a
 createProjDocumentClass env
-	| trace_n ("createProjDocumentClass") False = undef
-	#!	(cls,env)		= objc_getClass "NSDocument\0" env
-		(adc,env)		= objc_allocateClassPair cls documentClass 0 env
-
-	#!	(sel,env)		= sel_getUid "init\0" env
-		(ok,env)		= class_addMethod adc sel imp_init "@@:\0" env
-
-	#!	(sel,env)		= sel_getUid "readFromURL:ofType:error:\0" env
-		(ok,env)		= class_addMethod adc sel exportedCBHandler2 "i@:@@@\0" env
-
-	#!	(sel,env)		= sel_getUid "writeToURL:ofType:error:\0" env
-		(ok,env)		= class_addMethod adc sel exportedCBHandler3 "i@:@@@\0" env
-
-	#!	(sel,env)		= sel_getUid "makeWindowControllers\0" env
-		(ok,env)		= class_addMethod adc sel imp_makeWindowControllers "i@:@\0" env
-
-	#!	(sel,env)		= sel_getUid "build:\0" env
-		(ok,env)		= class_addMethod adc sel impBuild "v@:@\0" env		// lying about return type here...
-
-	#!	(sel,env)		= sel_getUid "buildAndRun:\0" env
-		(ok,env)		= class_addMethod adc sel impBuildAndRun "v@:@\0" env		// lying about return type here...
-
-	#!	(sel,env)		= sel_getUid "run:\0" env
-		(ok,env)		= class_addMethod adc sel impRun "v@:@\0" env		// lying about return type here...
-
-// create the ivar for storing the document path..
-	#!	(ok,env)		= class_addIvar adc "ppath\0" 8 3 "@\0" env
-// create the ivar for storing the document content..
-	#!	(ok,env)		= class_addIvar adc "root\0" 8 3 "@\0" env
-
-	#!	env				= objc_registerClassPair adc env
-	| trace_n ("exit createProjDocumentClass") False = undef
-	#!	env				= elemClass env		// class to store the project tree
+	#!	env	= createClass "NSDocument" "ProjDocument" projDocumentMethods projDocumentIvars env
+		env	= createClass "NSObject" "MyElement" elemMethods elemIvars env
 	= env
+
+projDocumentMethods =
+	[ ("init",	 								imp_init,						"@@:\0")
+	, ("readFromURL:ofType:error:",				exportedCBHandler2,				"i@:@@@\0")
+	, ("writeToURL:ofType:error:",	 			exportedCBHandler3,				"i@:@@@\0")
+	, ("makeWindowControllers", 				imp_makeWindowControllers,		"i@:@\0")
+	, ("build:",								impBuild,						"v@:@\0")
+	, ("buildAndRun:",							impBuildAndRun,					"v@:@\0")
+	, ("run:",									impRun,							"v@:@\0")
+	]
+projDocumentIvars =
+	[ ("ppath",		8,	3,	"@\0")
+	, ("root",		8,	3,	"@\0")
+	]
+
+elemMethods =
+	[ 
+	]
+elemIvars =
+	[ ("string",		8,	8,	"\0")
+	, ("path",			8,	8,	"\0")
+	, ("isgroup",		8,	8,	"\0")	// is expandable; use as BOOL : YES/NO
+	, ("children",		8,	8,	"\0")	// use for length and child retrieval (NSArray)
+	]
 
 // init
 
@@ -128,7 +121,7 @@ readFromURL_ofType_error self cmd absoluteURL typeName outError
 	#!	path				= ns2cls pathN
 		(prjPath,prj)		= splitRight path
 		(appPath,env)		= cleanhome env
-		root				= initProjectTree prj prjPath appPath
+		(root,env)			= initProjectTree prj prjPath appPath env
 		(_,env)				= object_setInstanceVariable self "root\0" root env			// HUH??? Doesn't appear to actually work?!
 		env					= msgI_V root "retain\0" env
 		(root`,env)			= object_getInstanceVariable self "root\0" env
@@ -229,13 +222,8 @@ imp_makeWindowControllers = code {
 
 makeProjWindowControllers :: !Int !Int -> Int
 makeProjWindowControllers self cmd
-	| trace_n ("makeWindowControllers called") False = undef
-	| trace_n ("self class: "+++object_getClassName self+++"\t"+++toString self) False = undef
-
 	#!	world				= newWorld
-
-//		(delegate,world)	= msgI_P application "delegate\0" world
-		(wctrl,world)		= makeProjWindowController self /*delegate*/ world
+		(wctrl,world)		= makeProjWindowController self world
 		world				= msgIP_V self "addWindowController:\0" wctrl world
 	= force world 42
 
@@ -272,75 +260,34 @@ lookChild child elm
 		(chd,env)		= msgII_P chs "objectAtIndex:\0" child env
 	= chd
 
-makeElem :: /*!Int*/ !String !String !Bool !{#Int} -> Pointer
-makeElem /*idx*/ str pth isgroup children
+makeElem :: !String !String !Bool !{#Int} -> Pointer
+makeElem str pth isgroup children
 	#!	(cls,env)		= objc_getClass "MyElement\0" newWorld
 		(ins,env)		= class_createInstance cls 0 env
-//		(_,env)			= object_setInstanceVariable ins "index\0" idx env
 		(_,env)			= object_setInstanceVariable ins "string\0" (p2ns str) env
-		(str`,env)		= object_getInstanceVariable ins "string\0" env
 		(_,env)			= object_setInstanceVariable ins "path\0" (p2ns pth) env
-		(path`,env)		= object_getInstanceVariable ins "path\0" env
 		(_,env)			= object_setInstanceVariable ins "isgroup\0" (if isgroup YES NO) env
-		(isgroup`,env)	= object_getInstanceVariable ins "isgroup\0" env
 
-		arr				= makeArray children
+		(arr,env)		= makeArray children env
 		(_,env)			= object_setInstanceVariable ins "children\0" arr env
-		(arr`,env)		= object_getInstanceVariable ins "children\0" env
 		env				= msgI_V ins "retain\0" env
-// WHY does hier view not get filled if we don't trace here???
-	| trace_n ("makeElem arr\t"+++toString arr+++"\t"+++toString arr`) False = undef
-
-//	| trace_n ("makeElem\t"+++toString ins+++"\t"+++str+++"\t"+++pth+++"\t"+++toString isgroup+++"\t"+++toString (size children)) False = undef
-//	| trace_n ("lookNumChildren\t"+++toString (lookNumChildren ins)) False = undef
-	#!	(chs,env)		= object_getInstanceVariable ins "children\0" env
-//	| trace_n ("ivar children\t"+++toString chs+++"\t"+++object_getClassName chs) False = undef
-	#!	(num,env)		= msgI_P chs "count\0" env
-//	| trace_n ("num\t"+++toString num) False = undef
 	= force env ins
 
-makeArray :: !{#Int} -> Pointer
-makeArray cs
-	| trace_n ("array size: "+++toString (size cs)) False = undef
-	| trace_n ("force sum: "+++ toString (sum [e \\ e <-: cs])) False = undef
-	#!	env			= newWorld
-//		(arr,env)	= msgCV_P "NSArray\0" "arrayWithObjects:\0" cs env
-		(arr,env)	= msgC_P "NSMutableArray\0" "array\0" env
+makeArray :: !{#Int} !*a -> (!Pointer,!*a)
+makeArray cs env
+	#!	(arr,env)	= msgC_P "NSMutableArray\0" "array\0" env
 		env			= addObjects 0 cs arr env
-//		csa			= {e \\ e <- cs}
-//		(arr,env)	= msgCV_P "NSArray\0" "arrayWithObjects:\0" csa env
-	| trace_n ("arr created at: "+++toString arr) False = undef
-	#!	env			= msgI_V arr "retain\0" env
-	| trace_n ("arr retained") False = undef
-	= force env arr
+		env			= msgI_V arr "retain\0" env
+	= (arr,env)
 
 addObjects :: !Int !{#Int} !Pointer !*a -> *a
 addObjects idx cs arr env
-	| trace_n ("addObjects\t"+++toString idx+++"\t"+++toString (size cs)+++"\t"+++toString arr) False = undef
 	| idx >= size cs
 		= env
 	#!	elm			= cs.[idx]
 		env			= msgIP_V arr "addObject:\0" elm env
-
-	#!	(num,env)	= msgI_P arr "count\0" env
-		(chd,env)	= msgII_P arr "objectAtIndex:\0" (dec num) env
-	| trace_n ("arr size after add: "+++toString num+++"\t"+++toString chd+++"\t"+++toString elm) False = undef
 	= addObjects (inc idx) cs arr env
 	
-elemClass :: !*a -> *a
-elemClass env
-	#!	(cls,env)		= objc_getClass "NSObject\0" env
-		(mye,env)		= objc_allocateClassPair cls "MyElement\0" 0 env
-//		(ok,env)		= class_addIvar mye "index\0" 8 8 "\0" env
-		(ok,env)		= class_addIvar mye "string\0" 8 8 "\0" env
-		(ok,env)		= class_addIvar mye "path\0" 8 8 "\0" env
-		// is expandable
-		(ok,env)		= class_addIvar mye "isgroup\0" 8 8 "\0" env	// use as BOOL : YES/NO
-		// get child n
-		(ok,env)		= class_addIvar mye "children\0" 8 8 "\0" env	// use for length and child retrieval (NSArray)
-		env				= objc_registerClassPair mye env
-	= env
-
 :: TreeView	:== {TreeElement}
 :: TreeElement
 	= Node String [Int]		// dirname		child idcs
@@ -361,28 +308,31 @@ instance FileEnv Files where
 	accFiles accfun io = accfun io
 	appFiles appfun io = appfun io
 
-readEnvironment :: !String !*Files -> (![String],!*Files)
-readEnvironment env files
-	#!	(home,files)			= cleanhome files
+readEnvironment :: !String !*World -> (![String],!*World)
+readEnvironment env world
+	#!	(home, world)			= cleanhome world
 	#	envspath				= home +++ "/etc/" +++. EnvsFileName
-		(envs,files)			= openEnvironments home envspath files
+		(envs, world)			= openEnvironments home envspath world
 		senv				 	= [ e \\ e <- envs | e.target_name == env ]
 	| isEmpty senv
-		= ([],files)
+		= ([], world)
 	#	envPaths				= [ p \\ p <|- (hd senv).target_path ]
-	= (envPaths,files)
+	= (envPaths, world)
 
-readProject :: !String !String !String !*Files -> (TreeView,!*Files)
-readProject prj prjPath appPath files
+readProject :: !String !String !String !*World -> (TreeView,!*World)
+readProject prj prjPath appPath world
 		#!	path						= prjPath +++. prj
-			((proj,succ,errmsg),files)	= ReadProjectFile path appPath files
+			((proj,succ,errmsg), world)	= accFiles (ReadProjectFile path appPath) world
 		| not succ && trace_n ("failed to read project file: '"+++path+++"' with error: '"+++errmsg+++"'") True
-			= ({},files)
+			= ({}, world)
+		= projectToTreeView proj (symPath prjPath appPath) world
+
+projectToTreeView proj symbolisize world
 		#!	modules						= PR_GetModuleStuff proj
 			mods						= [ (mod,pth) \\ (mod,pth,_,_) <|- modules ]
 		| isEmpty mods
-			= ({},files)
-		#!	(envPaths,files)			= readEnvironment (PR_GetTarget proj) files
+			= ({}, world)
+		#!	(envPaths, world)			= readEnvironment (PR_GetTarget proj) world
 		#!	ppaths						= StrictListToList (PR_GetPaths proj)
 			srcpaths					= ppaths ++ envPaths // list of project search paths ++ environment search paths
 			[(root,rootdir):mods]		= mods
@@ -392,12 +342,10 @@ readProject prj prjPath appPath files
 			rootitem					= GetModuleName root
 			nodeidcs					= [idx \\ idx <- [2..] & (Node _ _) <- moditems]
 			items						= [ Node ("dummy top") [1:nodeidcs]
-//			nodeidcs					= length (filter isNode moditems) + 1
-//			items						= [ Node ("dummy top") [1..nodeidcs]
 										  , Leaf rootitem rootdir 
 										  : moditems
 										  ]
-		= ({i \\ i <- items},files)
+		= ({i \\ i <- items}, world)
 where
 	less a b c d srcpaths
 		| before b d srcpaths
@@ -414,7 +362,7 @@ where
 
 	makenice idx [] = []
 	makenice idx l=:[(module,b):r]
-		#	dir				= symPath appPath prjPath b
+		#	dir				= symbolisize b
 			idx				= inc idx
 			(elems,rest)	= span (\(_,d)->d==b) l
 			numelems		= length elems
@@ -432,30 +380,136 @@ where
 doHierMods mods
 	= []
 
-initProjectTree :: !String !String !String -> Pointer
-initProjectTree prj prjPath appPath
-	| trace_n ("project: '"+++prj+++"'") False = undef
-	| trace_n ("path: '"+++prjPath+++"'") False = undef
-	| trace_n ("appPath: '"+++appPath+++"'") False = undef
-	| trace_n ("# treeElem: "+++toString (size treeItems)) False = undef
+initProjectTree :: !String !String !String !*World -> (!Pointer,!*World)
+initProjectTree prj prjPath appPath env
+	#!	(treeItems,env)	= readProject prj prjPath appPath env
 	| size treeItems == 0
-		= 0
-	#!	root = treeElem 0
-	| trace_n ("iPT root:\t"+++toString root) False = undef
-	= root
+		= (0,env)
+	#!	root			= treeElem treeItems 0
+	= (root,env)
 where
-	treeElem :: !Int -> Pointer
-	treeElem idx
+	treeElem :: !{TreeElement} !Int -> Pointer
+	treeElem treeItems idx
 		#	elem	= treeItems.[idx]
 		= case elem of
-//			(Node s c)	-> makeElem s s True (map treeElem c)
-			(Node s c)	-> makeElem s s True {# treeElem e \\ e <- c}
-//			(Leaf s p)	-> makeElem s p False []
+			(Node s c)	-> makeElem s s True {# treeElem treeItems e \\ e <- c}
 			(Leaf s p)	-> makeElem s p False {}
-	
-	treeItems :: {TreeElement}
-	treeItems = accUnsafe (accFiles (readProject prj prjPath appPath))
-	
+
+//updateDummy	(-> #0 Node: #1 ++ all Node elements as children)
+//updateMain	(-> #1 Leaf: main module)
+//updateNodeLeafs
+
+updateVar ptr name value env
+	#!	(str,env)		= object_getInstanceVariable ptr name env
+		env				= msgI_V str "release\0" env
+		(_,env)			= object_setInstanceVariable ptr name (p2ns value) env
+	= env
+
+updateLeaf ptr str pth env
+	#!	env				= updateVar ptr "string\0" str env
+		env				= updateVar ptr "path\0" pth env
+	= env
+
+updateNode ptr str children env
+...
+
+removeLeaf ptr env
+	#!	(var,env)		= object_getInstanceVariable ptr "string\0" env
+		env				= msgI_V var "release\0" env
+		(var,env)		= object_getInstanceVariable ptr "path\0" env
+		env				= msgI_V var "release\0" env
+		(var,env)		= object_getInstanceVariable ptr "isgroup\0" env
+		env				= msgI_V var "release\0" env
+		(var,env)		= object_getInstanceVariable ptr "children\0" env
+		env				= msgI_V var "release\0" env
+	= env
+removeNode ptr env
+	#!	(var,env)		= object_getInstanceVariable ptr "string\0" env
+		env				= msgI_V var "release\0" env
+		(var,env)		= object_getInstanceVariable ptr "path\0" env
+		env				= msgI_V var "release\0" env
+		(var,env)		= object_getInstanceVariable ptr "isgroup\0" env
+		env				= msgI_V var "release\0" env
+		(var,env)		= object_getInstanceVariable ptr "children\0" env
+		(num,env)		= msgI_I var "count\0" env
+		env				= removeChildren (dec num) var env
+		env				= msgI_V var "release\0" env
+	= env
+removeChildren idx ptr env
+	| idx < 0
+		= env
+	#!	(chd,env)		= msgII_P ptr "objectAtIndex:\0" idx env
+		env				= removeNode chd env
+	= removeChildren (dec idx) ptr env
+
+// how to maintain current selection in list??
+updProjectTree :: !Pointer !{TreeElement} !*env -> *env
+updProjectTree root tree env
+	#	(rs,rp,rg,rc)					= lookElem root			// fetch dummy
+		(Node _ dc)						= tree.[0]
+// update main
+		(Leaf str pth)					= tree.[1]
+		env								= updateLeaf rc.[0] str pth env
+// update NLs
+		(,env)							= updateProjectDir (tl rc) (tl dc) env 
+// update dummy
+...
+where
+	updateProjectDir [] [] acc env
+		= (reverse acc,env)
+	updateProjectDir [root:roots] [] acc env
+		#	env		= removeRoot root env
+		= updateProjectDir roots [] acc env
+	updateProjectDir [] [(Node ...):nodes] acc env
+		#	(root,env)		= insertNode env
+		= updateProjectDir [] nodes [root:acc] env
+	updateProjectDir [root:roots] [(Node ...):nodes] acc env
+
+//updProjectTree roots tree idxs env	// root is pointer to tree.[idx]
+// we now at top level [Node (dummy),Leaf (main),mods] where mods = (Node;Leaf+)*
+updProjectTree [root:roots] tree [idx:idxs]	
+	#	elem							= tree.[idx]
+		(s,p,g,c)						= case elem of
+			(Node s c)	-> ( s, s, True, c)
+			(Leaf s p)	-> ( s, p, False, [])
+		(string,path,isgroup,children)	= lookElem root
+	| s == string
+	&& p == path
+	&& g == isgroup
+		#	rs	= updProjectTree children tree c
+			..	= children		// we kinda want to update the nsarray rather than remove & realloc
+//	&& c/children?
+updProjectTreeNode root tree idx	
+	#	elem							= tree.[idx]
+		(s,p,g,c)						= case elem of
+			(Node s c)	-> ( s, s, True, c)
+			(Leaf s p)	-> ( s, p, False, [])
+		(string,path,isgroup,children)	= lookElem root
+	| s == string
+	&& p == path
+	&& g == isgroup
+		#	rs	= updProjectTree children tree c
+			..	= children		// we kinda want to update the nsarray rather than remove & realloc
+//	&& c/children?
+/*
+how to update?
+if path (=Node/isgroup)
+
+cur		expect
+N		N
+					before cur expect -> remove cur & children; else insert expect & children
+L		L
+					assert paths should match
+					cur < expect -> remove cur; else insert expect;
+N		L			insert expect
+L		N			remove cur
+-		N			insert expect & children
+-		L			insert expect
+N		-			remove cur & children
+L		-			remove cur
+*/
+
+
 // build:
 // buildAndRun:
 // run:
@@ -513,10 +567,26 @@ where
 
 RunProcess :: !String !*GeneralSt -> *GeneralSt
 RunProcess execpath ps=:{gst_world}
-		#!	(res,world)			= runProcessWithRedirect execpath [] Nothing Nothing Nothing gst_world
+		#!	world				= RunWithRedirect execpath gst_world
 	= {ps & gst_world = world}
 
-import PmProject, PmPath, Clyde.Process
+RunWithRedirect :: !String !*World -> *World
+RunWithRedirect execpath env
+// :-) also need to be able to redirect stdin...
+// and subclass keyDown on the NSTextView (or NSWindow or...)
+
+//console setup notifications...
+	#!	env	= openConsoleWindow execpath env
+/*	#!	(res,env)				= runProcessWithRedirect execpath [] Nothing
+									(Just con_stdin_remote) 
+									(Just con_stdout_remote) 
+									(Just con_stdout_remote) 
+//									(Just con_stderr_remote) 
+									env	
+*/
+	= env
+
+import PmProject, PmPath, Clyde.Process, Clyde.Console
 
 Run :: !Int !Int !Int -> Int
 Run self cmd notification
@@ -531,7 +601,7 @@ Run self cmd notification
 		execpath				= PR_GetExecPath proj
 		execpath				= fulPath app_path prj_path` execpath
 
-		(res,env)				= runProcessWithRedirect execpath [] Nothing Nothing Nothing env	
+		env						= RunWithRedirect execpath env	
 // gives out/err in Clyde out/err.. (for console apps)
 // runs process as child process, maybe not what we really want?
 	= force env 42

@@ -4,10 +4,12 @@ from StdFile import ::Files
 from UtilStrictLists import ::List
 from PmTypes import ::CodeGenOptions,::Processor,::ApplicationOptions,::LinkMethod,::ModuleDirAndName
 from PmCompilerOptions import ::CompilerOptions,::ListTypes
+from IdeState import ::GeneralSt,instance FileSystem GeneralSt,instance FileEnv GeneralSt
+from StdFile import class FileSystem,class FileEnv
 
 import StdOverloaded
 import StdPathname
-import PmCallBack
+//import PmCallBack
 
 :: CompilerProcessIds
 

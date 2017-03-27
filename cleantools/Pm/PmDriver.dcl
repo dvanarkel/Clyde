@@ -1,10 +1,10 @@
 definition module PmDriver
 
 from PmProject		import :: Project, :: Pathname
-from IdeState		import :: General
+from IdeState		import :: General, :: GeneralSt
 from PmCleanSystem	import :: CompileOrCheckSyntax
 
-import PmCallBack
+//import PmCallBack
 
 :: SetMadeProjectFun :==
 	(	Bool

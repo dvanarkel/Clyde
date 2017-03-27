@@ -10,7 +10,7 @@ import StdPathname
 import PmTypes
 from PmCompilerOptions import ::CompilerOptions(..),::ListTypes(..),instance == ListTypes
 import PmPath
-import PmCallBack
+//import PmCallBack
 from PmParse import IsTypeSpec,IsImportError20
 from linkargs import ReadLinkErrors,WriteLinkOpts,:: LinkInfo`(..),:: LPathname
 
@@ -247,7 +247,7 @@ CodeGen cgen used_compiler_process_ids wf genAsmOrCode abc_path obj_path timepro
 		= abort "creat failed"
 
 	#	args	= add_options_string_to_args 0 options (cg_arguments++[path_without_suffix])
-		res		= accUnsafe ( runProcessWithRedirect cgen args Nothing Nothing (Just stderr_fd) )
+		res		= accUnsafe ( runProcessWithRedirect cgen args Nothing Nothing Nothing (Just stderr_fd) )
 	| isError res
 		#	(err_code,err_msg)	= fromError res
 		= abort ("Code generation failed: ("+++toString err_code+++") "+++err_msg)
@@ -312,7 +312,7 @@ start_code_generator cgen wf abc_path slot timeprofile cgo tp startupdir ps
 		= abort "creat failed"
 
 	#	args	= add_options_string_to_args 0 options (cg_arguments++[path_without_suffix])
-		res	= accUnsafe (runProcessWithRedirect cgen args Nothing Nothing (Just stderr_fd))
+		res	= accUnsafe (runProcessWithRedirect cgen args Nothing Nothing Nothing (Just stderr_fd))
 	| isError res
 		#	(err_code,err_msg)	= fromError res
 		= abort ("Code generation failed: ("+++toString err_code+++") "+++err_msg)
@@ -499,7 +499,7 @@ start_compiler compiler_file_name
 	#	res		= accUnsafe (runProcess compiler_file_name cocl_arguments Nothing)
 	| isError res
 		#	(err_code,err_msg)	= fromError res
-		= abort ("start compiler failed (exec): ("+++toString err_code+++") "+++err_msg)
+		= abort ("compiler failed (exec): ("+++toString err_code+++") "+++err_msg)
 	#	compiler_pid		= (fromOk res).pid
 	# commands_fd = open (commands_file_name+++"\0") O_WRONLY 0
 	| commands_fd == -1

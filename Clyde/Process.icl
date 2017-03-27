@@ -43,8 +43,8 @@ runProcess path args mCurrentDirectory world
 		= getLastOSError world
 
 // as above but with potential redirect of stdout & stderr to passed file descriptors
-runProcessWithRedirect :: !FilePath ![String] !(Maybe String) !(Maybe Int) !(Maybe Int) !*World -> (MaybeOSError ProcessHandle, *World)
-runProcessWithRedirect path args mCurrentDirectory mStdOut mStdErr world
+runProcessWithRedirect :: !FilePath ![String] !(Maybe String) !(Maybe Int) !(Maybe Int) !(Maybe Int) !*World -> (MaybeOSError ProcessHandle, *World)
+runProcessWithRedirect path args mCurrentDirectory mStdIn mStdOut mStdErr world
 	//Check if path exists 
 /*	#	(ok,world)				= fileExists path world		// why stat before fork?
 	| not ok
@@ -54,12 +54,14 @@ runProcessWithRedirect path args mCurrentDirectory mStdOut mStdErr world
 	#	(pid, world)			= fork world
 	| pid == 0
 		//Exec
-		#	world				= setChildDir mCurrentDirectory world
+		#!	world				= setChildDir mCurrentDirectory world
+			world				= setChildIn mStdIn world
 			world				= setChildOut mStdOut world
 			world				= setChildErr mStdErr world
 
 		#	(argv,args_memory)	= makeArgv [path:args]
 		#	(res,world)			= execv (path +++ "\0") argv world
+		| trace_n ("???res???" +++ toString res) False = undef
 		= (exit 1 world)
 	| pid > 0
 		= (Ok {ProcessHandle| pid = pid}, world)
@@ -75,21 +77,41 @@ setChildDir (Just dir) world
 	= world
 
 :: FileDesc :== Int
+import StdDebug
+setChildIn :: !(Maybe FileDesc) !*World -> *World
+setChildIn Nothing world
+	= world
+setChildIn (Just stdin_fd) world
+	#	(r,world)	= dup2 stdin_fd 0 world
+	| r == (-1)
+		= abort "dup2 failed"
+	| close stdin_fd <> 0
+		= abort "close failed"
+	= world
+
 setChildOut :: !(Maybe FileDesc) !*World -> *World
 setChildOut Nothing world
 	= world
 setChildOut (Just stdout_fd) world
+	| trace_n ("setting stdout: "+++ toString stdout_fd) False = undef
 	#	(r,world)	= dup2 stdout_fd 1 world
 	| r == (-1)
 		= abort "dup2 failed"
+	| close stdout_fd <> 0
+		= abort "close failed"
 	= world
+
 setChildErr :: !(Maybe FileDesc) !*World -> *World
 setChildErr Nothing world
 	= world
 setChildErr (Just stderr_fd) world
-	# (r,world)	= dup2 stderr_fd 2 world			// redirect cgen stderr to errors file
+	| trace_n ("setting stderr: "+++ toString stderr_fd) False = undef
+//	# (r,world)	= dup2 stderr_fd 2 world
+	# (r,world)	= dup2 1 2 world			// hack as for now we know this is what we use for console...
 	| r== (-1)
 		= abort "dup2 failed"
+//	| close stderr_fd <> 0
+//		= abort "close failed"
 	= world
 
 makeArgv :: [String] -> (!{#Pointer},!Pointer)
@@ -202,5 +224,10 @@ execv program argv world = code {
 dup2 :: !Int !Int !*w -> (!Int, !*w)
 dup2 old new world = code {
     ccall dup2 "II:I:A"
+}
+
+close :: !Int -> Int;
+close fd = code {
+	ccall close "I:I"
 }
 

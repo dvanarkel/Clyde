@@ -24,16 +24,12 @@ cleanhome env
 
 build :: !Bool !String !(!String !Bool !Bool !*GeneralSt -> *GeneralSt) !*World -> (!Int,!*World)
 build force proj_path cont world
-	#!	(startup,world)			= cleanhome world
-	| trace_n ("projactions:build\t"+++startup) False = undef
 	//	ed_ask_save_all False True (enableProjectMenu o bring_project_upto_date force cont o disableProjectMenu) ps
 	//	mb_update_undoinfo ps
-	// '/Users/dvanarkelmaccom/Documents/CleanLab/Clyde.prj'
-	// '/usr/local/Cellar/clean-itasks/20151022/etc/'
-
-	# envloc					= startup +++ "/etc/"
-	# envspath					= envloc +++. EnvsFileName
-	# (envs,world)				= openEnvironments startup envspath world
+	#!	(startup,world)			= cleanhome world
+		envloc					= startup +++ "/etc/"
+		envspath				= envloc +++. EnvsFileName
+		(envs,world)			= openEnvironments startup envspath world
 
 	| trace_n ("proj_path: '"+++proj_path+++"'") False = undef
 	| trace_n ("application_path: '"+++application_path ""+++"'") False = undef

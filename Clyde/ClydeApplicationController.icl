@@ -120,6 +120,7 @@ appDelegateMethods	=
 	, ("test:",									impTest,						"v@:@\0")
 	, ("hideLogWindow:",						impHideL,						"v@:@\0")
 	, ("hideTypeWindow:",						impHideT,						"v@:@\0")
+//	, ("hideConsoleWindow:",					impHideC,						"v@:@\0")
 	, textStorageDidProcess 
 	: tableViewControllerMethods 
 	]
@@ -147,17 +148,17 @@ where
 
 import Clyde.textwindowcontroller
 
-mylogwindow =: accUnsafe (swizzledTextWindow "Log")
-mytypwindow =: accUnsafe (swizzledTextWindow "Types")
+mylogwindow =: accUnsafe (swizzledTextWindow "Log" "hideLogWindow:\0")
+mytypwindow =: accUnsafe (swizzledTextWindow "Types" "hideTypeWindow:\0")
 
-swizzledTextWindow :: !String !*World -> (!Int,!*World)
-swizzledTextWindow title env
+swizzledTextWindow :: !String !String !*World -> (!Int,!*World)
+swizzledTextWindow title close env
 	#!	(delegate,env)	= applicationDelegate env
-	#!	(wind,env)	= populateTextWindow delegate "" env
-		(but,env)	= msgII_P wind "standardWindowButton:\0" NSWindowCloseButton env
-		env			= setAction but "hideLogWindow:\0" env
-		env			= msgIP_V but "setTarget:\0" delegate env
-		env			= msgIP_V wind "setTitle:\0" (p2ns title) env
+	#!	(wind,env)		= populateTextWindow delegate title env		// send title as type so we can specialise background colour
+		(but,env)		= msgII_P wind "standardWindowButton:\0" NSWindowCloseButton env
+		env				= setAction but close env
+		env				= msgIP_V but "setTarget:\0" delegate env
+		env				= msgIP_V wind "setTitle:\0" (p2ns title) env
 	= (wind,env)
 
 NSWindowCloseButton	:== 0
@@ -195,7 +196,8 @@ openLogWindow  env
 		(cont,env)		= msgI_P mylogwindow "contentView\0" env
 		(txtv,env)		= msgI_P cont "documentView\0" env
 		(stor,env)		= msgI_P txtv "textStorage\0" env
-		env				= msgIP_V stor "setString:\0" (p2ns "") env
+		(mstr,env)		= msgI_P stor "mutableString\0" env
+		env				= msgIP_V mstr "setString:\0" (p2ns "") env
 		env				= msgIP_V mylogwindow "makeKeyAndOrderFront:\0" application env
 		env				= msgII_V mylogwindow "setIsVisible:\0" YES env
 	= env
@@ -207,7 +209,8 @@ openTypeWindow  env
 		(cont,env)		= msgI_P mytypwindow "contentView\0" env
 		(txtv,env)		= msgI_P cont "documentView\0" env
 		(stor,env)		= msgI_P txtv "textStorage\0" env
-		env				= msgIP_V stor "setString:\0" (p2ns "") env
+		(mstr,env)		= msgI_P stor "mutableString\0" env
+		env				= msgIP_V mstr "setString:\0" (p2ns "") env
 		env				= msgIP_V mytypwindow "makeKeyAndOrderFront:\0" application env
 		env				= msgII_V mytypwindow "setIsVisible:\0" YES env
 	= env

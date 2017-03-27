@@ -7,4 +7,4 @@ start :: !.a !(.Bool -> .(.a -> .(*GeneralSt -> *(.a,*GeneralSt)))) !*GeneralSt 
 cont :: !*(!.a,!*GeneralSt) -> *(.a,!*GeneralSt);
 stop :: !*(.a,!*GeneralSt) -> *(.a,!*GeneralSt);
 
-IF_BATCHBUILD_OR_IDE batchbuild ide :== batchbuild
+//IF_BATCHBUILD_OR_IDE batchbuild ide :== batchbuild
