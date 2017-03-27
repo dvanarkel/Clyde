@@ -17,6 +17,7 @@ from Clyde.textdocument					import createTextDocument
 from Clyde.projdocument					import createProjDocumentClass
 from Clyde.menus						import populateMainMenu
 from Clyde.DebugClyde					import installDebug
+from Clyde.Console						import createConsoleWindowControllerClass
 
 Start world
 	#!	world			= installDebug world
@@ -28,6 +29,7 @@ Start world
 		world			= createTextDocument world				// register TextDocument class
 		world			= createProjDocumentClass world			// register ProjDocument class
 		world			= makeProjWindowControllerClass world	// register ProjWindowController class
+		world			= createConsoleWindowControllerClass world	// register ConsoleController class
 		world			= makeUnbundledLaunchable app world		// not sure if this is working or changes anything?!
 		world			= initAppDelegate app world
 		world			= runApplication app world
