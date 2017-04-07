@@ -260,6 +260,20 @@ lookChild child elm
 		(chd,env)		= msgII_P chs "objectAtIndex:\0" child env
 	= chd
 
+lookElem :: !Pointer -> (!String,!String,!Bool,![Pointer])
+lookElem elm
+	#!	env				= newWorld
+		(str,env)		= object_getInstanceVariable elm "string\0" env
+		(pth,env)		= object_getInstanceVariable elm "path\0" env
+		(isg,env)		= object_getInstanceVariable elm "isgroup\0" env
+		(chs,env)		= object_getInstanceVariable elm "children\0" env
+		(num,env)		= msgI_I chs "count\0" env
+		(children,env)	= seqList [getChild elm i \\ i <- [0..num]] env
+	= force env (ns2cls str,ns2cls pth,isg==YES,children)
+where
+	getChild chs i env
+		= msgII_P chs "objectAtIndex:\0" i env
+
 makeElem :: !String !String !Bool !{#Int} -> Pointer
 makeElem str pth isgroup children
 	#!	(cls,env)		= objc_getClass "MyElement\0" newWorld
@@ -410,8 +424,8 @@ updateLeaf ptr str pth env
 		env				= updateVar ptr "path\0" pth env
 	= env
 
-updateNode ptr str children env
-...
+//updateNode ptr str children env
+//...
 
 removeLeaf ptr env
 	#!	(var,env)		= object_getInstanceVariable ptr "string\0" env
@@ -442,6 +456,8 @@ removeChildren idx ptr env
 		env				= removeNode chd env
 	= removeChildren (dec idx) ptr env
 
+insertNode = undef
+
 // how to maintain current selection in list??
 updProjectTree :: !Pointer !{TreeElement} !*env -> *env
 updProjectTree root tree env
@@ -451,23 +467,23 @@ updProjectTree root tree env
 		(Leaf str pth)					= tree.[1]
 		env								= updateLeaf rc.[0] str pth env
 // update NLs
-		(,env)							= updateProjectDir (tl rc) (tl dc) env 
+		(acc,env)						= updateProjectDir (tl rc) (tl dc) env 
 // update dummy
-...
+	= undef		// <== TODO
 where
 	updateProjectDir [] [] acc env
 		= (reverse acc,env)
 	updateProjectDir [root:roots] [] acc env
-		#	env		= removeRoot root env
+		#	env		= removeNode root env
 		= updateProjectDir roots [] acc env
-	updateProjectDir [] [(Node ...):nodes] acc env
+	updateProjectDir [] [(Node n cs):nodes] acc env
 		#	(root,env)		= insertNode env
 		= updateProjectDir [] nodes [root:acc] env
-	updateProjectDir [root:roots] [(Node ...):nodes] acc env
+//	updateProjectDir [root:roots] [(Node ...):nodes] acc env
 
 //updProjectTree roots tree idxs env	// root is pointer to tree.[idx]
 // we now at top level [Node (dummy),Leaf (main),mods] where mods = (Node;Leaf+)*
-updProjectTree [root:roots] tree [idx:idxs]	
+updProjectTree___ [root:roots] tree [idx:idxs]	
 	#	elem							= tree.[idx]
 		(s,p,g,c)						= case elem of
 			(Node s c)	-> ( s, s, True, c)
@@ -477,7 +493,8 @@ updProjectTree [root:roots] tree [idx:idxs]
 	&& p == path
 	&& g == isgroup
 		#	rs	= updProjectTree children tree c
-			..	= children		// we kinda want to update the nsarray rather than remove & realloc
+	//		..	= children		// we kinda want to update the nsarray rather than remove & realloc
+		= undef		// <== TODO
 //	&& c/children?
 updProjectTreeNode root tree idx	
 	#	elem							= tree.[idx]
@@ -489,8 +506,10 @@ updProjectTreeNode root tree idx
 	&& p == path
 	&& g == isgroup
 		#	rs	= updProjectTree children tree c
-			..	= children		// we kinda want to update the nsarray rather than remove & realloc
+//			..	= children		// we kinda want to update the nsarray rather than remove & realloc
+		= undef		// <== TODO
 //	&& c/children?
+
 /*
 how to update?
 if path (=Node/isgroup)

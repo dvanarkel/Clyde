@@ -22,7 +22,7 @@ cleanhome :: !*env -> (!String,!*env)
 cleanhome env
 		= stringForKey "CLEAN_HOME" env
 
-build :: !Bool !String !(!String !Bool !Bool !*GeneralSt -> *GeneralSt) !*World -> (!Int,!*World)
+build :: !Bool !String !(String Bool Bool *GeneralSt -> *GeneralSt) !*World -> (!Int,!*World)
 build force proj_path cont world
 	//	ed_ask_save_all False True (enableProjectMenu o bring_project_upto_date force cont o disableProjectMenu) ps
 	//	mb_update_undoinfo ps

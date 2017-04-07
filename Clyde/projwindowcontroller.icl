@@ -239,7 +239,7 @@ makeProjWindowController document env
 //		(should,env)	= msgI_I wctrl "shouldCascadeWindows\0" env
 //		env				= trace_n ("should\t"+++toString (should<>0)) env
 		env				= createPOView wctrl view env		
-		wind			= msgIS_V "setContentRect:\0" rect env
+//		env				= msgIS_V "setContentRect:\0" rect env
 //		(w,env)			= msgI_P wind "becomeFirstResponder\0" env	
 //		env				= msgIP_V wind "makeKeyAndOrderFront:\0" self env
 

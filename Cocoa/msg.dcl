@@ -22,7 +22,9 @@ msgCPPP_P :: !ZString !ZString !Pointer !Pointer !Pointer !*a -> (!Pointer,!*a)
 msgI_V :: !Pointer !ZString !*a -> *a
 msgI_P :: !Pointer !ZString !*a -> (!Pointer,!*a)
 msgI_I :: !Pointer !ZString !*a -> (!Int,!*a)
+msgIP_V :: !Pointer !ZString !Pointer !*a -> *a
 msgIP_P :: !Pointer !ZString !Pointer !*a -> (!Pointer,!*a)
+msgIR_P :: !Pointer !ZString !Real !*a -> (!Pointer,!*a)
 msgIP_I :: !Pointer !ZString !Pointer !*a -> (!Int,!*a)
 msgIPA_V :: !Pointer !ZString !Pointer !{#Int} !*a -> *a
 msgIPA_P :: !Pointer !ZString !Pointer !{#Int} !*a -> (!Pointer,!*a)
@@ -32,14 +34,17 @@ msgIPP_P :: !Pointer !ZString !Pointer !Pointer !*a -> (!Pointer,!*a)
 msgIPPPP_I :: !Pointer !ZString !Pointer !Pointer !Pointer !Pointer !*a -> (!Int,!*a)
 msgIPI_V :: !Pointer !ZString !Pointer !Int !*a -> *a
 msgIPP_V :: !Pointer !ZString !Pointer !Pointer !*a -> *a
+msgIPR_V :: !Pointer !ZString !Pointer !Real !*a -> *a
+msgIPR_P :: !Pointer !ZString !Pointer !Real !*a -> (!Pointer,!*a)
+msgIPRR_P :: !Pointer !ZString !Pointer !Real !Real !*a -> (!Pointer,!*a)
 msgIPII_V :: !Pointer !ZString !Pointer !Int !Int !*a -> *a
 msgIPPII_V :: !Pointer !ZString !Pointer !Pointer !Int !Int !*a -> *a
 msgIPPP_P :: !Pointer !ZString !Pointer !Pointer !Pointer !*a -> (!Pointer,!*a)
 msgII_P :: !Pointer !ZString !Int !*a -> (!Pointer,!*a)
 msgII_V :: !Pointer !ZString !Int !*a -> *a
-msgIP_V :: !Pointer !ZString !Pointer !*a -> *a
 msgIR_V :: !Pointer !ZString !Real !*a -> *a
 msgIRR_V :: !Pointer !ZString !Real !Real !*a -> *a
+msgIRR_P :: !Pointer !ZString !Real !Real !*a -> (!Pointer,!*a)
 msgIPIIB_P :: !Pointer !ZString !Pointer !Int !Int !Bool !*a -> (!Pointer,!*a)
 
 from Cocoa.dyncall import :: DCStruct, :: DCpointer

@@ -752,9 +752,7 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 	//	Check whether executable is out of date and relink it	if required.
 	| intr || not ok
 		= continue False newpaths False fileinfo libsinfo modpaths project intr (abccache, ps)
-	# lo						= PR_GetLinkOptions project
-	# (prj_path,ps)				= getProjectFilePath ps
-	# (app_path,ps)				= getStup ps
+
 	# (srcpaths,ps)				= get_project_and_environment_paths project ps
 	// set up dircache for 'Clean System Files'
 	# ((errs,warns,abcPathsCache),ps)	= accFiles (DC_Setup (Map MakeSystemPathname srcpaths)) ps
@@ -762,26 +760,27 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 	// maybe use variant DC_Setup which ignores nonexistent CSF-dirs...
 	# ({be_verbose},ps)			= getPrefs ps
 	# ps						= HandleDCErrors be_verbose errs warns ps
+
 	# system_abc				= MakeABCPathname System
 	# (ok,full_sys0,_,abcPathsCache) = DC_Search system_abc abcPathsCache
 	# full_sys					= full_sys0 +++ DirSeparatorString +++ system_abc
 	# system_mdn 				= {mdn_dir=full_sys0,mdn_name=System}
 	
 	# ao						= PR_GetApplicationOptions project
-	// possibly patch _system to correct profiling settings...
 
+// possibly patch _system to correct profiling settings...
 	# (tp,ps)					= getCurrentProc ps
 	# ((modinfo,abccache,fileinfo),ps)
 								= FI_GetFileInfo tp system_mdn abccache fileinfo ps
 	
-	# wantstp					= ao.profiling //&& (not co.neverTimeProfile)
-	# compile					= /*mp <> info.abcOptions.abcMemoryProfile ||*/ wantstp <> modinfo.abcOptions.abcTimeProfile
+	# wantstp					= ao.profiling
+	# compile					= wantstp <> modinfo.abcOptions.abcTimeProfile
 	# lines						= if (be_verbose && compile)
 									(Level3 ["["+++system_abc+++",]: compiled with different options"])
 									(Level3 [])
 	# ps						= verboseInfo be_verbose lines ps
 	# (version,ps)				= getCurrentVers ps
-	# (patched, ps)				= accFiles (PatchSystemABC version compile full_sys /*ao.memoryProfiling*/ wantstp) ps
+	# (patched, ps)				= accFiles (PatchSystemABC version compile full_sys wantstp) ps
 	| not patched
 		# line					= Level3 ["Error: ["+++system_abc+++",]: could not be patched."]
 		# ps					= showInfo line ps
@@ -805,16 +804,20 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 										-> (abcPathsCache,ps)
 	| not ok
 		= continue False newpaths False fileinfo libsinfo modpaths project intr (abccache, ps)
-
+// analyse _system
 	# ((ok,_,_,_,sys_objs,sys_libs,abccache),ps)
 								= accFiles (ParseABCDependencies` abcpath sys_date abccache) ps
 	| not ok
 		# line					= Level3 ["Error: ["+++system_abc+++",]: could not be analysed."]
 		# ps					= showInfo line ps
 		= continue False newpaths False fileinfo libsinfo modpaths project intr (abccache, ps)
+// done with _system
 
+	# lo						= PR_GetLinkOptions project
 	# execpath					= PR_GetExecPath project
-	# prj_path` = PR_GetRootDir project
+	# (prj_path,ps)				= getProjectFilePath ps
+	# (app_path,ps)				= getStup ps
+	# prj_path`					= PR_GetRootDir project
 	# execpath					= fulPath app_path prj_path` execpath
 	# ps						= showInfo (Level2 ("Linking '" +++ RemovePath execpath +++ "'")) ps
 	
@@ -862,7 +865,7 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 	# linkObjFileNames			= Map (append_object_file_extension_if_dot_at_end tp use_64_bit_processor) abcLinkInfo.linkObjFileNames
 	# (objPathsOk,ofiles,abcPathsCache)
 								= GetPathNames linkObjFileNames ofiles abcPathsCache
-	# (_,ofiles`,abcPathsCache) = GetPathNames /*abcLinkInfo.*/linkObjFileNames ofiles` abcPathsCache
+	# (_,ofiles`,abcPathsCache) = GetPathNames linkObjFileNames ofiles` abcPathsCache
 	# (libPathsOk,lfiles,abcPathsCache)
 								= GetPathNames abcLinkInfo.linkLibraryNames lfiles abcPathsCache
 	| not objPathsOk
@@ -883,10 +886,11 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 
 	# (env_static_libs,ps)		= getCurrentSlibs ps
 	#! sfiles					= Concat (SL_Libs libsinfo) env_static_libs		// only if really used?
+
 	#! ofiles					= Reverse ofiles
 	#! lfiles					= Reverse lfiles
 
-//*	
+
 	// .exe or .dat older than module.o
 	// martijn also wants comparison with other libs and objs
 	// !!! fails to check if console type options have changed...
@@ -903,7 +907,7 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 										-> CheckExecOutOfDate genabc execpath fileinfo project ps
 	| not ood
 		= continue True False False fileinfo libsinfo modpaths project intr (abccache, ps)
-//*/
+
 	# (_,ps)					= accFiles (SaveProjectFile prj_path project app_path) ps
 	# (linkstr,ps)				= getCurrentLink ps
 	# (startupdir,ps)			= getStup ps
@@ -914,7 +918,7 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 // ofiles ok
 // sfiles ok
 // so: chache .exe date with used ao and lfiles,ofiles,sfiles dates...
-// can imporve now by Younger checking all objects
+// can improve now by Younger checking all objects
 
 	# optionspath				= MakeOptionsName prj_path tp
 	# (dynlstr,ps)				= getCurrentDynl ps
@@ -922,7 +926,7 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 	  with
 		linkfun (ps,ok) linkstr
 			| ok
-				= Link (ltrim linkstr) updateErrorWindow execpath ao
+				= Link (ltrim linkstr) execpath ao
 									optionspath lfiles ofiles sfiles
 									(lo.method == LM_Static)
 									lo.generate_relocations
@@ -932,9 +936,10 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 									(fulPath app_path prj_path` lo.resource_source)
 									lo.generate_dll
 									(fulPath app_path prj_path` lo.dll_export_list_name)
-									startupdir dynlstr tp /*lo.add_carb_resource*/ use_64_bit_processor ps
+									startupdir dynlstr tp use_64_bit_processor ps
 				= (ps,ok)
 	# project					= if ok (PR_SetLinked project) project
+
 	= continue ok False ok fileinfo libsinfo modpaths project intr (abccache, ps)
 where
 	DATEtoDateTime :: !DATE -> DateTime
@@ -972,6 +977,7 @@ where
 step intr DDone ps
 	= stop (DDone,ps)
 
+// 
 currently_compiled :: String [CurrentlyCompiled] -> Bool
 currently_compiled next current
 	= Any (\c -> c.iclModule.mdn_name == next) current
@@ -1517,67 +1523,6 @@ where
 			= []
 		= []
 	
-//-- Link Phase...
-
-MakeOptionsName :: !.String !Processor -> String
-MakeOptionsName path processor
-	= path`+++DirSeparatorString+++"Clean System Files"+++DirSeparatorString+++"_"+++name+++MakeObjPathname processor "_options"
-where
-	path` = RemoveFilename path
-	name  = RemoveSuffix` (RemovePath path)
-
-CheckObjsOutOfDate gen execpath objs ps
-	#	({be_verbose},ps)	= getPrefs ps
-	#	execname			= RemovePath execpath
-	| gen
-		#	lines			= if be_verbose
-									(Level3 ["[" +++ execname +++ ",]: out of date. Linking new executable."])
-								(Level3 [])
-		= (True, verboseInfo be_verbose lines ps)
-	#	(date, ps)			= accFiles (FModified execpath) ps
-	| not date.exists
-		#	lines			= if be_verbose
-									(Level3 ["[" +++ execname +++ ",]: does not exist. Linking new executable."])
-								(Level3 [])
-		= (True, verboseInfo be_verbose lines ps)
-	# (ood,ps) = accFiles (check date objs) ps
-	| ood
-		#	lines			= if be_verbose
-									(Level3 ["[" +++ execname +++ ",]: is older than object files. Linking new executable."])
-								(Level3 [])
-		= (True, verboseInfo be_verbose lines ps)
-	= (False,ps)
-where
-	check date Nil files			= (False,files)
-	check date (hd :! tl) files
-		#	(objDate, files)		= FModified hd files
-		| Older_Date date objDate	= (True,files)
-		= check date tl files
-
-CheckExecOutOfDate :: !Bool !Pathname !FileInfoCache !Project !*GeneralSt -> *(Bool,*GeneralSt)
-CheckExecOutOfDate gen execpath fileinfo project ps
-	| gen
-		= (True,ps)
-	#	({be_verbose},ps)	= getPrefs ps
-	#	execname			= RemovePath execpath
-	| not (PR_ExecUpToDate project)
-		#	lines			= if be_verbose
-								(Level3 ["'" +++ execname +++ "' was linked with different application options"])
-								(Level3 [])
-		= (True, verboseInfo be_verbose lines ps)
-	#	(date, ps)			= accFiles (FModified execpath) ps
-	#	youngest			= YoungestObj NoDate fileinfo
-	#	link				= youngest.exists && (not date.exists || Older_Date date youngest)
-	| link
-		#	lines			= if be_verbose
-								(if date.exists
-									(Level3 ["[" +++ execname +++ ",]: is older than object files. Linking new executable."])
-									(Level3 ["[" +++ execname +++ ",]: does not exist. Linking new executable."])
-									)
-								(Level3 [])
-		= (True, verboseInfo be_verbose lines ps)
-	= (False,ps)
-
 //-- dircache functions
 
 GetPathNames :: !(List String) !(List String) !*DirCache -> (.Bool,List String,!*DirCache)

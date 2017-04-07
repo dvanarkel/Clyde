@@ -11,6 +11,8 @@ import StdOverloaded
 import StdPathname
 //import PmCallBack
 
+import Clyde.Link
+
 :: CompilerProcessIds
 
 ::	CompileOrCheckSyntax	= SyntaxCheck | Compilation
@@ -79,10 +81,10 @@ wait_for_finished_code_generator :: !{#Int} !*GeneralSt -> (!Int,!Int,!*GeneralS
 
 finish_code_generator :: !Int/*HANDLE*/ !StartedCodeGenerator !Int !(WindowFun *GeneralSt) !*GeneralSt -> (!Bool,!*GeneralSt)
 
-Link ::	!String !(WindowFun *GeneralSt) !Pathname !ApplicationOptions
-		!Pathname !(List Pathname) !(List Pathname) !(List Pathname) !Bool !Bool !Bool !Bool !Bool !String
-		!Bool !String !Pathname !String !Processor !Bool !*GeneralSt
-		 -> (!*GeneralSt,!Bool)
+//Link ::	!String !(WindowFun *GeneralSt) !Pathname !ApplicationOptions
+//		!Pathname !(List Pathname) !(List Pathname) !(List Pathname) !Bool !Bool !Bool !Bool !Bool !String
+//		!Bool !String !Pathname !String !Processor !Bool !*GeneralSt
+//		 -> (!*GeneralSt,!Bool)
 
 DelayEventLoop :: !.ps -> .ps
 

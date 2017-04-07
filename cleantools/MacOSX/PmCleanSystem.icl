@@ -12,7 +12,7 @@ from PmCompilerOptions import ::CompilerOptions(..),::ListTypes(..),instance == 
 import PmPath
 //import PmCallBack
 from PmParse import IsTypeSpec,IsImportError20
-from linkargs import ReadLinkErrors,WriteLinkOpts,:: LinkInfo`(..),:: LPathname
+//from linkargs import ReadLinkErrors,WriteLinkOpts,:: LinkInfo`(..),:: LPathname
 
 from Platform import TempDir
 tooltempdir =: TempDir
@@ -342,79 +342,8 @@ finish_code_generator process_handle {scg_abc_path,scg_path_without_suffix,scg_s
 	= (exit_code==0, ps)
 
 from System._Pointer import ::Pointer,packString,derefString
-from System._Posix import getcwd,chdir
+//from System._Posix import getcwd,chdir
 import StdDebug
-Link ::	!String !(WindowFun *GeneralSt) !Pathname !ApplicationOptions
-		!Pathname !(List Pathname) !(List Pathname) !(List Pathname) !Bool !Bool !Bool !Bool !Bool !String
-		!Bool !String !Pathname !String !Processor !Bool !*GeneralSt
-		 -> (!*GeneralSt,!Bool)
-Link linker winfun path
-		applicationOptions=:{ss,hs,initial_heap_size,profiling,heap_size_multiple,o,memoryProfilingMinimumHeapSize=minheap}
-		optionspathname library_file_names object_file_names static_libraries static gen_relocs gen_symbol_table gen_linkmap
-		link_resources resource_path gen_dll dll_syms startupdir dynlstr _ use_64_bit_processor ps
-	# (linker,linkerdir,options)= get_path_name_and_options linker startupdir
-	# flags						= ApplicationOptionsToFlags applicationOptions
-	# optdirpath				= RemoveFilename optionspathname
-	# ((ok,pd_optdirpath),ps)	= pd_StringToPath optdirpath ps
-	| not ok
-		= (winfun ["Linker error: Unable to understand path: "+++optdirpath] ps,False)
-	# ((err,{pi_fileInfo={isDirectory}}),ps) = getFileInfo pd_optdirpath ps
-	  (err,ps) = if (case err of DoesntExist -> True; _ -> not isDirectory)
-					(createDirectory pd_optdirpath ps)
-					(err,ps)
-	| case err of NoDirError -> False; _ -> True
-		= (winfun ["Linker error: Unable to access or create: "+++optdirpath] ps,False)
-	# (options_file_ok,ps)		= accFiles (write_options_file optionspathname flags hs ss initial_heap_size heap_size_multiple minheap use_64_bit_processor) ps
-	| not options_file_ok
-		= (winfun ["Linker error: Could not write the options object file: "+++optionspathname] ps,False)
-	# is_gcc	= linker == "/usr/bin/gcc"
-	# linkopts	=
-		{ exe_path					= path
-		, res_path					= resource_path
-		, open_console				= o <> NoConsole
-		, static_link				= static
-		, gen_relocs				= gen_relocs
-		, gen_symbol_table          = gen_symbol_table
-		, gen_linkmap				= gen_linkmap
-		, link_resources			= link_resources
-		, object_paths				= optionspathname :! (RemoveDup object_file_names)
-	  	, dynamic_libs				= RemoveDup library_file_names
-	  	, static_libs				= RemoveDup static_libraries
-	  	, stack_size				= ss
-		, gen_dll					= gen_dll
-		, dll_names					= dll_syms
-		, dynamics_path				= startupdir +++. DirSeparatorString +++. dynlstr
-		, lib_name_obj_path 		= MakeFullPathname tooltempdir "lib_name.o"
-	  	}
-	# linkoptspath = MakeFullPathname tooltempdir "linkopts"
-	# linkerrspath = MakeFullPathname tooltempdir "linkerrs"
-	# (err,ps) = if is_gcc (Nothing,ps) (accFiles (WriteLinkOpts linkoptspath linkopts) ps)
-	| isJust err
-		= (winfun (fromJust err) ps,False)
-
-	# linker_args = if is_gcc (add_options_string_to_args 0 options ["-o", path: [optionspathname : StrictListToList (RemoveDup object_file_names)]++StrictListToList library_file_names])
-							  ["-I",linkoptspath,"-O",linkerrspath]
-
-	#	res	= accUnsafe (runProcess linker linker_args (Just (optdirpath+++"/..")))
-	| isError res
-		#	(err_code,err_msg)	= fromError res
-		= abort ("Linking failed (exec): ("+++toString err_code+++") "+++err_msg)
-	#	ld_pid		= (fromOk res)
-		res	= accUnsafe (waitForProcess ld_pid)
-	| isError res
-		#	(err_code,err_msg)	= fromError res
-		= abort ("Linking failed (wait): ("+++toString err_code+++") "+++err_msg)
-	# result = fromOk res
-	# link_ok = result>=0
-	//Read link errors
-	# ((err,link_errors),ps) = if is_gcc ((Nothing,[]),ps) (accFiles (ReadLinkErrors linkerrspath) ps)
-	| isJust err
-		= (winfun (fromJust err) ps,False)
-	# (errtext,errlines) = (link_errors, length link_errors)
-	| errlines<>0
-		= (winfun errtext ps,link_ok)
-	=  (ps,link_ok)
-
 DelayEventLoop :: !.ps -> .ps
 DelayEventLoop ps
 	= ps
@@ -782,89 +711,6 @@ where
 		| j >= l = (i,s)
 		# s = update s i h.[j]
 		= sU l (inc i) (inc j) s h
-
-ApplicationOptionsToFlags :: !ApplicationOptions -> Int
-ApplicationOptionsToFlags {sgc,pss,marking_collection,set,o,memoryProfiling,write_stderr_to_file,disable_rts_flags}
-	= showgc+printstacksize+showexectime+cons+marking_collection_mask+memory_profiling_mask+write_stderr_to_file_mask+disable_rts_flags_mask
-where
-	showgc					
-		| sgc	= 2
-				= 0
-	printstacksize			
-		| pss	= 4
-				= 0
-	showexectime 
-		| set	= 8 
-				= 0
-	write_stderr_to_file_mask
-		| write_stderr_to_file	= 128 
-								= 0
-	marking_collection_mask 
-		| marking_collection 	= 64  
-								= 0	
-	memory_profiling_mask
-		| memoryProfiling	= 32  
-							= 0
-	cons
-		= case o of
-			BasicValuesOnly		-> 1
-			ShowConstructors	-> 0
-			NoReturnType		-> 16
-			NoConsole			-> 16
-
-	disable_rts_flags_mask
-		| disable_rts_flags	= 8192
-							= 0
-
-(FWI) infixl
-(FWI) f i :== fwritei i f
-
-write_options_file :: !{#.Char} !.Int !.Int !.Int !.Int !.Int !.Int !Bool !*Files -> *(!Bool,!*Files)
-write_options_file options_file_name flags heap_size stack_size initial_heap_size heap_size_multiple min_write_heap_size use_64_bit_processor files
-	# (opened,file,files) 
-		= fopen options_file_name FWriteData files
-	| not opened
-		= (False,files)
-	#! file = file FWI
-			0xfeedfacf FWI 0x01000007 FWI 0x00000003 FWI 0x00000001 FWI
-			0x00000003 FWI 0x00000150 FWI 0x00000000 FWI 0x00000000 FWI
-			0x00000019 FWI 0x000000e8 FWI 0x00000000 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000000 FWI 0x00000000 FWI 0x00000000 FWI
-			0x00000028 FWI 0x00000000 FWI 0x00000170 FWI 0x00000000 FWI
-			0x00000028 FWI 0x00000000 FWI 0x00000007 FWI 0x00000007 FWI
-			0x00000002 FWI 0x00000000 FWI 0x65745f5f FWI 0x00007478 FWI
-			0x00000000 FWI 0x00000000 FWI 0x45545f5f FWI 0x00005458 FWI
-			0x00000000 FWI 0x00000000 FWI 0x00000000 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000000 FWI 0x00000170 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000000 FWI 0x80000000 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000000 FWI 0x61645f5f FWI 0x00006174 FWI
-			0x00000000 FWI 0x00000000 FWI 0x41445f5f FWI 0x00004154 FWI
-			0x00000000 FWI 0x00000000 FWI 0x00000000 FWI 0x00000000 FWI
-			0x00000028 FWI 0x00000000 FWI 0x00000170 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000000 FWI 0x00000000 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000000 FWI 0x00000002 FWI 0x00000018 FWI
-			0x00000198 FWI 0x00000005 FWI 0x000001e8 FWI 0x0000004c FWI
-			0x0000000b FWI 0x00000050 FWI 0x00000000 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000005 FWI 0x00000005 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000000 FWI 0x00000000 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000000 FWI 0x00000000 FWI 0x00000000 FWI
-			0x00000000 FWI 0x00000000 FWI 0x00000000 FWI 0x00000000 FWI
-			flags FWI 0x00000000 FWI initial_heap_size FWI 0x00000000 FWI
-			heap_size FWI 0x00000000 FWI stack_size FWI 0x00000000 FWI
-			heap_size_multiple FWI 0x00000000 FWI 0x00000026 FWI 0x0000020f FWI
-			0x00000018 FWI 0x00000000 FWI 0x00000001 FWI 0x0000020f FWI
-			0x00000000 FWI 0x00000000 FWI 0x0000001b FWI 0x0000020f FWI
-			0x00000010 FWI 0x00000000 FWI 0x00000035 FWI 0x0000020f FWI
-			0x00000020 FWI 0x00000000 FWI 0x00000008 FWI 0x0000020f FWI
-			0x00000008 FWI 0x00000000 FWI 0x6c665f00 FWI 0x00736761 FWI
-			0x696e695f FWI 0x6c616974 FWI 0x6165685f FWI 0x69735f70 FWI
-			0x5f00657a FWI 0x70616568 FWI 0x7a69735f FWI 0x615f0065 FWI
-			0x74735f62 FWI 0x5f6b6361 FWI 0x657a6973 FWI 0x65685f00 FWI
-			0x735f7061 FWI 0x5f657a69 FWI 0x746c756d FWI 0x656c7069 FWI
-			0x00000000
-	# (close_ok,files) 
-		= fclose file files
-	= (close_ok,files)
 
 ClearCompilerCache :: .a
 ClearCompilerCache = abort "ClearCompilerCache"

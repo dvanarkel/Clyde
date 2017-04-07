@@ -71,5 +71,8 @@ NSTexturedRoundedBezelStyle   = 11
 NSRoundRectBezelStyle         = 12
 NSRecessedBezelStyle          = 13
 NSRoundedDisclosureBezelStyle = 14
-// The inline bezel style contains a solid round-rect border background. It can be used to create an "unread" indicator in an outline view, or another inline button in a tableview, such as a stop progress button in a download panel. Use text for an unread indicator, and a template image for other buttons.
+/* The inline bezel style contains a solid round-rect border background. It can be used to create
+   an "unread" indicator in an outline view, or another inline button in a tableview, such as a
+   stop progress button in a download panel. Use text for an unread indicator, and a template image
+   for other buttons.*/
 NSInlineBezelStyle = 15		// NS_ENUM_AVAILABLE_MAC(10_7) 

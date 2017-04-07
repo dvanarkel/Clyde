@@ -59,7 +59,7 @@ where
 //Ivar object_setInstanceVariable(id obj, const char *name, void *value)
 object_setInstanceVariable :: !ID !CString !Int !*a -> (!Ivar,!*a)
 object_setInstanceVariable obj name value env = code {
-		ccall object_setInstanceVariable "psI:p:A"
+		ccall object_setInstanceVariable "psp:p:A"
 	}
 
 //Ivar object_getInstanceVariable(id obj, const char *name, void **outValue)

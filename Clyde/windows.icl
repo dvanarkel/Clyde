@@ -201,7 +201,6 @@ populateSecondWindow self env
 		env				= msgIP_V view "addSubview:\0" rbut3 env
 
 		env				= msgIP_V wind "setContentView:\0" view env
-
 		(w,env)			= msgI_P wind "becomeFirstResponder\0" env
 ///...
 /*

@@ -20,6 +20,7 @@ appendTypeWindow :: !String !*a -> *a
 doTest :: !Int !Int !Int -> Int
 doHideL :: !Int !Int !Int -> Int
 doHideT :: !Int !Int !Int -> Int
+doGetPath :: !Int !Int !Int -> Int
 
 //
 
