@@ -586,7 +586,10 @@ where
 
 RunProcess :: !String !*GeneralSt -> *GeneralSt
 RunProcess execpath ps=:{gst_world}
-		#!	world				= RunWithRedirect execpath gst_world
+		#!	world				= case True of
+										True	-> LaunchApplication execpath gst_world
+										_		-> RunWithRedirect execpath gst_world	
+//		#!	world				= RunWithRedirect execpath gst_world
 	= {ps & gst_world = world}
 
 RunWithRedirect :: !String !*World -> *World
@@ -606,21 +609,44 @@ RunWithRedirect execpath env
 	= env
 
 import PmProject, PmPath, Clyde.Process, Clyde.Console
+import Clyde.ClydeApplicationController
+// Run should check with project whether to run standalone or with redirected console...
+// for now default to standalone launch
+// http://stackoverflow.com/questions/5048677/launching-an-mac-app-with-objective-c-cocoa
+
+// open in Terminal kind of works... but isn't great
+
+LaunchApplication path env
+	| trace_n ("Enter LaunchApplication... "+++path) False = undef
+	#	(nsws,env)				= msgC_P "NSWorkspace\0" "sharedWorkspace\0" env
+//		(ret,env)				= msgIP_I nsws "launchApplication:\0" (p2ns path) env
+//		(ret,env)				= msgIPPI_I nsws "openFile:withApplication:andDeactivate:\0" (p2ns path) (p2ns "Terminal") YES env
+		(ret,env)				= msgIPPP_P nsws "openFile:withApplication:andDeactivate:\0" (p2ns path) (p2ns "Terminal") YES env
+	| trace_n ("Returned: "+++toString ret) False = undef
+	| ret == 0
+		#	env					= openLogWindow env
+		= appendLogWindow ("failed to launch " +++ path) env
+	= env
 
 Run :: !Int !Int !Int -> Int
 Run self cmd notification
+	| trace_n ("Enter Run...") False = undef
 	#!	env						= newWorld
 		(pathN,env)				= object_getInstanceVariable self "ppath\0" env
 		proj_path				= ns2cls pathN
+	| trace_n ("Path: "+++proj_path) False = undef
 
-		(app_path,env)			= cleanhome env
+	#	(app_path,env)			= cleanhome env
 		((proj,ok,err), env)	= accFiles (ReadProjectFile proj_path app_path) env
 
 		prj_path`				= PR_GetRootDir proj
 		execpath				= PR_GetExecPath proj
 		execpath				= fulPath app_path prj_path` execpath
+	| trace_n ("Exec: "+++execpath) False = undef
 
-		env						= RunWithRedirect execpath env	
+	#	env						= case True of
+									True	-> LaunchApplication execpath env
+									_		-> RunWithRedirect execpath env	
 // gives out/err in Clyde out/err.. (for console apps)
 // runs process as child process, maybe not what we really want?
 	= force env 42

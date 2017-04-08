@@ -57,7 +57,7 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 ## Roadmap ##
 
 ### v0.1 
-- [ ] get `Run` functioning (as well as Build & Run)
+- [x] get `Run` functioning (as well as Build & Run)
 - [x] figure out if code signing required
 - [x] get `Build` functioning
 - [x] cleanup Project menu
@@ -71,17 +71,19 @@ Where the filter is triggered as the `.gitattributes` has been modified to inclu
 - [x] add line numbers
 - [x] paste styled text as plain (for Paste command from main menu)
 - [x] jump to line... (should be easy with added NSTextView++)
-- [ ] override [shouldRunSavePanelWithAccessoryView](https://developer.apple.com/library/content/documentation/DataManagement/Conceptual/DocBasedAppProgrammingGuideForOSX/AdvancedTopics/AdvancedTopics.html)  to return NO 
 
 ### v0.2 
 - [ ] update project window after build
-- [ ] error, message and type windows for build output
 - [ ] save all before Build
+- [ ] edit project options
+- [ ] console redirection for launched processes
+- [ ] distinguish console vs standalone apps for launch
 - [ ] paste styled text as plain (e.g. when drag 'n drop text into IDE window)
+- [ ] still some paste issues for styled text (NS substring out of range.. so looks like an issue with syntax colouring)
 - [ ] New should allow you to choose prj/dcl/icl/txt
 - [ ] after first save it appears later edit's do not immediately mark file as dirty
 - [ ] shift-doubleclick doesn't have desired effect in project window (should open definition module)
-- [ ] edit project options
+- [x] error, message and type windows for build output
 - [x] column sizes & resizing in project window
 
 
