@@ -4,6 +4,8 @@ import Data.Maybe, Data.Either
 import System.OSError, System.FilePath
 from System._Posix import exit
 
+// modified copy of System.Process where we try to get std file descriptor redirection working...
+
 /*
 Not yet implemented:
 => - Pass startup directory
@@ -50,3 +52,4 @@ callProcess :: !FilePath ![String] !(Maybe String) !*World -> (MaybeOSError Int,
 // as above but with potential redirect of stdout & stderr to passed file descriptors
 runProcessWithRedirect :: !FilePath ![String] !(Maybe String) !(Maybe Int) !(Maybe Int) !(Maybe Int) !*World -> (MaybeOSError ProcessHandle, *World)
 waitForAnyChild :: !{#Int} !*World -> (!(!Int,!MaybeOSError Int),!*World)
+ 

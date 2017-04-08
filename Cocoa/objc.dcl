@@ -12,6 +12,7 @@ from System._Pointer import :: Pointer
 :: NSString	:== Pointer
 :: Ivar		:== Pointer
 :: BOOL		:== Int		// Int or can we convert straight to Bool???
+:: VOID		:== Int		// type for void returns...
 
 YES						:== 1
 NO						:== 0

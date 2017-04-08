@@ -6,7 +6,7 @@ import UtilOptions
 import UtilStrictLists
 import PmPath
 import StdMaybe
-import Platform
+//import Platform
 import PmTypes
 
 EnvsFileName :== "IDEEnvs"
@@ -188,9 +188,9 @@ t_StdEnv20 =
 		( "{Application}\\Libraries\\StdEnv"
 		:! Nil
 		)
-	, target_libs	= PlatformDependant
+	, target_libs	= //PlatformDependant
 		( Nil )	// Win
-		( Nil )	// Mac
+	//	( Nil )	// Mac
 	, target_objs	= Nil
 	, target_stat	= Nil
 	, target_comp	= "Tools\\Clean System\\CleanCompiler.exe"

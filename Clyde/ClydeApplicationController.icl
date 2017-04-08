@@ -59,7 +59,7 @@ imp_orderFrontStandardAboutPanel = code {
 		pushLc orderFrontStandardAboutPanel
 	}
 
-orderFrontStandardAboutPanel :: !Int !Int !Int -> Int
+orderFrontStandardAboutPanel :: !ID !SEL !ID -> BOOL
 orderFrontStandardAboutPanel self cmd arg
 	| trace_n ("entering orderFrontStandardAboutPanel") False = undef
 	#!	env			= newWorld
@@ -95,21 +95,7 @@ initAppDelegate app world
 
 createAppDelegate :: !*World -> *World
 createAppDelegate world
-/*
-		(sel,world)		= sel_getUid "build:\0" world
-		(ok,world)		= class_addMethod adc sel impBuild "v@:@\0" world		// lying about return type here...
-
-		(sel,world)		= sel_getUid "buildAndRun:\0" world
-		(ok,world)		= class_addMethod adc sel impBuildAndRun "v@:@\0" world		// lying about return type here...
-
-		(sel,world)		= sel_getUid "run:\0" world
-		(ok,world)		= class_addMethod adc sel impRun "v@:@\0" world		// lying about return type here...
-
-		(sel,world)		= sel_getUid "project:\0" world
-		(ok,world)		= class_addMethod adc sel imp_project "v@:@\0" world		// lying about return type here...
-*/
 	#!	world			= force startTime world		// capture process start...
-//		world			= createClass` "NSObject" "AppDelegate" appDelegateMethods world
 		world			= createClass "NSObject" "AppDelegate" appDelegateMethods [] world
 	= world
 
@@ -156,11 +142,11 @@ impHideL = code {
 foreign export doHideT
 foreign export doHideL
 
-doHideL :: !Int !Int !Int -> Int
+doHideL :: !ID !SEL !ID -> BOOL
 doHideL self cmd notification
 	= force (doHide mylogwindow newWorld) NO
 
-doHideT :: !Int !Int !Int -> Int
+doHideT :: !ID !SEL !ID -> BOOL
 doHideT self cmd notification
 	= force (doHide mytypwindow newWorld) NO
 
@@ -226,7 +212,7 @@ imp_should = code {
 
 foreign export shouldOpenUntitledFile
 
-shouldOpenUntitledFile :: !Int !Int !Int -> Int
+shouldOpenUntitledFile :: !ID !SEL !ID -> BOOL
 shouldOpenUntitledFile self cmd notification
 	= NO
 
@@ -239,7 +225,7 @@ impAppDelLogWindows = code {
 			pushLc 	AppDelLogWindows
 		}
 
-AppDelLogWindows :: !Int !Int !Int -> Int
+AppDelLogWindows :: !ID !SEL !ID -> BOOL
 AppDelLogWindows self cmd notification
 	| traceMsg "AppDelLogWindows" self cmd notification	= undef
 	#!	(ret,world)		= callback newWorld
@@ -250,7 +236,7 @@ where
 		#!	(app,env) 		= sharedApplication env
 			(windows,env)	= msgI_P app "windows\0" env
 			(count,env)		= count windows env
-			env	= trace_n ("# windows\t"+++toString count) env
+			env				= trace_n ("# windows\t"+++toString count) env
 			env				= logwindows 0 count windows env
 		= (0,env)
 	
@@ -269,10 +255,10 @@ logwindows index count windows env
 	| trace_n ("\t"+++rect2string frame) False = undef
 	#!	(content,env)		= msgI_P window "contentView\0" env
 		(frame,env)			= msgI_P content "superview\0" env
-	| trace_n ("frame\t"+++toString frame) False = undef
+	| trace_n ("frame\t"+++ hex64 frame) False = undef
 	| trace_n ("frame\t"+++object_getClassName frame) False = undef
 	#!	env					= logviews 2 frame env
-	| trace_n ("\t"+++toString content) False = undef
+	| trace_n ("\t"+++ hex64 content) False = undef
 	| trace_n ("\t"+++object_getClassName content) False = undef
 	#!	env					= logviews 2 content env
 	= logwindows (inc index) count windows env
@@ -296,7 +282,7 @@ where
 		| index >= count
 			= env
 		#!	(view,env)		= objectAtIndex subs index env
-		| trace_n (indent +++. "# "+++. toString index +++. "\t" +++ toString view) False = undef
+		| trace_n (indent +++. "# "+++. toString index +++. "\t" +++ hex64 view) False = undef
 		#!	env		= logviews (inc nest) view env
 		= logsubs (inc index) count subs env
 
@@ -317,8 +303,7 @@ impAppDelDidFinishLaunching = code {
 		pushLc 	AppDelDidFinishLaunching
 	}
 
-//AppDelDidFinishLaunching :: !ID !SEL !ID -> BOOL
-AppDelDidFinishLaunching :: !Int !Int !Int -> Int
+AppDelDidFinishLaunching :: !ID !SEL !ID -> BOOL
 AppDelDidFinishLaunching self cmd notification
 	| traceMsg "AppDelDidFinishLaunching" self cmd notification	= undef
 	#!	(ret,world)		= callback newWorld
@@ -326,17 +311,7 @@ AppDelDidFinishLaunching self cmd notification
 where
 	callback :: !*World -> (!Int,!*World)
 	callback env
-//		#!	env				= populateMainMenu env
-//			env				= trace_n "populateMainMenu done" env
-/*		#!	env				= populateWindow self env
-			env				= trace_n "populateWindow done" env
-			env				= populateSecondWindow self env
-			env				= trace_n "populateSecondWindow done" env
-			env				= populateThirdWindow self env
-			env				= trace_n "populateThirdWindow done" env
-			env				= populateFourthWindow self env
-			env				= trace_n "populateFourthWindow done" env
-*/		= (1,env)	// YES
+		= (YES,env)
 
 
 // test:
@@ -345,8 +320,6 @@ import Clyde.controls
 import Cocoa.layout
 import Cocoa.tabview
 import Cocoa.toolbar
-//from stringutil import hex32, hex64
-//import Cocoa.Foundation
 
 impTest :: IMP
 impTest = code {
@@ -355,7 +328,7 @@ impTest = code {
 
 foreign export doTest
 
-doTest :: !Int !Int !Int -> Int
+doTest :: !ID !SEL !ID -> BOOL
 doTest self cmd notification
 	| traceMsg "doTest" self cmd notification	= undef
 	#!	(ret,world)		= testWind self newWorld
@@ -515,7 +488,7 @@ impGetPath = code {
 
 foreign export doGetPath
 
-doGetPath :: !Int !Int !Int -> Int
+doGetPath :: !ID !SEL !ID -> BOOL
 doGetPath self cmd notification
 	| traceMsg "doGetPath" self cmd notification	= undef
 	#!	(ret,world)		= getPath self newWorld

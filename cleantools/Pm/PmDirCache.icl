@@ -7,7 +7,10 @@ from StdLibMisc import :: Date{..}, :: Time{..}
 import Directory
 
 import UtilStrictLists, PmPath, UtilIO
-import Platform
+//import Platform
+
+DirSeparator :== '/'
+DirSeparatorString :== "/"
 
 :: DirCacheElem :== (String,String,DateTime) // module name, module path, module modified
 
@@ -72,9 +75,9 @@ where
 		= (errs,cache,files)
 
 	//winfix :: renames root directories
-	winfix s = PlatformDependant
+	winfix s = //PlatformDependant
 		(/*Win*/ if (size s > 0 && s.[size s - 1] == ':') (s +++. "\\") (s))
-		(/*Mac*/ if (findPos ':' s 0 == ~1) (s +++. ":") (s))
+//		(/*Mac*/ if (findPos ':' s 0 == ~1) (s +++. ":") (s))
 
 	findPos c s i
 		| i >= size s = ~1

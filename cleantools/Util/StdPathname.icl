@@ -1,14 +1,16 @@
 implementation module StdPathname
 
 import StdArray, StdBool, StdChar, StdClass, StdInt, StdString, StdList
-import Platform
+//import Platform
 
 ::	Pathname			:== String
 
 EmptyPathname	:== ""
+DirSeparator	:== '/'
+DirSeparatorString:=="/"
 
 quoted_string :: !String -> String
-quoted_string s = PlatformDependant (win_quoted_string s) (mac_quoted_string s)
+quoted_string s = win_quoted_string s	//PlatformDependant (win_quoted_string s) (mac_quoted_string s)
 
 win_quoted_string :: !String -> String
 win_quoted_string string = "\"" +++ string +++ "\""

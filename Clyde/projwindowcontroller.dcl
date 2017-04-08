@@ -2,8 +2,8 @@ definition module Clyde.projwindowcontroller
 
 from Cocoa.objc import :: Pointer
 
-makeProjWindowControllerClass :: !*a -> *a
-makeProjWindowController :: !Pointer !*World -> (!Pointer,!*World)
+makeProjWindowControllerClass :: !*a -> *a					// create class ProjWindowController
+makeProjWindowController :: !*World -> (!Pointer,!*World)	// create and init instance of ProjWindowController
 
 // exported for foreign export
 cbHandlerPPPPP_P :: !Pointer !Pointer !Pointer !Pointer -> Int

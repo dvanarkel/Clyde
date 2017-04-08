@@ -1,12 +1,16 @@
 implementation module Clyde.Console
 
-import StdEnv
+import StdEnv, StdMaybe
 import System._Unsafe
+import Cocoa.dyncall
 import Cocoa.objc
 import Cocoa.msg
 import Cocoa.Foundation
 import Clyde.textdocument
 import Clyde.textwindowcontroller
+import Clyde.Process
+
+import StdDebug 
 
 /*
  * build the window controller.. 
@@ -52,7 +56,6 @@ consoleWindow env
 	| trace_n ("w: "+++toString w) False = undef
 	| trace_n ("c: "+++toString c) False = undef
 	#!	env	= msgI_V wctrl "retain\0" env
-//		env
 	= (wind,env)
 
 NSWindowCloseButton	:== 0
@@ -89,7 +92,7 @@ impKeyDown = code {
 
 foreign export keyDown
 
-keyDown :: !Int !Int !Int -> Int
+keyDown :: !ID !SEL !ID -> BOOL
 keyDown self cmd event
 	| trace_n "keyDown:" False = undef
 	#!	env				= newWorld
@@ -107,7 +110,7 @@ impDidRead = code {
 
 foreign export didRead
 
-didRead :: !Int !Int !Int -> Int
+didRead :: !ID !SEL !ID -> BOOL
 didRead self cmd noty
 	| trace_n "didRead:" False = undef
 	#!	env				= newWorld
@@ -132,13 +135,9 @@ didRead self cmd noty
 		env				= msgI_V obj "readInBackgroundAndNotify\0" env
 	= force env NO
 
-import Cocoa.dyncall
 NSFileHandleNotificationDataItem :: Int
 NSFileHandleNotificationDataItem
 	=: dlsym -2 "NSFileHandleNotificationDataItem\0"
-//	= code {
-//		pushLc NSFileHandleNotificationDataItem
-//	}
 
 NSFileHandleReadCompletionNotification :: Int
 NSFileHandleReadCompletionNotification
@@ -146,9 +145,6 @@ NSFileHandleReadCompletionNotification
 NSFileHandleReadCompletionNotification` :: Int
 NSFileHandleReadCompletionNotification`
 	=: dlsym -2 "NSFileHandleReadCompletionNotification\0"
-//	= code {
-//		pushLc NSFileHandleReadCompletionNotification
-//	}
 
 NSUTF8StringEncoding :== 4
 
@@ -159,7 +155,7 @@ impHideC = code {
 
 foreign export doHideC
 
-doHideC :: !Int !Int !Int -> Int
+doHideC :: !ID !SEL !ID -> BOOL
 doHideC self cmd notification
 	| trace_n "doHideC" False = undef
 	#!	env				= newWorld
@@ -175,7 +171,6 @@ doHideC self cmd notification
 
     [[pty_ masterFileHandle] readInBackgroundAndNotify];
 */
-import StdDebug, StdMaybe, Clyde.Process
 openConsoleWindow :: !String !*World -> *World
 openConsoleWindow execpath env
 	#!	(wctrl,env)		= msgI_P myconwindow "windowController\0" env

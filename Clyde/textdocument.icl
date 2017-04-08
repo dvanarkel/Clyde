@@ -15,7 +15,6 @@ createTextDocument :: !*a -> *a
 
 createTextDocument env
 	= createClass "NSDocument" "TextDocument" textDocumentMethods textDocumentIvars env
-//	= createClass` "NSDocument" "TextDocument" textDocumentMethods env
 
 textDocumentMethods =
 	[ ("readFromURL:ofType:error:",				exportedCBHandler2,				"i@:@@@\0")
@@ -28,42 +27,7 @@ textDocumentMethods =
 	]
 textDocumentIvars =
 	[ ("contentString",		8,	3,	"@\0")
-//	[
 	]
-/*
-createTextDocument env
-	| trace_n ("createTextDocument") False = undef
-	#!	(cls,env)		= objc_getClass "NSDocument\0" env
-		(adc,env)		= objc_allocateClassPair cls "TextDocument\0" 0 env
-
-	#!	(sel,env)		= sel_getUid "readFromURL:ofType:error:\0" env
-//	#!	(ok,env)		= class_addMethod adc sel imp_readFromURL_ofType_error "i@:@@@\0" env
-	#!	(ok,env)		= class_addMethod adc sel exportedCBHandler2 "i@:@@@\0" env
-
-	#!	(sel,env)		= sel_getUid "writeToURL:ofType:error:\0" env
-//	#!	(ok,env)		= class_addMethod adc sel imp_writeToURL_ofType_error "i@:@@@\0" env
-	#!	(ok,env)		= class_addMethod adc sel exportedCBHandler3 "i@:@@@\0" env
-
-	#!	(sel,env)		= sel_getUid "init\0" env
-	#!	(ok,env)		= class_addMethod adc sel imp_init "@@:\0" env
-
-	#!	(sel,env)		= sel_getUid "dealloc\0" env
-	#!	(ok,env)		= class_addMethod adc sel imp_dealloc "i@:\0" env
-
-	#!	(sel,env)		= sel_getUid "makeWindowControllers\0" env
-	#!	(ok,env)		= class_addMethod adc sel imp_makeWindowControllers "i@:@\0" env
-
-	#!	(sel,env)		= sel_getUid "_shouldShowAutosaveButtonForWindow\0" env
-	#!	(ok,env)		= class_addMethod adc sel imp_shouldShow "i@:@\0" env
-
-// create the ivar for storing the document content..
-//	#!	(ok,env)		= class_addIvar adc "contentString\0" size alignment types env
-	#!	(ok,env)		= class_addIvar adc "contentString\0" 8 3 "@\0" env
-
-	#!	env				= objc_registerClassPair adc env
-	| trace_n ("exit createTextDocument") False = undef
-	= env
-*/
 
 /*
 char *texPosEncoding = @encode(UITextPosition);
@@ -479,15 +443,6 @@ textStorageDidProcess = ("textStorageDidProcessEditing:", imp_textStorageDidProc
 
 foreign export textStorageDidProcessEditing
 
-addSyncolDelegate :: !Int !*a -> *a
-addSyncolDelegate adc env
-	#!	(sel,env)		= sel_getUid "textStorageDidProcessEditing:\0" env
-	| trace_n ("createTextDocument, selector = "+++toString sel) False = undef
-	#!	(ok,env)		= class_addMethod adc sel imp_textStorageDidProcessEditing "v@:@\0" env
-//	#!	(ok,env)		= class_addMethod adc sel imp_textStorageDidProcessEditing "i@:{s=q,l=q}\0" env
-	| trace_n ("createTextDocument, added = "+++toString ok) False = undef
-	= env
-
 imp_textStorageDidProcessEditing :: Int
 imp_textStorageDidProcessEditing = code {
 		pushLc textStorageDidProcessEditing
@@ -495,30 +450,18 @@ imp_textStorageDidProcessEditing = code {
 
 textStorageDidProcessEditing :: !Int !Int !Int -> Int
 textStorageDidProcessEditing self cmd notification
-//	| trace_n ("textStorageDidProcessEditing called") False = undef
-//	| trace_n ("self class: "+++object_getClassName self) False = undef
 	#!	env				= newWorld
 		(storage,env)	= msgI_P notification "object\0" env
-
 		env				= msgI_V storage "retain\0" env
-
 		(nsstring,env)	= msgI_P storage "string\0" env
-
 		env				= msgI_V nsstring "retain\0" env
-
 		(n,env)			= msgI_I nsstring "length\0" env
-		
-//		env = trace_n ("storage class: "+++object_getClassName storage) env
-//		env = trace_n ("nsstring class: "+++object_getClassName nsstring) env
-		
 //		env				= msgIII_V storage "removeAttribute:range:\0" 
 // lie about message type..
 	#!	string			= ns2cls nsstring
 		(idcs,lines)	= unzip (toLines 0 0 0 0 string)
 	| length lines <> length (toLines` 0 0 string)
 		= abort "\ntoLines messing up linecount\n\n"
-//	#!	info			= slToList (firstParse (slFromList lines))
-//		astrings		= map string2attribString info
 	#!	astrings		= attributeStrings lines
 		env = trace_n ("string length "+++toString (size string)) env
 	#!	(_,env)			= remForeground storage 0 n env
@@ -692,9 +635,6 @@ debugSubstring storage location length env
 
 
 NSForegroundColorAttributeName =: p2ns "NSColor"
-//NSForegroundColorAttributeName =: dlsym (-2) "NSForegroundColorAttributeName\0"
-
-//		(col,env)		= msgCRRRR_P "NSColor\0" "colorWithCalibratedRed:green:blue:alpha:\0" 1.0 1.0 (215.0/255.0) 1.0 env
 
 style2col :: !Style -> Pointer
 style2col s
@@ -707,7 +647,6 @@ style2col s
 		Typedef		-> typedefColour
 		Typedecl	-> typedeclColour
 
-//toString :: !Style -> String
 instance toString Style where
 	toString s
 		= case s of

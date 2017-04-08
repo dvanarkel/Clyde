@@ -81,5 +81,5 @@ getInteract  :: !*GeneralSt -> (!Bool,!*GeneralSt)
 //-- log functions for batch build
 
 writeLog :: !String !*GeneralSt -> *GeneralSt
-abortLog :: !Bool !String !*GeneralSt -> *GeneralSt
+//abortLog :: !Bool !String !*GeneralSt -> *GeneralSt
 closeLog :: !*GeneralSt -> *GeneralSt

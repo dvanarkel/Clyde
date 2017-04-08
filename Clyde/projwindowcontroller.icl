@@ -122,7 +122,6 @@ outlineViewIsItemExpandable self cmd ov item
 	
 outlineViewChildOfItem :: !Int !Int !Int !Int !Int -> Int
 outlineViewChildOfItem self cmd ov child item
-//	= lookChild child item
 	#!	item	= zeroToRoot ov item
 	| item == 0
 		= 0
@@ -212,8 +211,8 @@ addrcbHandlerPPPPP_P = code {
 
 import Clyde.windows
 
-makeProjWindowController :: !Pointer !*World -> (!Pointer,!*World)
-makeProjWindowController document env
+makeProjWindowController :: !*World -> (!Pointer,!*World)
+makeProjWindowController env
 	#!	(wind,env)		= msgC_P "NSWindow\0" "alloc\0" env
 		rect			= cgRect 0.0 0.0 1024.0 460.0			// TODO: need to free...
 		style			= NSTitledWindowMask + NSClosableWindowMask + NSResizableWindowMask + NSMiniaturizableWindowMask

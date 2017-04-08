@@ -19,6 +19,7 @@ tableViewControllerMethods =
 	]
 
 // excised from application delegate...
+/*
 createTableViewController :: !Pointer !*World -> *World
 createTableViewController adc world
 	#!	(sel,world)		= sel_getUid "numberOfRowsInTableView:\0" world
@@ -41,7 +42,6 @@ createTableViewController adc world
 		(sel,world)		= sel_getUid "tableView:shouldSelectRow:\0" world
 		imp				= imp_tableView_shouldSelectRow
 		(ok,world)		= class_addMethod adc sel imp "i@:@i\0" world		// lying about return type here...
-		
 	= world
 	
 createPLView :: !Pointer !Pointer !*a -> *a
@@ -119,7 +119,7 @@ addTableColumn table col_identifier col_label env
 //		env				= msgIR_V tcol "setWidth:\0" 200.0 env				// can we set a min width that propagates upwards?
 		env				= msgIP_V table "addTableColumn:\0" tcol env
 	= env
-
+*/
 
 foreign export tableView_isGroupRow 
 

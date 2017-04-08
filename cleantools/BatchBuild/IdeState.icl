@@ -236,7 +236,7 @@ writeLog :: !String !*GeneralSt -> *GeneralSt
 writeLog message ps
 	#!	ps	= appendLogWindow message ps
 	= appPLoc (\ls=:{logfile} -> {ls & logfile = writeLogfile message logfile}) ps
-
+/*
 abortLog :: !Bool !String !*GeneralSt -> *GeneralSt
 abortLog flag message ps
 	# ps		= case message of
@@ -251,7 +251,7 @@ abortLog flag message ps
 		True	-> app_world_instead_of_ps (set_return_code_world (-1)) ps
 		_		-> ps
 	= {ps & gst_continue_or_stop=True}
-
+*/
 closeLog :: !*GeneralSt -> *GeneralSt
 closeLog ps
 	# (lf,ps)	= accPLoc (\ls=:{logfile} -> (logfile,{ls & logfile = stderr})) ps

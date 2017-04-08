@@ -57,7 +57,7 @@ imp_init = code {
 	
 foreign export initProjDocument
 
-initProjDocument :: !Int !Int -> Int
+initProjDocument :: !ID !SEL -> VOID
 initProjDocument self cmd
 	| trace_n ("entering "+++object_getClassName self+++"\t"+++sel_getName cmd) False = undef
 //	#!	(sel,_)	= sel_getUid "init\0" newWorld
@@ -220,10 +220,10 @@ imp_makeWindowControllers = code {
 		pushLc makeProjWindowControllers
 	}
 
-makeProjWindowControllers :: !Int !Int -> Int
+makeProjWindowControllers :: !ID !SEL -> VOID
 makeProjWindowControllers self cmd
 	#!	world				= newWorld
-		(wctrl,world)		= makeProjWindowController self world
+		(wctrl,world)		= makeProjWindowController world
 		world				= msgIP_V self "addWindowController:\0" wctrl world
 	= force world 42
 
@@ -552,7 +552,7 @@ foreign export BuildAndRun
 foreign export Run
 import IdeState, messwin
 
-Build :: !Int !Int !Int -> Int
+Build :: !ID !SEL !ID -> BOOL
 Build self cmd notification
 	#!	env						= newWorld
 		(pathN,env)				= object_getInstanceVariable self "ppath\0" env
@@ -568,7 +568,7 @@ where
 
 //REFRESH PROJECT WINDOW AFTER BUILD
 
-BuildAndRun :: !Int !Int !Int -> Int
+BuildAndRun :: !ID !SEL !ID -> BOOL
 BuildAndRun self cmd notification
 	#!	env						= newWorld
 //	#!	(ret,env)				= buildAndRun env
@@ -628,7 +628,7 @@ LaunchApplication path env
 		= appendLogWindow ("failed to launch " +++ path) env
 	= env
 
-Run :: !Int !Int !Int -> Int
+Run :: !ID !SEL !ID -> BOOL
 Run self cmd notification
 	| trace_n ("Enter Run...") False = undef
 	#!	env						= newWorld

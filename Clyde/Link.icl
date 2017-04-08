@@ -4,10 +4,10 @@ import StdEnv
 import System.FilePath
 import Clyde.Process
 
-from IdeState		import :: GeneralSt(..), :: General, getPrefs, :: Prefs(..), instance FileEnv GeneralSt, instance FileSystem GeneralSt
+from IdeState			import :: GeneralSt(..), :: General, getPrefs, :: Prefs(..), instance FileEnv GeneralSt, instance FileSystem GeneralSt
 from PmCompilerOptions	import :: CompilerOptions
-from PmProject	import :: Project
-from PmTypes		import :: ApplicationOptions(..), :: Output(..), :: Processor
+from PmProject			import :: Project
+from PmTypes			import :: ApplicationOptions(..), :: Output(..), :: Processor
 
 from PmProject	import PR_ExecUpToDate
 
@@ -17,7 +17,7 @@ from UtilIO		import FModified
 import UtilDate
 
 from errwin		import updateErrorWindow
-from messwin		import showInfo, :: InfoMessage(..)
+from messwin	import showInfo, :: InfoMessage(..)
 
 Link ::	!String !Path !ApplicationOptions
 		!Path ![!Path!] ![!Path!] ![!Path!] !Bool !Bool !Bool !Bool !Bool !String

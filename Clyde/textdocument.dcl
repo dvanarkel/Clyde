@@ -7,9 +7,9 @@ https://github.com/MrNoodle/NoodleKit/blob/master/NoodleLineNumberView.m
 
 from Cocoa.objc import :: Pointer
 
-createTextDocument :: !*a -> *a
-addSyncolDelegate :: !Int !*a -> *a
-setMyParagraphStyle :: !Int !Int !*a -> *a
+createTextDocument :: !*a -> *a					// create class TextDocument
+textStorageDidProcess :: (!String,!Int,!String)	// implementation for textStorageDidProcessEditing:
+setMyParagraphStyle :: !Int !Int !*a -> *a		// 
 
 
 // exports for foreign callbacks
@@ -23,4 +23,3 @@ makeWindowControllers :: !Int !Int -> Int
 textStorageDidProcessEditing :: !Int !Int !Int -> Int
 shouldShow :: !Int !Int !Int -> Int
 
-textStorageDidProcess :: (!String,!Int,!String)

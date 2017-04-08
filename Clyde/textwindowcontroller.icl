@@ -23,26 +23,8 @@ populateTextWindow self type env
 
 		env				= msgIP_V wind "setTitle:\0" (c2ns "My Third Window\0") env
 
-		env				= createTextView2 self wind colour env
-
-//		env				= msgI_V wind "retain\0" env
-	= (wind,env)
-where
-	colour	= case type of
-				"Clean implementation module"	-> (1.0, 1.0, v, 1.0)
-				"nl.ru.clean.implementation"	-> (1.0, 1.0, v, 1.0)
-				"Clean definition module"		-> (1.0, v, v, 1.0)
-				"nl.ru.clean.definition"		-> (1.0, v, v, 1.0)
-				_								-> (1.0, 1.0, 1.0, 1.0)
-	v		= 215.0/255.0
-	
-FLT_MAX			= 8888888888888.0 * 8888888888888.0 * 8888888888888.0 * 8888888888888.0
-
-createTextView2 :: !Pointer !Pointer !(!Real,!Real,!Real,!Real) !*a -> *a
-createTextView2 delegate window (r,g,b,a) env
 	// create scroller
-	#!	
-
+	#!	(r,g,b,a)		= colour
 		//(bounds,env)	= getBounds container env
 		bounds			= cgRect 0.0 0.0 1024.0 460.0			// TODO: need to free...
 		
@@ -135,11 +117,22 @@ createTextView2 delegate window (r,g,b,a) env
 		env				= msgII_V tcont "setWidthTracksTextView:\0" NO env
 // add app delegate to text storage for syntax colouring...
 		(stor,env)		= msgI_P textv "textStorage\0" env
-		env				= msgIP_V stor "setDelegate:\0" delegate env
+		env				= msgIP_V stor "setDelegate:\0" self env
 	// assemble the pieces
 		env				= msgIP_V scroll "setDocumentView:\0" textv env
-		env				= msgIP_V window "setContentView:\0" scroll env
-		(cview,env)		= msgI_P window "contentView\0" env
+		env				= msgIP_V wind "setContentView:\0" scroll env
+		(cview,env)		= msgI_P wind "contentView\0" env
 		env				= setShowsLineNumbers textv True env
 	| trace_n ("created textview '"+++toString textv+++"'") False = undef
-	= env
+//		env				= msgI_V wind "retain\0" env
+	= (wind,env)
+where
+	colour	= case type of
+				"Clean implementation module"	-> (1.0, 1.0, v, 1.0)
+				"nl.ru.clean.implementation"	-> (1.0, 1.0, v, 1.0)
+				"Clean definition module"		-> (1.0, v, v, 1.0)
+				"nl.ru.clean.definition"		-> (1.0, v, v, 1.0)
+				_								-> (1.0, 1.0, 1.0, 1.0)
+	v		= 215.0/255.0
+	
+FLT_MAX			= 8888888888888.0 * 8888888888888.0 * 8888888888888.0 * 8888888888888.0

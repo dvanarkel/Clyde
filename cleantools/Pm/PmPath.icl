@@ -4,12 +4,13 @@ import StdClass,StdString, StdChar, StdBool, StdChar,StdInt, StdMisc,StdArray;
 import StdPathname
 
 import PmTypes
-import Platform
+//import Platform
 import UtilStrictLists
 
 /* The name of the system directory */
 SystemDir			:== "Clean System Files";
-
+DirSeparator		:== '/'
+DirSeparatorString	:== "/"
 //--
 
 IsDefPathname :: !Pathname -> Bool;
@@ -42,8 +43,8 @@ MakeProjectPathname name = RemoveSuffix name   +++ ".prj";
 
 MakeExecPathname :: !String -> Pathname;
 MakeExecPathname name
-	= PlatformDependant
-		(RemoveSuffix name+++".exe")	// Win
+	= //PlatformDependant
+		//(RemoveSuffix name+++".exe")	// Win
 		(RemoveSuffix name)				// Mac
 
 MakeSystemPathname :: !Pathname -> Pathname;
@@ -134,9 +135,9 @@ where
 		dir		= RemoveFilename abcname;
 		sep		= toString DirSeparator;
 		file	= RemovePath (RemoveSuffix abcname);
-		suffix	= PlatformDependant
+		suffix	= //PlatformDependant
 					".s"	// Win
-					".a"	// Mac
+					//".a"	// Mac
 
 GetModuleName :: !Pathname -> Modulename;
 GetModuleName name =  RemoveSuffix (RemovePath name);

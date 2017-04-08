@@ -7,8 +7,9 @@ import Cocoa.objc
 // - read/write content
 // - window controllers
 
-createProjDocumentClass :: !*a -> *a
+createProjDocumentClass :: !*a -> *a		// create class ProjDocument and MyElement
 
+// accessors for MyElement instances
 lookStr :: !Pointer -> Pointer
 lookPth :: !Pointer -> Pointer
 lookIsGroup :: !Pointer -> Bool
@@ -16,25 +17,17 @@ lookNumChildren :: !Pointer -> Pointer
 lookChild :: !Int !Pointer -> Pointer
 
 // exports for foreign callbacks
-initProjDocument :: !Int !Int -> Int
-readProjFromURL :: !Pointer !Pointer !Pointer !Pointer -> Int
-writeProjToURL :: !Pointer !Pointer !Pointer !Pointer -> Int
-makeProjWindowControllers :: !Int !Int -> Int
+initProjDocument			:: !ID !SEL -> VOID
+readProjFromURL				:: !Pointer !Pointer !Pointer !Pointer -> Int
+writeProjToURL				:: !Pointer !Pointer !Pointer !Pointer -> Int
+makeProjWindowControllers	:: !ID !SEL -> VOID
 
-Build :: !Int !Int !Int -> Int
-BuildAndRun :: !Int !Int !Int -> Int
-Run :: !Int !Int !Int -> Int
-
-/*
-project :: !Int !Int !Int -> Int
-*/
-
-
+Build		:: !ID !SEL !ID -> BOOL
+BuildAndRun	:: !ID !SEL !ID -> BOOL
+Run			:: !ID !SEL !ID -> BOOL
 
 /*
  * store project in document
  * move project actions to projectdocument
  * move outlineview setup to projwindowcontroller
-
-
 */

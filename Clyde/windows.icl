@@ -1,5 +1,30 @@
 implementation module Clyde.windows
 
+from Cocoa.objc import YES, NO
+import Cocoa.msg
+
+import code from "NSWindow+DvA.o"
+//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NSWindow+DvA.o NSWindow+DvA.m 
+
+cascade :: !Pointer !*a -> *a
+cascade wind env
+	= code {
+		ccall doCascade "p:V:A"
+	}
+
+////// Line Numbers
+import code from "NoodleLineNumberMarker.o"
+import code from "NoodleLineNumberView.o"
+import code from "NSTextView+JSDExtensions.o"
+//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NoodleLineNumberMarker.o NoodleLineNumberMarker.m 
+//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NoodleLineNumberView.o NoodleLineNumberView.m 
+//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NSTextView+JSDExtensions.o NSTextView+JSDExtensions.m 
+
+setShowsLineNumbers :: !Pointer !Bool !* a -> *a
+setShowsLineNumbers textv show env
+	= msgII_V textv "setShowsLineNumbers:" (if show YES NO) env			// from Noodle & NSTextView+JSDExtensions...
+
+/*
 import StdEnv
 import StdDebug
 import System._Pointer
@@ -13,6 +38,8 @@ import Clyde.tableviewcontroller
 //import Clyde.textviewcontroller
 import Clyde.menus
 import Clyde.textdocument
+
+NSWindowDocumentVersionsButton = 6
 
 contentLayoutRect :: !Pointer !*World -> (!Pointer,!*World)
 contentLayoutRect self env
@@ -47,14 +74,6 @@ where
 			ccall objc_msgSend_stret "Gppp:I:A"
 		}
 
-import code from "NSWindow+DvA.o"
-//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NSWindow+DvA.o NSWindow+DvA.m 
-
-cascade :: !Pointer !*a -> *a
-cascade wind env
-	= code {
-		ccall doCascade "p:V:A"
-	}
 /*
 cascadeTL	=: NSMakeSize 0.0 0.0
 cascadeTL`	=: NSMakeSize 0.0 0.0
@@ -121,24 +140,11 @@ cascade` _ _ _ _ _ = code {
 	} 
 
 
-////// Line Numbers
-import code from "NoodleLineNumberMarker.o"
-import code from "NoodleLineNumberView.o"
-import code from "NSTextView+JSDExtensions.o"
-//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NoodleLineNumberMarker.o NoodleLineNumberMarker.m 
-//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NoodleLineNumberView.o NoodleLineNumberView.m 
-//	gcc -c -ObjC -fobjc-arc -o Clean\ System\ Files/NSTextView+JSDExtensions.o NSTextView+JSDExtensions.m 
-
-setShowsLineNumbers :: !Pointer !Bool !* a -> *a
-setShowsLineNumbers textv show env
-	= msgII_V textv "setShowsLineNumbers:" (if show YES NO) env			// from Noodle & NSTextView+JSDExtensions...
-
 //////
 
+/*
 populateWindow :: !Pointer !*World -> *World
 populateWindow self env
-	= env
-/*
 	#!	(wind,env)		= msgC_P "NSWindow\0" "alloc\0" env
 		rect			= cgRect 0.0 0.0 1024.0 460.0			// TODO: need to free...
 		style			= NSTitledWindowMask + NSClosableWindowMask + NSResizableWindowMask + NSMiniaturizableWindowMask
@@ -160,7 +166,7 @@ populateWindow self env
 		(w,env)			= msgI_P wind "becomeFirstResponder\0" env	
 		env				= msgIP_V wind "makeKeyAndOrderFront:\0" self env
 	= env
-*/
+
 
 populateSecondWindow :: !Pointer !*World -> *World
 populateSecondWindow self env
@@ -231,7 +237,7 @@ populateSecondWindow self env
 //		env				= force (writeInt self 8 wind) env
 		env				= msgIP_V wind "makeKeyAndOrderFront:\0" self env
 	= env
-
+*/
 findView name view env
 	#!	(subs,env)		= msgI_P view "subviews\0" env
 		(count,env)		= msgI_I subs "count\0" env
@@ -248,34 +254,6 @@ where
 		= logsubs (inc index) count subs env
 
 /*
-		# 1	140556612321792
-			NSTitlebarContainerView
-			{x=0,y=460,w=1024,h=22}
-			# subviews	1
-			# 0	140556612329664
-				NSTitlebarView
-				{x=0,y=0,w=1024,h=22}
-				# subviews	5
-				# 0	140556612351568
-					_NSThemeCloseWidget
-					{x=7,y=3,w=14,h=16}
-					# subviews	0
-				# 1	140556610168960
-					_NSThemeZoomWidget
-					{x=47,y=3,w=14,h=16}
-					# subviews	0
-				# 2	140556610173056
-					_NSThemeWidget
-					{x=27,y=3,w=14,h=16}
-					# subviews	0
-				# 3	140556609187264
-					NSTextField
-					{x=459,y=3,w=124,h=17}
-					# subviews	0
-				# 4	140556610271200
-					NSThemeDocumentButton
-					{x=441,y=3,w=16,h=16}
-					# subviews	0
 
 NSView *themeFrame = [[self contentView] superview];
 NSRect c = [themeFrame frame];  // c for "container"
@@ -287,10 +265,12 @@ NSRect newFrame = NSMakeRect(                                                c.s
 [closeButton setAutoresizingMask:NSViewMaxXMargin | NSViewMinYMargin];  
 [closeButton setEnabled:YES];
 [closeButton setTarget:self];
-[closeButton setAction:NSSelectorFromString(@"testClick:") ];*/
-//+ (nullable NSButton *)standardWindowButton:(NSWindowButton)b forStyleMask:(NSUInteger)styleMask;
-NSWindowDocumentVersionsButton = 6
+[closeButton setAction:NSSelectorFromString(@"testClick:") ];
 
+//+ (nullable NSButton *)standardWindowButton:(NSWindowButton)b forStyleMask:(NSUInteger)styleMask;
+*/
+
+/*
 populateThirdWindow :: !Pointer !*World -> *World
 populateThirdWindow self env
 	= populateSecondWindow self env
@@ -325,7 +305,7 @@ populateFourthWindow self env
 	
 		env				= msgIP_V wind "makeKeyAndOrderFront:\0" self env
 	= env
-
+*/
 ///// SAFE LOCAL DEFS
 
 force :: !.a !.b -> .b
@@ -339,3 +319,4 @@ newWorld
 		  fillI 65536 0 
 	}
 
+*/

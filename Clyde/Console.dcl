@@ -1,14 +1,16 @@
 definition module Clyde.Console
 
-createConsoleWindowControllerClass :: !*World -> *World
+createConsoleWindowControllerClass :: !*World -> *World		// create class
 
-doHideC :: !Int !Int !Int -> Int
+con_stdin_remote :: Int					// file descriptor for stdin pipe
+con_stdout_remote :: Int				// file descriptor for stdout pipe
+con_stderr_remote :: Int				// file descriptor for stderr pipe
 
-con_stdin_remote :: Int
-con_stdout_remote :: Int
-con_stderr_remote :: Int
+openConsoleWindow :: !String !*World -> *World	// run process with console window
 
-keyDown :: !Int !Int !Int -> Int
-didRead :: !Int !Int !Int -> Int
+// exports for foreign...
+from Cocoa.objc import :: ID, :: SEL, :: BOOL, :: Pointer
 
-openConsoleWindow :: !String !*World -> *World
+doHideC :: !ID !SEL !ID -> BOOL
+keyDown :: !ID !SEL !ID -> BOOL
+didRead :: !ID !SEL !ID -> BOOL

@@ -78,9 +78,3 @@ isatty :: !Int -> Bool
 isatty _ = code {
 		ccall isatty "I:I"
 	}
-
-///// SAFE LOCAL DEFS
-/*
-force :: !.a !.b -> .b
-force _ x = x
-*/

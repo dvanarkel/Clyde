@@ -8,7 +8,7 @@ from UtilNewlinesFile import :: NewlineConvention(..)
 import PmCompilerOptions
 from StdPathname import :: Pathname
 import StdFile
-import Platform
+//import Platform
 
 ::	Modulename			:== String
 
@@ -43,12 +43,12 @@ UnexpectedConstructor typeName string defaultValue
 	| I386
 
 DefaultProcessor :: Processor
-DefaultProcessor = PlatformDependant I386 PowerPC_Carbon
+DefaultProcessor = I386 	//PlatformDependant I386 PowerPC_Carbon
 
 PlatformProcessors :: [Processor]
-PlatformProcessors = PlatformDependant
+PlatformProcessors = //PlatformDependant
 	[I386]
-	[PowerPC_Classic,PowerPC_Carbon,PowerPC_MachO]
+//	[PowerPC_Classic,PowerPC_Carbon,PowerPC_MachO]
 
 ProcessorSuffix :: !Processor -> String
 ProcessorSuffix CurrentProcessor	= ProcessorSuffix DefaultProcessor

@@ -7,7 +7,7 @@ import PmPath, UtilStrictLists
 from UtilDate import NoDate, :: DATE
 import UtilNewlinesFile
 import PmTypes
-import Platform
+//import Platform
 import UtilOptions, PmFiles
 
 ::	Def_and_Imp				:== Bool;
@@ -102,9 +102,9 @@ PR_NewProject main_module_file_name eo compilerOptions cgo ao prjpaths linkOptio
 	= { PR_InitProject
 	& saved			= False
 	, exec			= False
-	, execpath		= PlatformDependant	//MakeExecPathname main_module_file_name
-						("{Project}"+++DirSeparatorString+++modname+++".exe")		// Win
-						("{Project}"+++DirSeparatorString+++modname)				// Mac
+	, execpath		= //PlatformDependant	//MakeExecPathname main_module_file_name
+						//("{Project}"+++DirSeparatorString+++modname+++".exe")		// Win
+						("{Project}/"+++modname)				// Mac
 	, inflist		=
 		{ mn		= modname
 		, info		=	{ dir		= "{Project}"//dirname
@@ -787,9 +787,9 @@ SL_SetDeps lp sl = {sl & sDeps = lp}
 
 SaveProjectFile	:: !String !Project !String !*Files -> (!Bool, !*Files);
 SaveProjectFile	projectPath project applicationDir files
-	= IF_WINDOWS
-		(SaveProjectAndPropsFile projectPath project applicationDir files)
-		(SaveProjectFileOnly projectPath project applicationDir files)
+//	= IF_WINDOWS
+//		(SaveProjectAndPropsFile projectPath project applicationDir files)
+	=	(SaveProjectFileOnly projectPath project applicationDir files)
 where
 	SaveProjectAndPropsFile	projectPath project applicationDir files
 		# (opened, prj_file, files) = fopen projectPath FWriteText files

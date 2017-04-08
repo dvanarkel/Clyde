@@ -17,7 +17,7 @@ import PmCleanSystem,PmPath,PmProject
 from PmDialogues import doPathsDialog
 import PmAbcMagic,PmFileInfo,PmDirCache
 
-import Platform
+//import Platform
 from StdLibMisc import :: Date{..}, :: Time{..}
 
 verboseInfo verbose info ps :== verbi verbose info ps
@@ -223,11 +223,11 @@ MakeTheProject force fileinfo libsinfo abccache project continue ps
 	# (method,ps)			= getCurrentMeth ps
 	# (compinfo,ps) = case method of
 				CompileSync			-> (Sync,ps)
-				(CompileAsync cmax)	-> PlatformDependant
+				(CompileAsync cmax)	-> //PlatformDependant
 										(AsyncWin [] {win_max_n_processes=cmax,win_compiler_process_ids=NoCompilerProcessIds},ps)								// win
-										(let (compiler_process_ids,ps2) = getCompilerProcessIds ps
-										 in  (Async [] {max_n_processes=cmax,compiler_process_ids=compiler_process_ids,unknown_finished_processors=NoUnknownFinishedProcessors},ps2)	// mac
-										)
+										//(let (compiler_process_ids,ps2) = getCompilerProcessIds ps
+										// in  (Async [] {max_n_processes=cmax,compiler_process_ids=compiler_process_ids,unknown_finished_processors=NoUnknownFinishedProcessors},ps2)	// mac
+										//)
 				CompilePers			-> (Pers InitCompilingInfo,ps)
 	# ds = 
 		{ project	= project
@@ -382,7 +382,12 @@ step intr (DComp force dircache (AsyncWin [] {win_compiler_process_ids,win_max_n
 	# ps = app_world_instead_of_ps (QuitCleanCompiler True win_compiler_process_ids) ps;
 	# ps					= showInfo (Level1 "Generating...") ps
 	# (paths,ds)			= ds!modpaths
-	= step intr (DGene paths (IF_WINDOWS (ASyncCodeGenerationWin [] win_max_n_processes) SyncCodeGeneration) ds) ps
+	= step intr (DGene paths
+//					(IF_WINDOWS
+//						(ASyncCodeGenerationWin [] win_max_n_processes)
+						SyncCodeGeneration
+//					)
+					ds) ps
 
 step intr state=:(DComp force _ (Async _ _) _ _) ps
 	# (state, ps)			= check_completed state ps
@@ -763,7 +768,7 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 
 	# system_abc				= MakeABCPathname System
 	# (ok,full_sys0,_,abcPathsCache) = DC_Search system_abc abcPathsCache
-	# full_sys					= full_sys0 +++ DirSeparatorString +++ system_abc
+	# full_sys					= full_sys0 +++ "/" +++ system_abc
 	# system_mdn 				= {mdn_dir=full_sys0,mdn_name=System}
 	
 	# ao						= PR_GetApplicationOptions project
@@ -795,7 +800,7 @@ step intr (DLink ds=:{ok, newpaths, fileinfo, libsinfo, modpaths, abccache, proj
 	# (sys_date, ps)			= accFiles (FModified full_sys) ps
 	# (abcPathsCache,ps)		= case genabc of
 									True
-										# sys_obj					= full_sys0 +++ DirSeparatorString +++ (MakeObjPathname tp System)
+										# sys_obj					= full_sys0 +++ "/" +++ (MakeObjPathname tp System)
 										  (sys_obj_date,ps)			= accFiles (FModified sys_obj) ps
 										  sys_obj_date_time			= DATEtoDateTime sys_obj_date
 										-> (DC_Update ((MakeObjPathname tp System),full_sys0,sys_obj_date_time) abcPathsCache,ps)
@@ -994,8 +999,8 @@ removeFromCurrent completedSlot [current=:{slot} : rest]
 
 append_object_file_extension_if_dot_at_end tp use_64_bit_processor s
 	| s.[size s - 1] == '.'
-		| use_64_bit_processor && DirSeparator=='\\'
-			= s+++"obj"
+//		| use_64_bit_processor && DirSeparator=='\\'	// DirSeparator:=='/'
+//			= s+++"obj"
 			= MakeObjPathname tp s
 		= s
 
@@ -1531,7 +1536,7 @@ GetPathNames Nil acc cache
 GetPathNames (fn:!fns) acc cache
 	# (ok,pn,_,cache) = DC_Search fn cache
 	| ok
-		= GetPathNames fns (pn +++ DirSeparatorString +++ fn :! acc) cache
+		= GetPathNames fns (pn +++ "/" +++ fn :! acc) cache
 		= (False, (fn :! Nil), cache)
 
 // Lookup Module Paths in Directory Cache
@@ -1579,7 +1584,7 @@ HandleDCErrors verbose errs _ ps
 
 //--
 
-ClearCompilerCache` ps = PlatformDependant ps (clear ps)
+ClearCompilerCache` ps = ps	//PlatformDependant ps (clear ps)
 where
   clear ps
 	# (method,ps) = getCurrentMeth ps

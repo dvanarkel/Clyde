@@ -5,7 +5,6 @@ implementation module PmCleanSystem
 import StdEnv,StdMisc,StdMaybe
 from Directory import pd_StringToPath,getFileInfo,createDirectory,::Path,::FileInfo{pi_fileInfo},::PI_FileInfo{isDirectory},::DirError(..)
 import UtilStrictLists
-from Platform import DirSeparatorString
 import StdPathname
 import PmTypes
 from PmCompilerOptions import ::CompilerOptions(..),::ListTypes(..),instance == ListTypes
@@ -14,8 +13,8 @@ import PmPath
 from PmParse import IsTypeSpec,IsImportError20
 //from linkargs import ReadLinkErrors,WriteLinkOpts,:: LinkInfo`(..),:: LPathname
 
-from Platform import TempDir
-tooltempdir =: TempDir
+//from Platform import TempDir
+//tooltempdir =: "/tmp"
 
 import Clyde.Process
 
@@ -531,17 +530,17 @@ strip_newlines s
 		= s
 
 temp_dir_path startupdir
-	= startupdir +++ DirSeparatorString +++ "Temp"
+	= startupdir +++ "/Temp"
 
 out_file_path temp_dir slot
 	| slot==0
-		= temp_dir +++ DirSeparatorString +++ "out"
-		= temp_dir +++ DirSeparatorString +++ "out"+++toString slot
+		= temp_dir +++ "/out"
+		= temp_dir +++ "/out"+++toString slot
 
 errors_file_path temp_dir slot
 	| slot==0
-		= temp_dir +++ DirSeparatorString +++ "errors"
-		= temp_dir +++ DirSeparatorString +++ "errors"+++toString slot
+		= temp_dir +++ "/errors"
+		= temp_dir +++ "/errors"+++toString slot
 
 get_path_name_and_options2 ccstring startupdir
 	# (ccstring,rem) = splitOptions ccstring

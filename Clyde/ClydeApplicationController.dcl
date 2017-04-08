@@ -1,28 +1,24 @@
 definition module Clyde.ClydeApplicationController
 
-swizzleAboutPanel :: !*a -> *a
+swizzleAboutPanel	:: !*a -> *a					// replace default About panel with our own
 
-initAppDelegate :: !Int !*World -> *World
+createAppDelegate	:: !*World -> *World			// create the AppDelegate class
+initAppDelegate		:: !Int !*World -> *World		// attach AppDelegate to Application
 
-createAppDelegate :: !*World -> *World
+
+openLogWindow		:: !*World -> *World			// clear and open the log window
+appendLogWindow		:: !String !*a -> *a			// append to log window
+openTypeWindow		:: !*World -> *World			// clear and open Types window
+appendTypeWindow	:: !String !*a -> *a			// append to Types window
 
 // exports for foreign...
-AppDelLogWindows :: !Int !Int !Int -> Int
-AppDelDidFinishLaunching :: !Int !Int !Int -> Int
-shouldOpenUntitledFile :: !Int !Int !Int -> Int
+from Cocoa.objc import :: ID, :: SEL, :: BOOL, :: Pointer
 
-
-openLogWindow :: !*World -> *World
-appendLogWindow :: !String !*a -> *a
-openTypeWindow :: !*World -> *World
-appendTypeWindow :: !String !*a -> *a
-
-doTest :: !Int !Int !Int -> Int
-doHideL :: !Int !Int !Int -> Int
-doHideT :: !Int !Int !Int -> Int
-doGetPath :: !Int !Int !Int -> Int
-
-//
-
-imp_orderFrontStandardAboutPanel :: Int
-orderFrontStandardAboutPanel :: !Int !Int !Int -> Int
+orderFrontStandardAboutPanel	:: !ID !SEL !ID -> BOOL
+doHideT							:: !ID !SEL !ID -> BOOL
+doHideL							:: !ID !SEL !ID -> BOOL
+shouldOpenUntitledFile			:: !ID !SEL !ID -> BOOL
+AppDelLogWindows				:: !ID !SEL !ID -> BOOL
+AppDelDidFinishLaunching		:: !ID !SEL !ID -> BOOL
+doTest							:: !ID !SEL !ID -> BOOL
+doGetPath						:: !ID !SEL !ID -> BOOL

@@ -8,14 +8,6 @@ import Cocoa.objc
 
 // 'cocoa' functions
 
-:: Menu		:== Pointer		// pointer to NSMenu instance
-:: MenuItem	:== Pointer		// pointer to NSMenuItem instance
-:: Title	:== String
-:: Action	:== CString		// still zero terminated for now...
-:: Action`	:== Pointer		// pointer to ...
-:: KeyEquivalent	:== String
-:: Object	:== Pointer		// pointer to NSObject instance
-
 NSFindPanelActionShowFindPanel = 1
 NSFindPanelActionNext = 2
 NSFindPanelActionPrevious = 3
