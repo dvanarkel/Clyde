@@ -30,6 +30,6 @@ EnvsFileName :== "IDEEnvs"
 	
 getEnvironments :: !String !String !*env -> *([Target],*env) | FileSystem, FileEnv env
 openEnvironments	:: !String !String !*env -> *([Target],*env) | FileEnv env
-saveEnvironments	:: !String ![Target] !*env -> *(Bool,*env) | FileEnv env
+saveEnvironments	:: !String !String ![Target] !*env -> *(Bool,*env) | FileEnv env
 
 t_StdEnv :: Target

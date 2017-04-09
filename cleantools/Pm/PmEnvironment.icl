@@ -1,7 +1,7 @@
 implementation module PmEnvironment
 
 import StdArray, StdFunc, StdList
-import UtilIO
+//import UtilIO
 import UtilOptions
 import UtilStrictLists
 import PmPath
@@ -70,7 +70,7 @@ openEnvironments stup envpath env
 	# ((targets,ok,_),env)		= accFiles (openEnvironment envpath) env
 	| not ok
 		#	targets				= emptyTargets
-		#	(_,env)				= saveEnvironments envpath targets env
+		#	(_,env)				= saveEnvironments stup envpath targets env
 		#	targets				= map (fixAppPaths stup) targets
 		= (targets,env)
 	# targets				= map (fixAppPaths stup) targets
@@ -92,9 +92,9 @@ openEnvironment envpath env
 		=	((targets, True,"The file \"" +++ envpath +++ "\" clould not be closed."), env)	// warning genereren of zo?
 	=	((targets, True,""), env)
 
-saveEnvironments :: !String ![Target] !*env -> *(Bool,*env) | FileEnv env
-saveEnvironments envpath targets env
-	# (stup,env)	= accFiles GetFullApplicationPath env
+saveEnvironments :: !String !String ![Target] !*env -> *(Bool,*env) | FileEnv env
+saveEnvironments stup envpath targets env
+//	# (stup,env)	= accFiles GetFullApplicationPath env
 	# targets		= map (unfixAppPaths stup) targets
 	# (err,env)		= accFiles (saveEnvironments envpath targets) env
 	# ok			= isNothing err

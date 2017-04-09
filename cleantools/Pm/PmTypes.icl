@@ -4,7 +4,7 @@ implementation module PmTypes
 
 import StdBool, StdInt
 import UtilStrictLists
-from UtilNewlinesFile import :: NewlineConvention(..)
+//from UtilNewlinesFile import :: NewlineConvention(..)
 import PmCompilerOptions
 from StdPathname import :: Pathname
 import StdFile
@@ -107,17 +107,17 @@ where
 ::	ModInfo	=
 	{ dir				:: !String				// !Pathname			// directory
 	, compilerOptions	:: !CompilerOptions		// compiler options
-	, mod_edit_options	:: !ModEditOptions
+//	, mod_edit_options	:: !ModEditOptions
 	, abcLinkInfo		:: !ABCLinkInfo
 	}
-
+/*
 ::	ModEditOptions = {
 		defeo 		:: !EditWdOptions,		// definition module edit options
 		impeo		:: !EditWdOptions,		// implementation module edit options
 		defopen 	:: !Bool,				// definition module is open
 		impopen 	:: !Bool				// implementation module is open
 	}
-
+*/
 :: ABCLinkInfo = {linkObjFileNames :: !List LinkObjFileName, linkLibraryNames :: !List LinkLibraryName}
 
 :: LinkObjFileName	:== String
@@ -246,7 +246,7 @@ DefWindowPos_and_Size =
 
 
 //	The Editor Options: default settings for the EditWindows.
-
+/*
 ::	EditOptions	=
 	{/*	tabs		:: !Int
 	,	fontname	:: !String				// !FontName
@@ -276,7 +276,7 @@ where
 	,	pos_size	:: !OptionalWindowPosAndSize 
 	}
 	// edit options, window pos&size
-	
+*/
 //	The Code Generator Options: default settings for the code generator
 ::	CodeGenOptions =
 	{ cs	:: !Bool

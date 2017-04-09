@@ -22,6 +22,6 @@ DC_Update	:: !(!String,!String,!DateTime) !*DirCache -> *DirCache
 // Update directory cache
 DC_HUpdate :: !(!String,!String,!DateTime) !String !*DirCache !*Files -> (!*DirCache,!*Files)
 
-SearchDisk	:: !Modulename !(List Pathname) !*Files -> (!(!Bool,!Pathname),!*Files)
+//SearchDisk	:: !Modulename !(List Pathname) !*Files -> (!(!Bool,!Pathname),!*Files)
 // Find file in paths (no caching)
-FindHModule :: !Modulename !{#Char} !(List Pathname) !*Files -> (!(!Bool,!Pathname),!*Files)
+//FindHModule :: !Modulename !{#Char} !(List Pathname) !*Files -> (!(!Bool,!Pathname),!*Files)

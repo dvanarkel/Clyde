@@ -3,7 +3,8 @@ implementation module PmFiles
 //	File I/O routines for the project.
 
 import StdArray, StdFunc, StdInt
-import UtilNewlinesFile, UtilOptions, UtilStrictLists
+//import UtilNewlinesFile
+import UtilOptions, UtilStrictLists
 import PmProject
 import UtilDate
 from PmPath import convert_path_separators,convert_exec_path_separators_and_extension
@@ -127,6 +128,7 @@ needed_obj_files_option = ListOption "NeededObjFiles" ObjectFile "" (\a->a.info.
 needed_libraries_option = ListOption "NeededLibraries" Library "" (\a->a.info.abcLinkInfo.linkLibraryNames)
 																  (\v a->{a & info.abcLinkInfo.linkLibraryNames=v}) 
 
+/*
 dcl_option = GroupedOption "Dcl" EditWdOptionsTable (\a->a.info.mod_edit_options.defeo) (\v a->{a & info.mod_edit_options.defeo=v})
 dcl_open_option = SimpleOption "DclOpen" (\a->a.info.mod_edit_options.defopen) (\v a->{a & info.mod_edit_options.defopen=v})
 icl_option = GroupedOption "Icl" EditWdOptionsTable (\a->a.info.mod_edit_options.impeo) (\v a->{a & info.mod_edit_options.impeo=v})
@@ -146,37 +148,37 @@ ModInfoAndNameTable =
 	}
 
 ModInfoAndNameEntry = GroupedOption "Module" ModInfoAndNameTable id const
-
+*/
 prj_mod_info_and_name_table :: OptionsTable ModInfoAndName
 prj_mod_info_and_name_table
 	= { name_option, dir_option, compiler_option, needed_obj_files_option, needed_libraries_option }
 
 prj_mod_info_and_name_entry = GroupedOption "Module" prj_mod_info_and_name_table id const
-
+/*
 prp_mod_info_and_name_table :: OptionsTable ModInfoAndName
 prp_mod_info_and_name_table
 	= { name_option, dir_option, dcl_option, dcl_open_option, icl_option, icl_open_option }
 
 prp_mod_info_and_name_entry = GroupedOption "Module" prp_mod_info_and_name_table id const
-
+*/
 ProjectTable :: OptionsTable ProjectGlobalOptions
-ProjectTable
-	# main_module_option = GroupedOption "MainModule" ModInfoAndNameTable (\a->a.pg_mainModuleInfo)	(\v a->{a & pg_mainModuleInfo=v})
+ProjectTable = project_table
+/*	# main_module_option = GroupedOption "MainModule" ModInfoAndNameTable (\a->a.pg_mainModuleInfo)	(\v a->{a & pg_mainModuleInfo=v})
 	# other_modules_option = ListOption "OtherModules" ModInfoAndNameEntry {info=EmptyModInfo,name=""} (\a->a.pg_otherModules) (\v a->{a & pg_otherModules=v})
 	= make_project_table main_module_option other_modules_option
-
+*/
 project_table :: OptionsTable ProjectGlobalOptions
 project_table
 	# main_module_option = GroupedOption "MainModule" prj_mod_info_and_name_table (\a->a.pg_mainModuleInfo)	(\v a->{a & pg_mainModuleInfo=v})
 	# other_modules_option = ListOption "OtherModules" prj_mod_info_and_name_entry {info=EmptyModInfo,name=""} (\a->a.pg_otherModules) (\v a->{a & pg_otherModules=v})
 	= make_project_table main_module_option other_modules_option
-
+/*
 edit_options_table :: OptionsTable ProjectGlobalOptions
 edit_options_table
 	# main_module_option = GroupedOption "MainModule" prp_mod_info_and_name_table (\a->a.pg_mainModuleInfo)	(\v a->{a & pg_mainModuleInfo=v})
 	# other_modules_option = ListOption "OtherModules" prp_mod_info_and_name_entry {info=EmptyModInfo,name=""} (\a->a.pg_otherModules) (\v a->{a & pg_otherModules=v})
 	= { main_module_option, other_modules_option }
-
+*/
 make_project_table :: !(OptionsTableEntry ProjectGlobalOptions) !(OptionsTableEntry ProjectGlobalOptions) -> OptionsTable ProjectGlobalOptions
 make_project_table main_module_option other_modules_option
 	=	// +++ order is important here
@@ -192,13 +194,14 @@ project_template_table
 
 EmptyModInfo :: ModInfo
 EmptyModInfo
-	# defaultEditWdOptions = {eo=DefaultEditOptions,pos_size=NoWindowPosAndSize}
-	# mod_edit_options = {defeo=defaultEditWdOptions,impeo=defaultEditWdOptions,
-						  defopen=False,impopen=False}
+//	# defaultEditWdOptions = {eo=DefaultEditOptions,pos_size=NoWindowPosAndSize}
+//	# mod_edit_options = {defeo=defaultEditWdOptions,impeo=defaultEditWdOptions,
+//						  defopen=False,impopen=False}
 	= {	dir		= EmptyPathname,
 		compilerOptions = DefaultCompilerOptions,
-		mod_edit_options = mod_edit_options,
+//		mod_edit_options = mod_edit_options,
 		abcLinkInfo = {linkObjFileNames = Nil, linkLibraryNames = Nil} }
+/*
 where
 	DefaultEditOptions :: EditOptions;
 	DefaultEditOptions =
@@ -212,7 +215,7 @@ where
 		,	showlins	= False
 		,	showsync	= True
 */		}
-
+*/
 CompilerOptionsTable :: OptionsTable CompilerOptions
 CompilerOptionsTable =
 	{
@@ -317,7 +320,7 @@ LinkOptionsTable	=
 	, SimpleOption	"ExportedNames"						(\a->a.dll_export_list_name)	(\v a->{a & dll_export_list_name = v})
 //	, SimpleOption	"AddCarbResource"					(\a->a.add_carb_resource)		(\v a->{a & add_carb_resource = v})
 	}
-
+/*
 EditWdOptionsTable :: OptionsTable EditWdOptions
 EditWdOptionsTable	=
 	{
@@ -340,6 +343,7 @@ EditOptionsTable	=
 	, SimpleOption "ShowTabs"	(\a->a.EditOptions.showtabs)		(\v a->{EditOptions | a & showtabs=v})
 	, SimpleOption "ShowLins"	(\a->a.EditOptions.showlins)		(\v a->{EditOptions | a & showlins=v})
 	}
+*/
 */
 WindowPositionTable :: OptionsTable OptionalWindowPosAndSize
 WindowPositionTable	=

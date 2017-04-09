@@ -2,7 +2,8 @@ implementation module PmDriver
 
 import StdArray,StdBool,StdList,StdMisc,StdEnum,StdStrictLists
 from StdOverloadedList import Foldr,++|,Hd,Any
-import UtilNewlinesFile, UtilIO
+//import UtilNewlinesFile
+//import UtilIO
 
 import IdeState
 
@@ -206,7 +207,7 @@ MakeTheProject force fileinfo libsinfo abccache project continue ps
 	# (root_mdn,project)	= PR_GetRootModuleDirAndName project
 	# (env_static_libs,ps)	= getCurrentSlibs ps
 	# sfiles				= StrictListToList (Concat (SL_Libs libsinfo) env_static_libs)
-	# (err,ps)				= check_exists sfiles ps
+	# (err,ps)				= (Nothing,ps)	//check_exists sfiles ps
 	| isJust err
 		# line				= Level3 ["Error: Unable to find static library: '" +++ fromJust err +++ "'."]
 		# ps				= showInfo line ps
@@ -240,13 +241,14 @@ MakeTheProject force fileinfo libsinfo abccache project continue ps
 		, modpaths	= [!]
 		}
 	= step False (DComp force dircache compinfo rest ds) ps
+/*
 where
 	check_exists [] ps = (Nothing,ps)
 	check_exists [file:rest] ps
 		# (ok,ps) = accFiles (FExists file) ps
 		| ok = check_exists rest ps
 		= (Just file,ps)
-
+*/
 :: CurrentlyCompiled =
 	{ iclModule	:: !ModuleDirAndName
 	, options	:: CompilerOptions
@@ -1598,3 +1600,46 @@ where
 			# (startupdir,ps)		= getStup ps
 			# (_,ps) = ClearCompilerCache ccstring startupdir ps
 			-> ps 
+
+// from UtilIO
+
+FModified :: !String !Files -> (!DATE, !Files);
+FModified name files
+	# s = createArray (IF_INT_64_OR_32 144 88) '\0';
+	# r = stat (name+++"\0") s;
+	| r<>0
+		= ({exists=False, yy=0, mm=0, dd=0, h=0, m=0, s=0}, files);
+		# struct_tm = localtime (s % (48,55));
+		| struct_tm==0
+			= ({exists=False, yy=0, mm=0, dd=0, h=0, m=0, s=0}, files);
+			= (struct_tm_to_DATE struct_tm , files);
+where
+		struct_tm_to_DATE struct_tm
+			# sec_min=load_long (struct_tm+0);
+			# sec=(sec_min<<32)>>32;
+			# min=sec_min>>32;
+			# hour_day=load_long (struct_tm+8);
+			# hour=(hour_day<<32)>>32;
+			# day=hour_day>>32;
+			# mon_year=load_long (struct_tm+16);
+			# mon=((mon_year<<32)>>32)+1;
+			# year=(mon_year>>32)+1900;
+			= {exists=True, yy=year, mm=mon, dd=day, h=hour, m=min, s=sec};
+
+stat :: !{#Char} !{#Char} -> Int;
+stat file_name stat_struct
+	= code {
+		ccall stat$INODE64 "ss:p"
+	}
+
+load_long :: !Int -> Int;
+load_long p = code {
+	load_i 0
+}
+
+localtime :: !{#Char} -> Int;
+localtime time_t_p
+	= code {
+		ccall localtime "s:p"
+	}
+

@@ -1,7 +1,7 @@
 implementation module PmFileInfo
 
-import StdBool
-from UtilIO import FModified
+import StdBool, StdInt, StdArray
+//from UtilIO import FModified
 from UtilDate import Older_Date
 import UtilStrictLists
 import PmPath, PmCompilerOptions, PmTypes
@@ -111,3 +111,46 @@ YoungestObj youngest ({objdate}:!rest)
 		= YoungestObj objdate rest
 	// otherwise
 		= YoungestObj youngest rest
+
+// from UtilIO
+
+FModified :: !String !Files -> (!DATE, !Files);
+FModified name files
+	# s = createArray (IF_INT_64_OR_32 144 88) '\0';
+	# r = stat (name+++"\0") s;
+	| r<>0
+		= ({exists=False, yy=0, mm=0, dd=0, h=0, m=0, s=0}, files);
+		# struct_tm = localtime (s % (48,55));
+		| struct_tm==0
+			= ({exists=False, yy=0, mm=0, dd=0, h=0, m=0, s=0}, files);
+			= (struct_tm_to_DATE struct_tm , files);
+where
+		struct_tm_to_DATE struct_tm
+			# sec_min=load_long (struct_tm+0);
+			# sec=(sec_min<<32)>>32;
+			# min=sec_min>>32;
+			# hour_day=load_long (struct_tm+8);
+			# hour=(hour_day<<32)>>32;
+			# day=hour_day>>32;
+			# mon_year=load_long (struct_tm+16);
+			# mon=((mon_year<<32)>>32)+1;
+			# year=(mon_year>>32)+1900;
+			= {exists=True, yy=year, mm=mon, dd=day, h=hour, m=min, s=sec};
+
+stat :: !{#Char} !{#Char} -> Int;
+stat file_name stat_struct
+	= code {
+		ccall stat$INODE64 "ss:p"
+	}
+
+load_long :: !Int -> Int;
+load_long p = code {
+	load_i 0
+}
+
+localtime :: !{#Char} -> Int;
+localtime time_t_p
+	= code {
+		ccall localtime "s:p"
+	}
+

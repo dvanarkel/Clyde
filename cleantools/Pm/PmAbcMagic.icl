@@ -8,7 +8,7 @@ import UtilStrictLists
 from PmPath import MakeImpPathname, MakeDefPathname
 
 import PmFileInfo
-import UtilNewlinesFile
+//import UtilNewlinesFile
 import PmDirCache
 
 from PmTypes	import :: LinkObjFileName, :: LinkLibraryName
@@ -512,4 +512,61 @@ where
 		| pat.[patpos] == str.[strpos]		= MatchS2 (inc patpos) (inc strpos) patlen pat str;
 											= False;
 										
+
+/////
+
+readLine file
+	:==	(line, file`)
+	where
+		(line, file`)
+			=	readAnyLine file
+
+readAnyLine :: !*File -> (!.{#Char}, !*File)
+readAnyLine file
+	# (line, file)
+		=	freadline file
+	  line
+	  	=	convertLine line
+	=	(line, file)
+
+convertLine :: !*{#Char} -> *{#Char}
+convertLine line
+	#! maxIndex
+			=	size line - 1
+	| maxIndex >= 0
+		#! lastChar
+			=	line.[maxIndex]
+		| lastChar == '\xa'
+			| maxIndex >= 1
+				#! lastButOneChar
+					=	line.[maxIndex-1]
+				|  lastButOneChar == '\xd'
+					=	{downSize maxIndex line & [maxIndex-1] = '\n'}
+				// otherwise
+					=	{line & [maxIndex] = '\n'}
+			// otherwise
+				=	{line & [maxIndex] = '\n'}
+		| lastChar == '\xd'
+			=	{line & [maxIndex] = '\n'}
+		// otherwise
+			=	line
+	// otherwise
+		=	line
+
+// slice that returns a unique array
+(%.) infixl 9 :: !.{#Char} !(!Int,!Int) -> .{#Char}
+(%.) string indices
+	=	code
+		{
+			.inline %.
+			.d 1 2 ii
+				jsr sliceAC
+			.o 1 0
+			.end
+		}
+
+// this should be added to the Clean rts, so that the string doesn't have to be copied
+downSize :: Int *{#Char} -> *{#Char}
+downSize newSize string
+	=	string %. (0, newSize-1)
 

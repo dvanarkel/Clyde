@@ -9,7 +9,7 @@ import PmTypes
 
 ProjectTable			:: OptionsTable ProjectGlobalOptions
 project_table			:: OptionsTable ProjectGlobalOptions
-edit_options_table		:: OptionsTable ProjectGlobalOptions
+//edit_options_table		:: OptionsTable ProjectGlobalOptions
 project_template_table	:: OptionsTable ProjectGlobalOptions
 CompilerOptionsTable	:: OptionsTable CompilerOptions
 CodeGenOptionsTable		:: OptionsTable CodeGenOptions

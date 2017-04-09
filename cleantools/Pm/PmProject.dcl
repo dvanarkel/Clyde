@@ -49,12 +49,12 @@ setDynamicInfo	:: !.ProjectDynamicInfo !.Project -> .Project
 
 PR_InitProject	:: Project
 PR_ProjectSet	:: !Project -> Bool
-PR_NewProject	:: !String !EditWdOptions !CompilerOptions !CodeGenOptions !ApplicationOptions
+PR_NewProject	:: !String /*!EditWdOptions*/ !CompilerOptions !CodeGenOptions !ApplicationOptions
 					!(List String) !LinkOptions -> Project
 
 PR_SetBuilt					:: ![!ModuleDirAndName] !u:Project -> u:Project
 PR_ClearDependencies		:: !Project -> Project
-PR_SetRoot					:: !String !EditWdOptions !CompilerOptions !Project -> Project
+PR_SetRoot					:: !String /*!EditWdOptions*/ !CompilerOptions !Project -> Project
 PR_SetRelativeRootDir	    :: !String !Project -> Project
 PR_SetCompiled				:: !Modulename !Project -> Project
 PR_SetCodeGenerated			:: !Modulename !Project -> Project

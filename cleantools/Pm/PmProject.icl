@@ -5,7 +5,7 @@ import StdMaybe
 from StdOverloadedList import ++|,Hd
 import PmPath, UtilStrictLists
 from UtilDate import NoDate, :: DATE
-import UtilNewlinesFile
+//import UtilNewlinesFile
 import PmTypes
 //import Platform
 import UtilOptions, PmFiles
@@ -94,9 +94,9 @@ PR_ProjectSet :: !Project -> Bool;
 PR_ProjectSet project=:{inflist=Nil}	=  False;
 PR_ProjectSet project=:{inflist}		=  True;
 
-PR_NewProject :: !String !EditWdOptions !CompilerOptions !CodeGenOptions !ApplicationOptions
+PR_NewProject :: !String /*!EditWdOptions*/ !CompilerOptions !CodeGenOptions !ApplicationOptions
 				!(List String) !LinkOptions -> Project;
-PR_NewProject main_module_file_name eo compilerOptions cgo ao prjpaths linkOptions
+PR_NewProject main_module_file_name /*eo*/ compilerOptions cgo ao prjpaths linkOptions
 	# modname	= GetModuleName main_module_file_name;
 	  dirname	= RemoveFilename main_module_file_name;
 	= { PR_InitProject
@@ -109,7 +109,7 @@ PR_NewProject main_module_file_name eo compilerOptions cgo ao prjpaths linkOptio
 		{ mn		= modname
 		, info		=	{ dir		= "{Project}"//dirname
 						, compilerOptions		= compilerOptions
-						, mod_edit_options = {defeo=eo,impeo=eo,defopen=False,impopen=True}
+//						, mod_edit_options = {defeo=eo,impeo=eo,defopen=False,impopen=True}
 						, abcLinkInfo = {linkObjFileNames = Nil, linkLibraryNames = Nil}
 						}
 		, src		= True
@@ -172,13 +172,13 @@ where
 	where
 		TryInsertImporter ::	!InfList !InfList -> InfList
 		TryInsertImporter Nil list
-			# default_edit_options = {pos_size = NoWindowPosAndSize, eo = {newlines= HostNativeNewlineConvention}}
+//			# default_edit_options = {pos_size = NoWindowPosAndSize, eo = {newlines= HostNativeNewlineConvention}}
 			# item =
 				  {	mn		= importermn, 
 					info	= { dir		= importerdir,
 								compilerOptions = compilerOptions,
-								mod_edit_options = {defeo = default_edit_options,impeo = default_edit_options,
-													defopen = False, impopen = False},
+//								mod_edit_options = {defeo = default_edit_options,impeo = default_edit_options,
+//													defopen = False, impopen = False},
 								abcLinkInfo = {linkObjFileNames = Nil, linkLibraryNames = Nil} },
 					src		= True,
 					abc		= True }
@@ -196,19 +196,19 @@ PR_ClearDependencies project=:{inflist=il=:(root :! rest)}
 where
 	root` = {InfListItem | root & info.abcLinkInfo = {linkObjFileNames = Nil, linkLibraryNames = Nil}}
 
-PR_SetRoot :: !String !EditWdOptions !CompilerOptions !Project -> Project;
-PR_SetRoot root eo co project=:{inflist=Nil}
+PR_SetRoot :: !String /*!EditWdOptions*/ !CompilerOptions !Project -> Project;
+PR_SetRoot root /*eo*/ co project=:{inflist=Nil}
 	= project;
-PR_SetRoot newroot eo compilerOptions project=:{prjpaths}
+PR_SetRoot newroot /*eo*/ compilerOptions project=:{prjpaths}
 	=	{project &	saved	= False,
 					exec	= False,
 					inflist	= {	mn		= modname,
 								info	= {	dir		= dirname,
 											compilerOptions		= compilerOptions,
-											mod_edit_options = {defeo = eo,impeo = eo,
-																impopen = True,
-																defopen = False	/* nonsense, we don't know this! */
-															   },
+//											mod_edit_options = {defeo = eo,impeo = eo,
+//																impopen = True,
+//																defopen = False	/* nonsense, we don't know this! */
+//															   },
 											abcLinkInfo = {linkObjFileNames = Nil, linkLibraryNames = Nil} },
 								src		= True,
 								abc		= True
@@ -436,10 +436,10 @@ where
 	modnames = MapR GetModulenames inflist
 
 	GetModulenames :: !InfListItem -> List String
-	GetModulenames {mn,info={dir,mod_edit_options={defopen,impopen}}}
-		| defopen && impopen	= defname :! impname :! Nil
-		| defopen				= defname :! Nil
-		| impopen				= impname :! Nil
+	GetModulenames {mn,info={dir}}//,mod_edit_options={defopen,impopen}}}
+//		| defopen && impopen	= defname :! impname :! Nil
+//		| defopen				= defname :! Nil
+//		| impopen				= impname :! Nil
 								= Nil
 	where
 		defname = ModuleDirAndNameToDefPathname {mdn_dir=dir,mdn_name=mn}
@@ -531,8 +531,8 @@ where
 	update` itm=:{InfListItem | info}	= ({InfListItem | itm & info = info`}, unchanged);
 	where 
 		info`		= update info;
-		unchanged	= eqInfo info info`;
-
+		unchanged	= True//eqInfo info info`;
+/*
 eqInfo :: !ModInfo !ModInfo -> Bool
 eqInfo info1=:{mod_edit_options=mod_edit_options1} info2=:{mod_edit_options=mod_edit_options2}
 	=	mod_edit_options1.defeo.eo == mod_edit_options2.defeo.eo &&
@@ -542,7 +542,7 @@ eqInfo info1=:{mod_edit_options=mod_edit_options1} info2=:{mod_edit_options=mod_
 		mod_edit_options1.impeo.pos_size == mod_edit_options2.impeo.pos_size &&
 		mod_edit_options1.defopen == mod_edit_options2.defopen &&
 		mod_edit_options1.impopen == mod_edit_options2.impopen
-
+*/
 eqCO :: !CompilerOptions !CompilerOptions -> Bool
 eqCO co1 co2
 	=	co1.neverTimeProfile == co2.neverTimeProfile &&
@@ -648,14 +648,14 @@ where
 	defaultModInfo	=
 		{ dir = EmptyPathname
 		, compilerOptions = DefaultCompilerOptions
-		, mod_edit_options = {	defeo = defaultEditWdOptions,impeo = defaultEditWdOptions,
-								defopen = False,impopen = False}
+//		, mod_edit_options = {	defeo = defaultEditWdOptions,impeo = defaultEditWdOptions,
+//								defopen = False,impopen = False}
 		, abcLinkInfo = {linkObjFileNames = Nil, linkLibraryNames = Nil} 
 		}
-	where
-		defaultEditWdOptions = {eo=DefaultEditOptions,pos_size=NoWindowPosAndSize}
-		DefaultEditOptions =
-			{ newlines = HostNativeNewlineConvention}
+//	where
+//		defaultEditWdOptions = {eo=DefaultEditOptions,pos_size=NoWindowPosAndSize}
+//		DefaultEditOptions =
+//			{ newlines = HostNativeNewlineConvention}
 /*			{ tabs = 4
 			, fontname = "Courier New"	//NonProportionalFontDef.fName
 			, fontsize = 10				//NonProportionalFontDef.fSize
@@ -791,7 +791,7 @@ SaveProjectFile	projectPath project applicationDir files
 //		(SaveProjectAndPropsFile projectPath project applicationDir files)
 	=	(SaveProjectFileOnly projectPath project applicationDir files)
 where
-	SaveProjectAndPropsFile	projectPath project applicationDir files
+/*	SaveProjectAndPropsFile	projectPath project applicationDir files
 		# (opened, prj_file, files) = fopen projectPath FWriteText files
 		| not opened
 			=	(False, files)
@@ -807,7 +807,7 @@ where
 		#! (prj_ok, files) = fclose prj_file files
 		#! (prp_ok, files) = fclose prp_file files
 		= (prj_ok && prp_ok, files)
-		
+*/		
 	SaveProjectFileOnly projectPath project applicationDir files
 		# (opened, prj_file, files) = fopen projectPath FWriteText files
 		| not opened
@@ -932,8 +932,8 @@ ReadProjectFile projectPath applicationDir files
 	#!	(options, file)			= ReadOptionsFile file
 		empty_projectGO			= GetProject applicationDir emptyProject
 		projectGO				= GetOptions ProjectTable options empty_projectGO
-		(projectGO,files)
-			= add_edit_options_from_prp_file (RemoveSuffix` projectPath +++ ".prp") projectGO empty_projectGO files
+//		(projectGO,files)
+//			= add_edit_options_from_prp_file (RemoveSuffix` projectPath +++ ".prp") projectGO empty_projectGO files
 		projectGO				= (if (version == "1.3")
 									(\p->{p&pg_target="StdEnv"})
 									(id)
@@ -969,7 +969,7 @@ read_project_template_file template_file_path applicationDir files
 	| not closed
 		= ((False,empty_project,"Could not read the file \"" +++ template_file_name +++ "\"."), files)
 	= ((True,project,""), files)
-
+/*
 add_edit_options_from_prp_file :: !String !ProjectGlobalOptions !ProjectGlobalOptions !*Files -> (!ProjectGlobalOptions, !*Files)
 add_edit_options_from_prp_file prp_path projectGO empty_projectGO files
 	# (opened, prp_file, files) = fopen prp_path FReadData files
@@ -1012,7 +1012,7 @@ add_edit_options {pg_mainModuleInfo,pg_otherModules} projectGO
 			= mod :! add_edit_options_of_other_module m mods
 	add_edit_options_of_other_module m Nil
 	 	= m:!Nil
-
+*/
 change_root_directory_of_project :: !{#Char} !{#Char} !Project -> Project 
 change_root_directory_of_project relative_root_dir root_dir project
 	= {project & relative_root_directory=relative_root_dir, root_directory=root_dir}

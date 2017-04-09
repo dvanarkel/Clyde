@@ -6,7 +6,7 @@ import StdArray,StdBool,StdEnum,StdList,StdFile,StdOrdList,StdStrictLists,StdMay
 from StdLibMisc import :: Date{..}, :: Time{..}
 import Directory
 
-import UtilStrictLists, PmPath, UtilIO
+import UtilStrictLists, PmPath//, UtilIO
 //import Platform
 
 DirSeparator :== '/'
@@ -281,7 +281,7 @@ where
 			= bin_search_subdir left mid subdir cache
 		// subdir > subdir_name
 			= bin_search_subdir (inc mid) right subdir cache
-
+/*
 SearchDisk :: !Modulename !(List Pathname) !*Files -> (!(!Bool,!Pathname),!*Files)
 SearchDisk modname dirs files
 	= SearchDisk2 modname dirs files
@@ -304,3 +304,4 @@ SearchDisk2 modname (dir:!rest) files
 	| exists
 		= ((True, dir_modname1),files)
 		= SearchDisk2 modname rest files
+*/

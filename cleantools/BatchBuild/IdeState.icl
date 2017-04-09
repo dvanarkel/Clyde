@@ -9,7 +9,7 @@ import PmCompilerOptions
 import typewin
 import PmEnvironment
 import logfile
-import set_return_code
+//import set_return_code
 import PmFileInfo
 from PmCleanSystem import ::CompilerProcessIds,NoCompilerProcessIds
 
