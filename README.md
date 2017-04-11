@@ -5,11 +5,18 @@ A Clean IDE for Mac OS X
 
 This is a work in progress towards an integrated development environment for [Clean](http://clean.cs.ru.nl/Clean)  similar to the [CleanIDE for Windows](http://clean.cs.ru.nl/Clean_IDE). 
 
-## Status
-This v0.0 is not yet directly useable due to:
+## Goal ##
 
-* build not yet functioning
-* code signing (is this actually needed?)(note that it also calls through to local backup script, not included)
+Create a functional Clean development environment for Mac OS
+
+## Non-Goal ##
+
+Port object i/o library to Cocoa
+## Status
+Version 0.1 is a very rough round the edges first alpha release.  
+Hopefully future releases improve on this!
+
+
 
 ## Using ##
 
@@ -28,7 +35,7 @@ We currently include
 - Titto icons from [Alejandro Lopez](http://musett.com/)
 
 ## Contributing
-Contributions welcome (code, comments, issue reports)
+Contributions welcome (code, comments, suggestions, issue reports,...)
 
 ## Building ##
 
@@ -38,7 +45,7 @@ Building Clyde requires
 - installation of the Xcode command line tools, if you don't have these already you can install them by running `xcode-select --install` from a Terminal session and following the prompts
 - open the Terminal in the Clyde.git directory
 - Run `.\cpm Clyde.prj`  (note the .\ in order to pick up the local copy of `cpm`)
-- Run `lsregister -f Clyde.app` in order to have the OS pick up any changes to the Clyde.app properties
+- Run `lsregister -f Clyde.app` in order to have the OS pick up any changes to the Clyde.app properties when it doesn't do so automatically
 - Append `StdEnvClyde.env` to the IDEEnvs file in your Clean installation
 
 ## Working With Git ##
@@ -111,5 +118,3 @@ IDEEnvs
 
 ### Others 
 - [ ] Update .gitignore
-- [ ] Sort out icon licensing
-- [ ] logo in README once we have sorted licensing
