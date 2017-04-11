@@ -1,6 +1,7 @@
 # Clyde
 A Clean IDE for Mac OS X
 
+<img src=https://github.com/dvanarkel/Clyde/raw/master/titto/PNG/Adium%201024.png width=600  />
 
 This is a work in progress towards an integrated development environment for [Clean](http://clean.cs.ru.nl/Clean)  similar to the [CleanIDE for Windows](http://clean.cs.ru.nl/Clean_IDE). 
 
