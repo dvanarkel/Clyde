@@ -47,7 +47,7 @@ addTab view tabv env
 	= env
 
 class addTabViewItem a where addTabViewItem :: !a !NSTabViewItem !*env -> *env
-class tabViewItems a where tabViewItems :: !a !*env -> (!Pointer,!*env)
+class tabViewItems a where tabViewItems :: !a !*env -> (!Int,!*env)
 class removeTabViewItem a where removeTabViewItem :: !a !NSTabViewItem !*env -> *env
 class insertTabViewItemAtIndex a where insertTabViewItemAtIndex :: !a !NSTabViewItem !Int !*env -> *env
 class tabView a where tabView :: !a !*env -> (!NSTabView,!*env)
@@ -221,6 +221,10 @@ NSPressedTab	= NSTabState 2
 
 identifier tabi env
 	= msgI_P tabi "identifier\0" env	// identifier is actually a generic pointer, above we always point to NSString
+
+setIdentifier (NSTabViewItem tab) identifier env
+	= msgIP_V tab "setIdentifier:\0" (p2ns identifier) env
+
 // could add setIdentifier
 // color				deprecated, tabs are now themed
 // view					generic
@@ -238,9 +242,10 @@ toolTip tabi env
 setTooltip tabi tooltip env
 	= msgIP_V tabi "setTooltip:\0" (p2ns tooltip) env
 
+tabViewItemWithViewController :: !Int !*env -> (!NSTabViewItem,!*env)
 tabViewItemWithViewController viewController env
 	# (tabi,env)	= msgCP_P "NSTabViewItem\0" "tabViewItemWithViewController:\0" viewController env
-	= (tabi,env)
+	= (NSTabViewItem  tabi,env)
 // image			NSImage				get/set
 // viewController	NSViewController	get/set
 
@@ -267,9 +272,13 @@ setTabStyle (NSTabViewController tvc) (NSTabViewControllerTabStyle tstyl) env
 	= msgII_V tvc "setTabStyle:\0" tstyl env
 
 :: NSTabViewControllerTabStyle =: NSTabViewControllerTabStyle Int
+NSTabViewControllerTabStyleSegmentedControlOnTop :: NSTabViewControllerTabStyle
 NSTabViewControllerTabStyleSegmentedControlOnTop	= NSTabViewControllerTabStyle 0
+NSTabViewControllerTabStyleSegmentedControlOnBottom :: NSTabViewControllerTabStyle
 NSTabViewControllerTabStyleSegmentedControlOnBottom	= NSTabViewControllerTabStyle 1
+NSTabViewControllerTabStyleToolbar :: NSTabViewControllerTabStyle
 NSTabViewControllerTabStyleToolbar					= NSTabViewControllerTabStyle 2
+NSTabViewControllerTabStyleUnspecified :: NSTabViewControllerTabStyle
 NSTabViewControllerTabStyleUnspecified				= NSTabViewControllerTabStyle -1
 
 // Accessing this property creates the tab view object if it does not already exist.
@@ -279,7 +288,10 @@ instance tabView NSTabViewController where
 		#	(r,env)	= msgI_P tvc "tabView\0" env
 		= (NSTabView r,env)
 
-// You may provide your own tab view by assigning it to this property. If you do so, you must assign your custom object before the tab view controller creates one of its own. In other words, you must assign your tab view object to this property while the view​Loaded property is still NO.
+// You may provide your own tab view by assigning it to this property. If you do so,
+// you must assign your custom object before the tab view controller creates one of
+// its own. In other words, you must assign your tab view object to this property while
+// the view​Loaded property is still NO.
 setTabView (NSTabViewController tvc) (NSTabView tview) env
 	= msgIP_V tvc "setTabView:\0" tview env
 

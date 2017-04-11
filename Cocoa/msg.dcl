@@ -25,6 +25,7 @@ msgCPPP_P	:: !ZString !ZString !Pointer !Pointer !Pointer !*a -> (!Pointer,!*a)
 msgI_V :: !Pointer !ZString !*a -> *a
 msgI_P :: !Pointer !ZString !*a -> (!Pointer,!*a)
 msgI_I :: !Pointer !ZString !*a -> (!Int,!*a)
+msgI_R :: !Pointer !ZString !*a -> (!Real,!*a)
 msgIP_V :: !Pointer !ZString !Pointer !*a -> *a
 msgIB_V :: !Pointer !ZString !Bool !*a -> *a
 msgIP_P :: !Pointer !ZString !Pointer !*a -> (!Pointer,!*a)

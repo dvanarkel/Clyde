@@ -21,4 +21,5 @@ shouldOpenUntitledFile			:: !ID !SEL !ID -> BOOL
 AppDelLogWindows				:: !ID !SEL !ID -> BOOL
 AppDelDidFinishLaunching		:: !ID !SEL !ID -> BOOL
 doTest							:: !ID !SEL !ID -> BOOL
+doTest2							:: !ID !SEL !ID -> BOOL
 doGetPath						:: !ID !SEL !ID -> BOOL

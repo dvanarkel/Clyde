@@ -294,6 +294,17 @@ msgI_I cls selS env
 		env				= dcFree vm env
 	= (ret,env)
 
+msgI_R :: !Pointer !ZString !*a -> (!Real,!*a)
+msgI_R cls selS env
+	#!	(vm,env)		= dcNewCallVM 4096 env
+		(sel,env)		= sel_getUid selS env
+		env				= dcReset vm env
+		env				= dcArgPointer vm cls env
+		env				= dcArgPointer vm sel env
+		(ret,env)		= dcCallDouble vm objc_msgSendPtr env
+		env				= dcFree vm env
+	= (ret,env)
+
 msgIP_V :: !Pointer !ZString !Pointer !*a -> *a
 msgIP_V cls selS arg env
 	#!	(vm,env)		= dcNewCallVM 4096 env

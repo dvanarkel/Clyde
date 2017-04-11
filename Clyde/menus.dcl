@@ -3,6 +3,16 @@ definition module Clyde.menus
 from StdEnv import <<
 
 populateMainMenu :: !*World -> *World
+populateApplicationMenu :: !Menu !*World -> *World
+populateFileMenu :: !Menu !*World -> *World
+populateEditMenu :: !Menu !*World -> *World
+populateFindMenu :: !Menu !*World -> *World
+populateSpellingMenu :: !Menu !*World -> *World
+populateViewMenu :: !Menu !*World -> *World
+populateWindowMenu :: !Menu !*World -> *World
+populateHelpMenu :: !Menu !*World -> *World
+populateDebugMenu :: !Menu !*World -> *World
+populateProjectMenu :: !Menu !*World -> *World
 
 // Cocoa menus...
 
@@ -27,6 +37,8 @@ NSFunctionKeyMask           			:== 1 << 23
 NSDeviceIndependentModifierFlagsMask    :== 0xffff0000
 
 removeItemWithTitle :: !Menu !Title !*a -> *a
+
+setMainMenu :: !Menu !*a -> (!Int,!*a)
 
 setAppleMenu :: !Menu !*a -> *a
 setWindowsMenu :: !Menu !*a -> *a

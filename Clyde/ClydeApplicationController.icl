@@ -104,6 +104,7 @@ appDelegateMethods	=
 	, ("logwindows:", 							impAppDelLogWindows,			"v@:@\0")	// lying about return type...
 	, ("applicationShouldOpenUntitledFile:",	imp_should,						"v@:@\0")	// lying about return type...
 	, ("test:",									impTest,						"v@:@\0")
+	, ("test2:",								impTest2,						"v@:@\0")
 	, ("hideLogWindow:",						impHideL,						"v@:@\0")
 	, ("hideTypeWindow:",						impHideT,						"v@:@\0")
 	, ("getPath:",								impGetPath,						"v@:@\0")
@@ -311,6 +312,7 @@ AppDelDidFinishLaunching self cmd notification
 where
 	callback :: !*World -> (!Int,!*World)
 	callback env
+		#!	(ret,env)		= testWind self env
 		= (YES,env)
 
 
@@ -326,6 +328,11 @@ impTest = code {
 		pushLc doTest
 	}
 
+impTest2 :: IMP
+impTest2 = code {
+		pushLc doTest2
+	}
+
 foreign export doTest
 
 doTest :: !ID !SEL !ID -> BOOL
@@ -333,6 +340,245 @@ doTest self cmd notification
 	| traceMsg "doTest" self cmd notification	= undef
 	#!	(ret,world)		= testWind self newWorld
 	= ret
+
+foreign export doTest2
+
+import Clyde.menus
+doTest2 :: !ID !SEL !ID -> BOOL
+doTest2 self cmd notification
+	#	env			= newWorld
+/*	| traceMsg "doTest" self cmd notification	= undef
+	#	(menu,env)	= msgI_P application "mainMenu\0" env
+		(bvis,env)	= msgC_P "NSMenu\0" "menuBarVisible\0" env
+		(mbht,env)	= msgI_R menu "menuBarHeight\0" env
+		(test,env)	= addSubmenu menu "Test" env
+	| trace_n ("main: "+++hex64 menu) False = undef
+	| trace_n ("bvis: "+++hex64 bvis) False = undef
+	| trace_n ("mbht: "+++toString mbht) False = undef
+	| trace_n ("test: "+++hex64 test) False = undef
+*/
+//addSubmenu :: !Menu !String !*a -> (!Menu,!*a)
+//addItemWith_title :: !Menu !Title !*a -> (!MenuItem,!*a)
+		env			= populateFourthWindow self env
+	= force env YES
+
+import Cocoa.toolbar
+populateFourthWindow :: !Pointer !*World -> *World
+populateFourthWindow self env
+	#!	(wind,env)		= allocObject "NSWindow" env
+		rect			= cgRect 0.0 0.0 1024.0 460.0			// TODO: need to free...
+		style			= NSTitledWindowMask + NSClosableWindowMask + NSResizableWindowMask + NSMiniaturizableWindowMask
+		backing			= NSBackingStoreBuffered	// NSBackingStoreRetained
+		rectT			= NSRectType
+		(wind,env)		= msgISIIB_P wind "initWithContentRect:styleMask:backing:defer:\0" rectT rect style backing False env
+
+		(bounds1,env)	= contentLayoutRect wind env
+
+		env				= msgIP_V wind "setTitle:\0" (c2ns "Profile Window\0") env
+
+		(view,env)		= msgC_P "NSView\0" "alloc\0" env
+		rect			= cgRect 0.0 0.0 400.0 400.0
+//		(cont_,env)		= msgI_P wind "contentView:\0" env
+//		(rect,env)		= getBounds cont_ env
+		(view,env)		= msgIS_P view "initWithFrame:\0" rectT rect env
+
+//		(vw,env)		= msgI_P wind "contentView\0" env
+//		(bounds1,env)	= getBounds vw env
+//		env = trace_n ("root "+++toString wind+++"\t"+++toString bounds1) env
+
+//		env				= createPLView self view env
+//		env				= addDocumentVersionsButton view env
+//		env				= makeTool wind env
+//		env				= msgII_V wind "setShowsToolbarButton:\0" YES env
+		(wctrl,env)		= allocObject "NSWindowController" env
+		env				= msgIP_V wctrl "initWithWindow:\0" wind env
+		env				= testWTab view wind wctrl env
+		
+//		env				= msgIP_V wind "setContentView:\0" view env
+		(w,env)			= msgI_P wind "becomeFirstResponder\0" env
+		env				= msgIP_V wind "makeKeyAndOrderFront:\0" self env
+	= env
+
+createBoxVC color env
+	#	(ctrl,env)		= createBox` color env
+		env				= msgII_V ctrl "setAutoresizingMask:\0" (NSViewWidthSizable + NSViewHeightSizable) env
+		(vc,env)		= allocObject "NSViewController" env
+		(vc,env)		= initObject vc env
+		env				= msgIP_V vc "setView:\0" ctrl env
+		env				= msgIP_V vc "setTitle:\0" (p2ns "my title") env
+	= (vc,env)
+
+testWTab :: !Int !Int !Int !*env -> *env
+testWTab view wind wctrl env
+	#	(tc,env)		= allocObject "NSTabViewController" env
+		(tc,env)		= initObject tc env
+		(NSTabView tv,env)	= tabView (NSTabViewController tc) env
+		env				= msgIP_V wctrl "setContentViewController:\0" tc env
+
+		env				= setTabStyle (NSTabViewController tc) NSTabViewControllerTabStyleToolbar env
+		(vc,env)		= createBoxVC (0.2,0.0,0.2,1.0) env
+		(ti,env)		= tabViewItemWithViewController vc env
+		env				= setIdentifier ti "tab 1" env
+
+		env				= addTabViewItem (NSTabViewController tc) ti env
+		(vc,env)		= createBoxVC (1.0,1.0,0.0,0.1) env
+		(ti,env)		= tabViewItemWithViewController vc env
+		env				= setIdentifier ti "tab 2" env
+		env				= addTabViewItem (NSTabViewController tc) ti env
+	= env
+
+setIdentifier (NSTabViewItem tab) identifier env
+	= msgIP_V tab "setIdentifier:\0" (p2ns identifier) env
+
+setTitle (NSTabViewItem tab) identifier env
+	= msgIP_V tab "setTitle:\0" (p2ns identifier) env
+
+import Cocoa.Foundation, System._Pointer, System._Posix
+findView name view env
+	#!	(subs,env)		= msgI_P view "subviews\0" env
+		(count,env)		= msgI_I subs "count\0" env
+	= logsubs 0 count subs env
+where
+	logsubs :: !Int !Int !Pointer !*a -> (!Pointer,!*a)
+	logsubs index count subs env
+		| index >= count
+			= (0,env)
+		#!	(view,env)		= msgII_P subs "objectAtIndex:\0" index env
+		| object_getClassName view == name
+			= (view,env)
+//		#!	env				= logviews (inc nest) view env
+		= logsubs (inc index) count subs env
+
+import Clyde.timeprofile
+
+createPLView :: !Pointer !Pointer !*a -> *a
+createPLView delegate container env
+	#!	(bounds,env)	= getBounds container env
+		(scroll,env)	= msgC_P "NSScrollView\0" "alloc\0" env
+		(scroll,env)	= msgIS_P scroll "initWithFrame:\0" NSRectType bounds env
+		env				= msgII_V scroll "setBorderType:\0" NSBezelBorder env
+		env				= msgII_V scroll "setHasVerticalScroller:\0" YES env
+		env				= msgII_V scroll "setHasHorizontalScroller:\0" YES env
+//		env				= msgII_V scroll "setAutohidesScrollers:\0" NO env
+		env				= msgII_V scroll "setAutohidesScrollers:\0" YES env
+    //This allows the view to be resized by the view holding it 
+//    [tableContainer setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+		env				= msgII_V scroll "setAutoresizingMask:\0" (NSViewWidthSizable + NSViewHeightSizable) env
+// TODO: Hmmmm... now horizontal scrollbar appears if I resize column... but not if I resize window???
+
+		(cont,env)		= msgI_P scroll "contentView\0" env
+		(bounds1,env)	= getBounds cont env
+//		env = trace_n ("cont "+++toString cont) env
+		origin_x		= readReal8 bounds1 0
+		origin_y		= readReal8 bounds1 8
+		size_w			= readReal8 bounds1 16
+		size_h			= readReal8 bounds1 24
+//		env = trace_n (toString origin_x+++"\t"+++toString origin_y) env
+//		env = trace_n (toString size_w+++"\t"+++toString size_h) env
+	#!	bounds1			= cgRect 0.0 0.0 298.0 298.0
+
+		(outl,env)		= msgC_P "NSTableView\0" "alloc\0" env
+		(outl,env)		= msgIS_P outl "initWithFrame:\0" NSRectType bounds1 env
+		
+		env				= msgII_V outl "setUsesAlternatingRowBackgroundColors:\0" YES env
+// - (void)setUsesAlternatingRowBackgroundColors:(BOOL)useAlternatingRowColors; // FOR Profile viewers...
+
+/*
+		(ocol1,env)		= msgC_P "NSTableColumn\0" "alloc\0" env
+		(ocol1,env)		= msgIP_P ocol1 "initWithIdentifier:\0" (c2ns "columnOne\0") env
+		(header,env)	= msgI_P ocol1 "headerCell\0" env
+		env				= msgIP_V header "setStringValue:\0" (c2ns "One\0") env
+//		env				= msgIR_V ocol1 "setWidth:\0" 200.0 env				// can we set a min width that propagates upwards?
+		env				= msgIP_V outl "addTableColumn:\0" ocol1 env
+
+		(ocol2,env)		= msgC_P "NSTableColumn\0" "alloc\0" env
+		(ocol2,env)		= msgIP_P ocol2 "initWithIdentifier:\0" (c2ns "columnTwo\0") env
+		(header,env)	= msgI_P ocol2 "headerCell\0" env
+		env				= msgIP_V header "setStringValue:\0" (c2ns "Two\0") env
+//		env				= msgIR_V ocol1 "setWidth:\0" 200.0 env
+		env				= msgIP_V outl "addTableColumn:\0" ocol2 env
+*/		
+//		env				= addTableColumn outl "columnOne" "One" env
+//		env				= addTableColumn outl "columnTwo" "Two" env
+		env				= addColumnHeaders outl headerline env
+		
+	// set outl delegate & datasource...
+		env				= msgIP_V outl "setDelegate:\0" delegate env		// ==> ahh.. probably arrives at app delegate by default so for proper view controller _do_ want to set
+		env				= msgIP_V outl "setDataSource:\0" delegate env
+
+		env				= msgIP_V scroll "setDocumentView:\0" outl env
+		
+		env				= msgIP_V container "addSubview:\0" scroll env
+		env				= msgI_V scroll "release\0" env
+		env				= msgI_V outl "reloadData\0" env
+	= env
+
+addColumnHeaders table [] env	= env
+addColumnHeaders table [col:cols] env
+	#!	env				= addTableColumn table col col env
+	= addColumnHeaders table cols env
+
+addTableColumn table col_identifier col_label env
+	#!	(tcol,env)		= msgC_P "NSTableColumn\0" "alloc\0" env
+		(tcol,env)		= msgIP_P tcol "initWithIdentifier:\0" (p2ns col_identifier) env
+		(header,env)	= msgI_P tcol "headerCell\0" env
+		env				= msgIP_V header "setStringValue:\0" (p2ns col_label) env
+//		env				= msgIR_V tcol "setWidth:\0" 200.0 env				// can we set a min width that propagates upwards?
+		env				= msgIP_V table "addTableColumn:\0" tcol env
+	= env
+
+NSWindowDocumentVersionsButton = 6
+
+addDocumentVersionsButton view env
+	#!	(vbut,env)		= msgCII_P "NSWindow\0" "standardWindowButton:forStyleMask:\0" NSWindowDocumentVersionsButton 0 env
+		(titb,env)		= msgI_P view "superview\0" env
+		(tcont,env)		= findView "NSTitlebarContainerView" titb env
+		(ttitb,env)		= findView "NSTitlebarView" tcont env
+		(ttext,env)		= findView "NSTextField" ttitb env
+		(bounds,env)	= getBounds ttext env
+		origin_x		= readReal8 bounds 0
+		origin_y		= readReal8 bounds 8
+		size_w			= readReal8 bounds 16
+		size_h			= readReal8 bounds 24
+//		env				= msgIRR_V vbut "setFrameOrigin:" (origin_x + size_w) origin_y env
+		env				= msgIRR_V vbut "setFrameOrigin:" (459.0 + 124.0) 3.0 env
+// fiddling with frame...
+//		env				= msgIP_V titb "_addKnownSubview:\0" vbut env
+		env				= msgIP_V ttitb "addSubview:\0" vbut env
+	= env
+
+contentLayoutRect :: !Pointer !*World -> (!Pointer,!*World)
+contentLayoutRect self env
+	#!	(sel,env)		= sel_getUid "contentLayoutRect\0" env
+		ptr				= malloc 32
+		(ptr`,env)		= theCall ptr self sel env
+	= (ptr,env)
+where
+	theCall :: !Pointer !Pointer !Pointer !*a -> (!Int,!*a)
+	theCall _ _ _ _ = code {
+			ccall objc_msgSend_stret "Gppp:I:A"
+		}
+
+readRect :: !Pointer !*a -> (!(!Real,!Real),!(!Real,!Real),!*a)
+readRect bounds env
+	#!	origin_x		= readReal8 bounds 0
+		origin_y		= readReal8 bounds 8
+		size_w			= readReal8 bounds 16
+		size_h			= readReal8 bounds 24
+	= ((origin_x,origin_y),(size_w,size_h),env)
+
+visibleFrame :: !Pointer !*a -> (!Pointer,!*a)
+visibleFrame self env
+	#!	(sel,env)		= sel_getUid "visibleFrame\0" env
+		ptr				= malloc 32
+		(ptr`,env)		= theCall ptr self sel env
+//		env = trace_n ("getFrame\t"+++toString self+++"\t"+++toString sel+++"\t"+++toString ptr+++"\t"+++toString ptr`) env
+	= (ptr,env)
+where
+	theCall :: !Pointer !Pointer !Pointer !*a -> (!Int,!*a)
+	theCall _ _ _ _ = code {
+			ccall objc_msgSend_stret "Gppp:I:A"
+		}
 
 /*
 path button & path list
@@ -349,6 +595,10 @@ testWind self env
 		env				= makeTool wind env
 
 		top				= 460.0
+
+		(ctrl,env)		= createButton "Test" "test2:\0" env
+		env				= msgIRR_V ctrl "setFrameOrigin:\0" 200.0 (top - 40.0) env
+		env				= msgIP_V view "addSubview:\0" ctrl env
 /*
 		(ctrl,env)		= createCheckbox "My checkbox" "null:\0" env
 		env				= msgIRR_V ctrl "setFrameOrigin:\0" 10.0 (top - 20.0) env
@@ -472,6 +722,20 @@ createBox (r,g,b,a) env
 		(ctrl,env)		= initWithFrame ctrl rect env
 //		env				= msgI_V ctrl "init\0" env
 		env				= msgII_V ctrl "setTranslatesAutoresizingMaskIntoConstraints:\0" NO env
+		env				= msgII_V ctrl "setBoxType:\0" 4 env	// custom
+		env				= msgIR_V ctrl "setBorderWidth:\0" 0.0 env
+		(col,env)		= msgCRRRR_P "NSColor\0" "colorWithCalibratedRed:green:blue:alpha:\0" r g b a env
+//		env				= msgI_V col "retain\0" env
+		env				= msgIP_V ctrl "setFillColor:\0" col env
+	= (ctrl,env)
+
+createBox` :: (Real,Real,Real,Real) *a -> (!NSControl,!*a)
+createBox` (r,g,b,a) env
+	#!	(ctrl,env)		= allocObject "NSBox" env
+		rect			= cgRect 0.0 0.0 200.0 200.0			// TODO: free...
+		(ctrl,env)		= initWithFrame ctrl rect env
+//		env				= msgI_V ctrl "init\0" env
+//		env				= msgII_V ctrl "setTranslatesAutoresizingMaskIntoConstraints:\0" NO env
 		env				= msgII_V ctrl "setBoxType:\0" 4 env	// custom
 		env				= msgIR_V ctrl "setBorderWidth:\0" 0.0 env
 		(col,env)		= msgCRRRR_P "NSColor\0" "colorWithCalibratedRed:green:blue:alpha:\0" r g b a env
