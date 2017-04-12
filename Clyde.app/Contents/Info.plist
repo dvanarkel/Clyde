@@ -15,11 +15,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.0</string>
+	<string>0.2.0</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleVersion</key>
-	<string>0.1.0.0</string>
+	<string>0.2.0.0</string>
 <!--
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
@@ -129,11 +129,6 @@
 			<array>
 				<string>nl.ru.clean.project</string>
 			</array>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>prj</string>
-			</array>
-
 			<key>NSDocumentClass</key>
 			<string>ProjDocument</string>
 			<key>LSHandlerRank</key>
@@ -143,10 +138,6 @@
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>nl.ru.clean.implementation</string>
-			</array>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>icl</string>
 			</array>
 			<key>CFBundleTypeIconFile</key>
 			<string>txt.icns</string>
@@ -170,10 +161,6 @@
 			<array>
 				<string>nl.ru.clean.definition</string>
 			</array>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>dcl</string>
-			</array>
 			<key>NSDocumentClass</key>
 			<string>TextDocument</string>
 			<key>LSHandlerRank</key>
@@ -190,12 +177,6 @@
 			<array>
 				<string>nl.ru.clean.abc</string>
 			</array>
-			<key>LSIsAppleDefaultForType</key>
-			<true/>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>abc</string>
-			</array>
 			<key>NSDocumentClass</key>
 			<string>TextDocument</string>
 			<key>LSHandlerRank</key>
@@ -208,10 +189,6 @@
 			<string>Clean time profile</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>pcl</string>
-			</array>
 			<key>NSDocumentClass</key>
 			<string>TextDocument</string>
 			<key>LSHandlerRank</key>
@@ -224,10 +201,6 @@
 			<string>Clean heap profile</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>hcl</string>
-			</array>
 			<key>NSDocumentClass</key>
 			<string>TextDocument</string>
 			<key>LSHandlerRank</key>
@@ -240,10 +213,6 @@
 			<string>Clean object module</string>
 			<key>CFBundleTypeRole</key>
 			<string>None</string>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>obj</string>
-			</array>
 		</dict>
 		<dict>
 			<key>CFBundleTypeIconFile</key>
@@ -252,10 +221,6 @@
 			<string>Clean object module</string>
 			<key>CFBundleTypeRole</key>
 			<string>None</string>
-			<key>CFBundleTypeExtensions</key>
-			<array>
-				<string>o</string>
-			</array>
 		</dict>
 	</array>
 </dict>

@@ -268,8 +268,8 @@ lookElem elm
 		(isg,env)		= object_getInstanceVariable elm "isgroup\0" env
 		(chs,env)		= object_getInstanceVariable elm "children\0" env
 		(num,env)		= msgI_I chs "count\0" env
-		(children,env)	= seqList [getChild elm i \\ i <- [0..num]] env
-	= force env (ns2cls str,ns2cls pth,isg==YES,children)
+		(children,env)	= seqList [getChild chs i \\ i <- [0..num-1]] env
+	= force env (ns2cls str,ns2cls pth,isg<>NO,children)
 where
 	getChild chs i env
 		= msgII_P chs "objectAtIndex:\0" i env
@@ -333,19 +333,21 @@ readEnvironment env world
 	#	envPaths				= [ p \\ p <|- (hd senv).target_path ]
 	= (envPaths, world)
 
-readProject :: !String !String !String !*World -> (TreeView,!*World)
+readProject :: !String !String !String !*World -> (!TreeView,!*World)
 readProject prj prjPath appPath world
 		#!	path						= prjPath +++. prj
 			((proj,succ,errmsg), world)	= accFiles (ReadProjectFile path appPath) world
 		| not succ && trace_n ("failed to read project file: '"+++path+++"' with error: '"+++errmsg+++"'") True
 			= ({}, world)
-		= projectToTreeView proj (symPath prjPath appPath) world
+		#!	(tv,cmp,world)	= projectToTreeView proj (symPath appPath prjPath) world
+		= (tv,world)
 
+projectToTreeView :: !Project !(String -> String) !*World -> (!TreeView,String String -> Bool,!*World)
 projectToTreeView proj symbolisize world
 		#!	modules						= PR_GetModuleStuff proj
 			mods						= [ (mod,pth) \\ (mod,pth,_,_) <|- modules ]
 		| isEmpty mods
-			= ({}, world)
+			= ({}, cmp [], world)
 		#!	(envPaths, world)			= readEnvironment (PR_GetTarget proj) world
 		#!	ppaths						= StrictListToList (PR_GetPaths proj)
 			srcpaths					= ppaths ++ envPaths // list of project search paths ++ environment search paths
@@ -359,8 +361,11 @@ projectToTreeView proj symbolisize world
 										  , Leaf rootitem rootdir 
 										  : moditems
 										  ]
-		= ({i \\ i <- items}, world)
+		= ({i \\ i <- items}, cmp srcpaths, world)
 where
+	cmp srcpaths l r
+		= before l r srcpaths
+
 	less a b c d srcpaths
 		| before b d srcpaths
 			= True		// use < -ordening of searchpaths...
@@ -409,9 +414,172 @@ where
 			(Node s c)	-> makeElem s s True {# treeElem treeItems e \\ e <- c}
 			(Leaf s p)	-> makeElem s p False {}
 
-//updateDummy	(-> #0 Node: #1 ++ all Node elements as children)
-//updateMain	(-> #1 Leaf: main module)
-//updateNodeLeafs
+
+:: TreeElement_
+	= Node_ String [TreeElement_]	// dirname		children
+	| Leaf_ String String			// modulename	path
+
+/*
+prep TreeElement_ from project
+
+handle top level Node,Leaf,[Node] structure...
+
+handleTopLevel project root env
+	#!	node		= process project		// where root node includes main as first in its list of children!
+		(acc,env)	= updateTE [node] [root] [] env
+
+ideally we write as list processing with if l `>` r then delete r; if l `<` r then insert l
+*/
+
+updateProjectOV self proj prjPath appPath world
+	| trace_n ("updateProjectOV "+++object_getClassName self) False = undef
+	#	(pathN, world)				= object_getInstanceVariable self "ppath\0" world
+		path						= ns2cls pathN
+		(root,world)				= object_getInstanceVariable self "root\0" world
+	| trace_n ("uPO "+++path+++"\t"+++toString root+++"\t"+++ object_getClassName root) False = undef
+
+	#	symbolisize		= symPath appPath prjPath
+		(tv,cmp,world)	= projectToTreeView proj symbolisize world
+	| trace_n ("pTV ") False = undef
+	#	tv_				= tv2tv_ (tv.[0]) tv
+		(root,world)	= object_getInstanceVariable self "root\0" world
+	| trace_n ("pTV 2 "+++toString root) False = undef
+	#	(ps,world)		= updateFirstTE cmp [tv_] [root] [] world
+	| trace_n ("pTV 3 "+++toString (hd ps)+++"\t"+++toString (length ps)+++"\t"+++toString root) False = undef	// should be same as root
+	#	(root,world)	= object_setInstanceVariable self "root\0" (hd ps) world
+	| trace_n ("pTV 4 "+++toString root) False = undef
+	#	(root,world)	= object_getInstanceVariable self "root\0" world
+	| trace_n ("pTV 5 "+++toString root) False = undef
+// kick outline view?
+	#	(wctrl, world)	= getWindowControllerForDocument self world
+	#!	(outl, world)	= object_getInstanceVariable wctrl "outlineview\0" world
+		world			= msgIPI_V outl "reloadItem:reloadChildren:\0" NIL YES world
+	= world
+
+updateFirstTE cmp tl=:[Node_ name children:ts] pl=:[p:ps] acc env
+	#	(rs,rp,rg,rc)		= lookElem p		// (NSString string,NSString path,NSBool group,NSArray children)
+	|      trace_n ("First1:\t" +++ toString (cmp name rs)+++"\t"+++toString (cmp rs name)) True 
+		&& trace_n ("First2:\t"+++toString (testMyElem p) +++ "\t" +++ toString (length acc)) True 
+		&& trace_n ("First3:\t"+++toString p +++ "\t" +++ toString rg) False 
+		= undef
+	| not rg	
+		#!	env		= removeNode p env
+		= updateTE cmp tl ps acc env
+	| cmp name rs
+		#!	(cs,env)	= updateTE cmp children [] [] env
+			n			= makeElem name name True {# ptr \\ ptr <- reverse cs}
+		= updateTE cmp ts pl [n:acc] env
+	| cmp rs name
+		#!	env		= removeNode p env
+		= updateTE cmp tl ps acc env
+	// name == rs, now check children
+	#!	(cs,env)	= updateTE cmp children rc [] env
+		(csa,env)	= makeArray  {# ptr \\ ptr <- reverse cs} env
+
+		(str,env)		= object_getInstanceVariable p "children\0" env
+		env				= msgI_V str "release\0" env
+		(_,env)			= object_setInstanceVariable p "children\0" csa env
+
+	| trace_n ("Exit:\t" +++ toString p +++ "\t" +++ toString (length ts)+++"\t"+++toString (length ps)
+		+++ "\t" +++ toString (length acc)
+		) False = undef
+	= updateTE cmp ts ps [p:acc] env
+
+/*
+1)	
+2)	return from setInstanceVariable <> what we pass in?
+
+
+   if([[self windowControllers] count] == 1)
+    {
+        return [[[self windowControllers] firstObject] window]; 
+    }
+ 
+i)		are we maintaining pointer equality of == objects?
+ii)		does isEqual respond with YES?
+iii)	does hash return identical/unique as appropriate?
+*/
+NIL = 0
+getWindowControllerForDocument :: !Int !*env -> (!Int,!*env)
+getWindowControllerForDocument doc env
+	#	(wcar,env)	= msgI_P doc "windowControllers\0" env
+		(num,env)	= msgI_I wcar "count\0" env
+	| num <> 1
+		= abort "\ngrrrrr in getWindowForDocument\n\n"
+	#	(wctrl,env)	= msgI_P wcar "firstObject\0" env
+	= (wctrl,env)
+
+
+tv2tv_ (Node n cs) tv
+	= Node_ n [tv2tv_ (tv.[c]) tv \\ c <- cs]
+tv2tv_ (Leaf m p) tv
+	= Leaf_ m p
+
+updateTE :: (String String -> Bool) [TreeElement_] [Pointer] [Pointer] !*env -> ([Pointer],!*env)
+updateTE cmp [] [] acc env	= (acc,env)
+updateTE cmp [] [p:ps] acc env
+	#	env	= removeNode p env
+	= updateTE cmp [] ps acc env
+updateTE cmp [Leaf_ name path:ts] [] acc env
+	#!	p	= makeElem name path False {}
+	= updateTE cmp ts [] [p:acc] env
+updateTE cmp [Node_ name children :ts] [] acc env
+	#!	(acc`,env)	= updateTE cmp children [] [] env
+		p			= makeElem name name True {# ptr \\ ptr <- reverse acc`}
+	= updateTE cmp ts [] [p:acc] env
+updateTE cmp tl=:[Leaf_ name path:ts] pl=:[p:ps] acc env
+	#	(rs,rp,rg,rc)		= lookElem p		// (NSString string,NSString path,NSBool group,NSArray children)
+	| not rg && name == "CX" && rs == "CX"
+		&& trace_n ("CX\t"+++toString p +++ "\t" +++ path +++ "\t" +++ rp +++ "\t" +++ toString (path==rp)) False 
+		= undef
+
+
+	| name == rs && path == rp && not rg	// let's assume path==rp is invariant true when not rg
+		= updateTE cmp ts ps [p:acc] env
+	| rg //&& path < rp	// we found a later Node		('<' is wrong.. we need to check against ordering of paths list)
+// BUT: what about if we are updating after path list reorder? Or are we fine just to rebuild more than needed then?
+		#!	p_	= makeElem name path False {}
+		= updateTE cmp ts pl [p_:acc] env
+//	| rg && path  = rp	// found a Node we are already exploring -> doesn't satisfy invariant
+//		= abort "\nAlready in Node\n\n"
+//	| rg && path > rp	// we found an earlier Node -> equally doesn't satisfy invariant
+	// it's a Leaf..
+	| name < rs
+		#!	p_	= makeElem name path False {}
+		= updateTE cmp ts pl [p_:acc] env
+//	| name > rs
+	#!	env		= removeNode p env
+		p_		= makeElem name path False {}
+	= updateTE cmp tl ps [p_:acc] env
+updateTE cmp tl=:[Node_ name children:ts] pl=:[p:ps] acc env
+	#	(rs,rp,rg,rc)		= lookElem p		// (NSString string,NSString path,NSBool group,NSArray children)
+	| rg && name == "{Project}" && rs == "{Project}" 
+		&& trace_n ("{Project}:\t" +++ toString (cmp name rs)+++"\t"+++toString (cmp rs name)) True 
+		&& trace_n ("::\t"+++toString (testMyElem p) +++ "\t" +++ "need distinct for hash ;-)") False 
+		= undef
+	| not rg	
+		#!	env		= removeNode p env
+		= updateTE cmp tl ps acc env
+	| cmp name rs
+		#!	(cs,env)	= updateTE cmp children [] [] env
+			n			= makeElem name name True {# ptr \\ ptr <- reverse cs}
+		= updateTE cmp ts pl [n:acc] env
+	| cmp rs name
+		#!	env		= removeNode p env
+		= updateTE cmp tl ps acc env
+	// name == rs, now check children
+	#!	(cs,env)	= updateTE cmp children rc [] env
+		(csa,env)	= makeArray  {# ptr \\ ptr <- reverse cs} env
+
+		(str,env)		= object_getInstanceVariable p "children\0" env
+		env				= msgI_V str "release\0" env
+		(_,env)			= object_setInstanceVariable p "children\0" csa env
+
+	= updateTE cmp ts ps [p:acc] env
+
+testMyElem p
+	#	(eq,env)	= msgIP_I p "isEqual:\0" p newWorld
+	= eq
 
 updateVar ptr name value env
 	#!	(str,env)		= object_getInstanceVariable ptr name env
@@ -459,6 +627,7 @@ removeChildren idx ptr env
 insertNode = undef
 
 // how to maintain current selection in list??
+/*
 updProjectTree :: !Pointer !{TreeElement} !*env -> *env
 updProjectTree root tree env
 	#	(rs,rp,rg,rc)					= lookElem root			// fetch dummy
@@ -509,6 +678,7 @@ updProjectTreeNode root tree idx
 //			..	= children		// we kinda want to update the nsarray rather than remove & realloc
 		= undef		// <== TODO
 //	&& c/children?
+*/
 
 /*
 how to update?
@@ -561,8 +731,17 @@ Build self cmd notification
 	= ret
 where
 	cont exepath linked ok ps
+		# ps				= showInfo (Level1 "Enter continuation.") ps
 		| trace_n ("cont\t"+++exepath+++"\t"+++toString linked+++"\t"+++toString ok) False = undef
 		| linked || not ok
+// update project here...
+			#	(appdir,ps)		= cleanhome ps
+				(proj,ps)		= getProject ps
+				(path,ps)		= getProjectFilePath ps
+				(ok,ps)			= accFiles (SaveProjectFile path proj appdir) ps
+// now we still need the window to update...
+				prjdir			= PR_GetRootDir proj
+				ps				= app_world_instead_of_ps (updateProjectOV self proj prjdir appdir) ps
 			= closeInfo ps
 		= showInfo (Level1 "Project is up to date") ps
 

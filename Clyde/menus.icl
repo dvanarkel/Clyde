@@ -178,9 +178,9 @@ populateDebugMenu menu world
 
 populateProjectMenu :: !Menu !*World -> *World
 populateProjectMenu menu world
-	#!	(item,world)	= addItemWith_title_action_keyEquivalent menu "Build" "build:" "" world
-		(item,world)	= addItemWith_title_action_keyEquivalent menu "Build & Run" "buildAndRun:" "" world
-		(item,world)	= addItemWith_title_action_keyEquivalent menu "Run" "run:" "" world
+	#!	(item,world)	= addItemWith_title_action_keyEquivalent menu "Build" "build:" "b" world
+		(item,world)	= addItemWith_title_action_keyEquivalent menu "Build & Run" "buildAndRun:" "r" world
+		(item,world)	= addItemWith_title_action_keyEquivalent menu "Run" "run:" "R" world
 		world			= addSeparator menu world
 		(delegate,world)= applicationDelegate world
 		(item,world)	= addItemWith_title_action_keyEquivalent menu "Open implementation module" "openIcl:" "\n" world

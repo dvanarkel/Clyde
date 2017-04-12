@@ -312,7 +312,7 @@ AppDelDidFinishLaunching self cmd notification
 where
 	callback :: !*World -> (!Int,!*World)
 	callback env
-		#!	(ret,env)		= testWind self env
+//		#!	(ret,env)		= testWind self env
 		= (YES,env)
 
 

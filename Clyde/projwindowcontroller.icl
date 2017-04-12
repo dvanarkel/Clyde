@@ -107,11 +107,11 @@ zeroToRoot ov item
 
 outlineViewNummberOfChildrenOfItem :: !Int !Int !Int !Int -> Int
 outlineViewNummberOfChildrenOfItem self cmd ov item
-	| trace_n ("outlineViewNummberOfChildrenOfItem\t"+++toString self+++"\t"+++toString ov+++"\t"+++toString item) False = undef
-	#!	item	= zeroToRoot ov item
-	| item == 0
+	#!	item`	= zeroToRoot ov item
+	| trace_n ("outlineViewNummberOfChildrenOfItem\t"+++toString self+++"\t"+++toString ov+++"\t"+++toString item+++"\t"+++toString item`) False = undef
+	| item` == 0
 		= 0
-	= lookNumChildren item
+	= lookNumChildren item`
 
 outlineViewIsItemExpandable :: !Int !Int !Int !Int -> Int
 outlineViewIsItemExpandable self cmd ov item

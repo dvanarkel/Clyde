@@ -4,6 +4,7 @@ import System._Posix
 import Cocoa.objc
 import Cocoa.msg
 import Cocoa.Foundation
+import Cocoa.viewcontroller
 
 // view controller & delegate...???
 
@@ -301,17 +302,6 @@ transitionOptions (NSTabViewController tvc) env		// default: NSViewControllerTra
 
 setTransitionOptions (NSTabViewController tvc) (NSViewControllerTransitionOptions to) env
 	= msgII_V tvc "setTransitionOptions:\0" to env
-
-:: NSViewControllerTransitionOptions =: NSViewControllerTransitionOptions Int
-NSViewControllerTransitionNone					= NSViewControllerTransitionOptions 0x0		// No animation (the default)
-NSViewControllerTransitionCrossfade				= NSViewControllerTransitionOptions 0x1		// Fades the new view in and simultaneously fades the old view out. Can be combined with any of the slide options.
-NSViewControllerTransitionSlideUp				= NSViewControllerTransitionOptions 0x10	// Slides the old view up while the new view comes into view from the bottom.
-NSViewControllerTransitionSlideDown				= NSViewControllerTransitionOptions 0x20	// Slides the old view down while the new view comes into view from the top.
-NSViewControllerTransitionSlideLeft				= NSViewControllerTransitionOptions 0x40	// Slides the old view to the left while the new view comes into view from the right.
-NSViewControllerTransitionSlideRight			= NSViewControllerTransitionOptions 0x80	// Slides the old view to the right while the new view comes into view from the left.
-NSViewControllerTransitionSlideForward			= NSViewControllerTransitionOptions 0x140	// Slide left/right as appropriate for UI layout direction
-NSViewControllerTransitionSlideBackward			= NSViewControllerTransitionOptions 0x180	// Slide left/right as appropriate for UI layout direction
-NSViewControllerTransitionAllowUserInteraction	= NSViewControllerTransitionOptions 0x1000	// Allow user interaction during the transition
 
 // default: YES
 // when YES and tab view controller title = nil, get title from selected child view controller
